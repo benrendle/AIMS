@@ -1,0 +1,14 @@
+#!/bin/bash
+# Script to run AIMS for multiple input files and edit the configuration file 
+# with each iteration.
+
+#cd /home/bmr135/AIMS_New
+file="/home/bmr135/AIMS_New/config_list2"
+while IFS= read -r line
+do
+	cp -f /home/bmr135/AIMS_New/Art_tests_round_2/"$line" AIMS_configure.py
+	printf '%s\n' "$line"
+	python AIMS.py "$line"
+done < "$file"
+
+
