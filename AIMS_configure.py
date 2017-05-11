@@ -125,7 +125,7 @@ grid_params = ("Mass","X")   # primary grid parameters (excluding age)	<--------
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_RGB" # binary file with model grid
+binary_grid = "grid_MS_v2" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -143,7 +143,7 @@ binary_grid = "grid_RGB" # binary file with model grid
 # log of this parameter.
 
 #user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)#("mHe", r'Helium Mass'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)#("mHe", r'Helium Mass'),)
 #user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
 #               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
 #               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
