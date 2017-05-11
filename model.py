@@ -775,7 +775,7 @@ class Model:
 
             :math:`\\frac{\\nu_{\\mathrm{cut-off}}}{\\nu_{\\mathrm{cut-off},\odot}} \
                       = \\left(\\frac{M}{M_{\\odot}}\\right)                        \
-                        \\left(\\frac{R}{R_{\\odot}}\\right)^2                      \
+                        \\left(\\frac{R}{R_{\\odot}}\\right)^-2                      \
                         \\left(\\frac{T_{\\mathrm{eff}}}{T_{\\mathrm{eff},\\odot}}\\right)^{-1/2}`
 
         :return: the :math:`\\nu_{\\mathrm{cut-off}}` value
@@ -786,8 +786,8 @@ class Model:
         """
 
         return constants.solar_cutoff*(self.glb[imass]/constants.solar_mass) \
-                                     /((self.glb[iradius]/constants.solar_radius)**2 \
-                                     *math.sqrt(self.glb[itemperature]/constants.solar_temperature))
+                                     /((self.glb[iradius]/constants.solar_radius)**-2 \
+                                     *math.sqrt(constants.solar_temperature/self.glb[itemperature]))
 
     def freq_sorted(self):
         """
