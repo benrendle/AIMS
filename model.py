@@ -786,8 +786,8 @@ class Model:
         """
 
         return constants.solar_cutoff*(self.glb[imass]/constants.solar_mass) \
-                                     /((self.glb[iradius]/constants.solar_radius)**-2 \
-                                     *math.sqrt(constants.solar_temperature/self.glb[itemperature]))
+                                     /((self.glb[iradius]/constants.solar_radius)**2 \
+                                     *math.sqrt(self.glb[itemperature]/constants.solar_temperature))
 
     def freq_sorted(self):
         """
