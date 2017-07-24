@@ -1,0 +1,46 @@
+BINARY GRID GENERATION GUIDE
+
+The process involved in generating a binary grid file is actually executed within the AIMS program itself, but prior to this the grid needs to be reformatted
+such that the program can read it in easily. This is done through the use of a series of scripts called from a single command script. As will become apparent,
+one should be vigilant when using these scripts to ensure that all file names and locations are correct before execution, otherwise the end result will more
+often than not be unexpected.
+
+
+The entire process is run autonomously from a simple bash script named "configure". This script can be executed from anywhere you deem appropriate, with only
+location of the grid needing editing. The other parameter names can also be changed as necessary, just remember to make sure that the names in the other scripts
+are changed accordingly. There are 3 other scripts that are executed from within configure - master_list.py, master_script.py, list_correction.py - and their 
+purposes are explained below. Each of the python scripts should be placed in the directory containing the grid.
+
+
+PROCEDURE (based on having frequencies with a .tgz folder)
+
+1) Upon execution of configure, the working directory will immediately change to the directory to which the generated grid has been saved. From here, any previous
+   files extracted from previous executions of this procedure are removed.
+
+2) All .tgz files are then listed in a file named "files", which is then read into the program "master_script.py". An example of this file is given in the same folder
+   as this document (as can all other example files).
+
+3) Execution of "master_script.py" - this python script acts to generate a script called "extract" containing the folder name, unzip command and file name to be
+   extracted. Each line of the script relates to a different model within the grid.
+
+4) The file "extract" is modified such that it is now an executable file.
+
+5) The extracted file names are then filtered into a list called "structure". This list in turn has the input file names modified such that they are consistent with
+   the format required for input into AIMS. This new file is called "structure.lis" and is used in "master_list.py".
+
+6) Execution of "master_list.py" - this script acts to create the basic input file to read by AIMS when generating the binary grid. The list containing the file names 
+   of the models within the grid, "struture.lis", is read in here. This file is read in line by line, with the model name being used to locate the respective summary 
+   file for the extraction of the required stellar parameters. It is outlined within the AIMS documentation what the minimum column headers required are and the 
+   parameters to fulfil this, plus any other additional parameters you requrie, are calculated here. The comments outline the alterations necessary when including 
+   additional parameters as well as the units in which the parameters are being converted to. Please ensure that the solar constants used here are consistent with those
+   used in the generation of the grid otherwise an offset from the expected values will occur. The file is not quite complete at this point and requires a further 
+   modification. This file is therefore saved out as "master" and to be read in by "list_correction.py".
+
+7) Execution of "list_correction.py" - this script is designed to provide the final formatting of the binary grid input file. Here, the directory containing the 
+   frequency files is appended at the top of the file and the complete path name to where the frequency files is generated and replaces the placeholding file name. The 
+   final function of this script is to save out the final file to a location of the user's choice. Ideally, this should be to the folder from which the AIMS program
+   is executed.
+
+8) Your file is now ready to be read in by AIMS and the binary grid generated. Please double check at this point that all the correct columns have been included in 
+   the pescribed order and that any additional columns included are accounted for in the configuration file.
+
