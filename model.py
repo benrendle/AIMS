@@ -1554,6 +1554,8 @@ def find_interpolation_coefficients(grid,pt,tessellation,ndx):
     if (pt is None): return None, None
     if (tessellation is None): return None, None
     pt1 = np.asarray(pt[0:-1],dtype=gtype)
+    # print pt1
+    #print pt1.reshape((1,grid.ndim))
     val = tessellation.find_simplex(pt1.reshape((1,grid.ndim)))[0]
 
     # see if point is outside tessellation

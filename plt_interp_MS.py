@@ -484,7 +484,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     kk = np.array(k)
 
-    print kk
+    # print kk
 
 #    try:
 #        j = np.where(kk == -1.3979)[0][0]
@@ -555,7 +555,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 	else:
 	    n += 1
     pp = float(m)/len(z1)
-    print 'Pass percentage',p,': ',pp*100,'%'
+    # print 'Pass percentage',p,': ',pp*100,'%'
 
 
 
@@ -577,8 +577,8 @@ if __name__ == "__main__":
     results_age = [results_age1, results_age2]
     input_data.close()
 
-    #print ndx1
-
+    # print grid # mass/met
+    print results_age1[0][0]
     #print ndx2
     # df = pd.DataFrame(list(results_track[0][:]))
     #print df

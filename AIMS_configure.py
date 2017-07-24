@@ -29,9 +29,9 @@ parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 5 # number of temperatures
-nwalkers    = 400     # number of walkers (this number should be even)
-nsteps0     = 200     # number of burn-in steps
-nsteps      = 4000     # number of steps
+nwalkers    = 40     # number of walkers (this number should be even)
+nsteps0     = 20     # number of burn-in steps
+nsteps      = 400    # number of steps
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
 PT          = True   # use parallel tempering?
@@ -54,8 +54,8 @@ tight_ball_range = {}
 tight_ball_range["Mass"]     = ("Gaussian", [0.0, 0.01])	# (29/06/16) edited these to 0.005, 0.002, 0.05, 100, 0.1, 0.1, 0.02, 10
 tight_ball_range["Z"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
 tight_ball_range["log_Z"]    = ("Gaussian", [0.0, 0.05])
-# tight_ball_range["X"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
-# tight_ball_range["log_X"]    = ("Gaussian", [0.0, 0.05])
+tight_ball_range["X"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
+tight_ball_range["log_X"]    = ("Gaussian", [0.0, 0.05])
 tight_ball_range["Age"]      = ("Gaussian", [0.0, 100.0])
 tight_ball_range["numax"]    = ("Gaussian", [0.0, 0.5])
 tight_ball_range["Dnu"]      = ("Gaussian", [0.0, 0.5])
@@ -120,7 +120,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
 list_grid     = "list_RGB"   # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
-grid_params = ("Mass","X")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
+grid_params = ("Mass","log_Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
@@ -163,8 +163,8 @@ priors = {}                      # The priors will be defined thanks to this
 priors["Mass"]     = ("Uniform", [0.9, 1.5])
 priors["Z"]        = ("Uniform", [0.0023, 0.0175])
 priors["log_Z"]    = ("Uniform", [math.log10(0.0023), math.log10(0.0175)])
-# priors["X"]        = ("Uniform", [0.68, 0.73])
-# priors["log_X"]    = ("Uniform", [math.log10(0.68), math.log10(0.73)])
+priors["X"]        = ("Uniform", [0.68, 0.73])
+priors["log_X"]    = ("Uniform", [math.log10(0.68), math.log10(0.73)])
 priors["Age"]      = ("Uniform", [0.0, 2e4])
 priors["numax"]    = ("Uniform", [0.0, 5.0e3])
 priors["A_surf"]   = ("Uniform", [-1.0, 1.0])  # this is too broad and will be sent by AIMS
@@ -187,7 +187,7 @@ interpolation_file = "interp_RGB"  # Name of the file to which to
 #                       "M_H", "Age", "Teff", "Dnu", "Rho", "g"
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","DNl1")
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H")#,"DNl1")
 output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
 with_osm       = False         # decide whether to write output files for

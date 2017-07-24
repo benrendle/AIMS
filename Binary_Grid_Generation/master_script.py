@@ -12,7 +12,7 @@ def get_lines(filename):
 
 ##########################################
 
-root = "/home/miglioa/GridCLESAIMS_D"	# location of .tgz folders
+root = "/home/miglioa/GridNGC6819_Fep0.25/LOGS/"	# location of .tgz folders
 input_file = "files"
 output_file = "extract"
 lines = get_lines(input_file)
@@ -26,7 +26,8 @@ for line in lines:
 commands = []
 for i in range(len(names)):
 	# command line to create extraction code for each input file
-	commands.append("cd " + directs[i] + "\ntar xzvf " + names[i] + "\n")
+	# commands.append("cd " + directs[i] + "\ntar xzvf " + names[i] + "\n")
+	commands.append("cd " + directs[i] + "\ncp " + names[i] + " /home/miglioa/GridNGC6819_Fep0.25/ \n")
 
 with open(output_file,"w") as f:
 	f.write("#!/bin/bash\n\n")

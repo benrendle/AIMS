@@ -19,7 +19,7 @@
 #
 
 """
-This implements a :py:class:`ImprovedTessellation`, a subclass of 
+This implements a :py:class:`ImprovedTessellation`, a subclass of
 :py:class:`scipy.spatial.Delaunay` which provides support for extrapolation
 outside the grid of points, as well as various utility methods.
 """
@@ -34,7 +34,7 @@ class ImprovedTessellation(Delaunay):
     """
     A class which extends scipy.spatial.Delaunay thereby providing an improved
     tessellation which allows the user to find the nearest simplex outside the
-    convex hull of the grid of points upon which the tessellation is built. 
+    convex hull of the grid of points upon which the tessellation is built.
     This facilitates extrapolation outside the grid of points.
     """
 
@@ -97,6 +97,8 @@ class ImprovedTessellation(Delaunay):
         ndim = self.points.shape[1]
         pt2 = np.array(pt,dtype=self.points.dtype)
         pt2 = pt2.reshape((1,ndim))
+        # print "Hello"
+        # print pt2
         val = Delaunay.find_simplex(self,pt2)
         if (val[0] != -1): return val
 
@@ -142,34 +144,34 @@ class ImprovedTessellation(Delaunay):
     def find_barycentres(self):
         """
         Find the barycentres of the simplices.
-        
+
         :return: the set of barycentres
         :rtype: 2D numpy float array
         """
-    
+
         nsimplices = self.simplices.shape[0]
         ndim = self.points.shape[1]
-        
+
         result = np.zeros((nsimplices,ndim),dtype=self.points.dtype)
         for i in xrange(nsimplices):
             for j in self.simplices[i,:]:
                 result[i,:] += self.points[j,:]
         result *= (1.0/(ndim+1))
-    
+
         return result
 
     def find_barycentre_distances(self):
         """
-        Find minimun and maximum distances between the barycentres 
+        Find minimun and maximum distances between the barycentres
         of the simplices and points which make up these simplices.
-    
+
         :return: the set of distances
         :rtype: 2D numpy float array
         """
-    
+
         nsimplices = self.simplices.shape[0]
         ndim = self.points.shape[1]
-    
+
         result = np.empty((nsimplices,2),dtype=self.points.dtype)
         result[:,0] = np.inf
         result[:,1] = 0.0
@@ -188,19 +190,19 @@ class ImprovedTessellation(Delaunay):
 
         :param val: index corresponding to a simplex
         :type val: integer
- 
+
         :return: an array representation of the simplex
         :rtype: (ndim+1,ndim) numpy float array
         """
 
         assert (val >= 0), "Negative index not allowed for a simplex"
         assert (val < self.simplices.shape[0]), "Index larger than the number of simplices"
- 
+
         ndim = self.points.shape[1]
         result = np.zeros((ndim+1,ndim),dtype=self.points.dtype)
         for i in xrange(ndim+1):
              result[i,:] = self.points[self.simplices[val,i],:]
-    
+
         return result
 
     def find_distances(self,points):
@@ -237,14 +239,14 @@ class ImprovedTessellation(Delaunay):
     def find_simplex_volumes(self):
         """
         Find volumes of simplices.
-    
+
         :return: the set of volumes
         :rtype: 1D numpy float array
         """
-    
+
         nsimplices = self.simplices.shape[0]
         ndim = self.points.shape[1]
-    
+
         result = np.zeros((nsimplices,),dtype=self.points.dtype)
         simplex_array = np.empty((ndim+1,ndim),dtype=self.points.dtype)
         for i in xrange(nsimplices):
@@ -352,4 +354,3 @@ class ImprovedTessellation(Delaunay):
         # find volume by taking square root and dividing by (d-1)!
         # (see wikipedia for an explanation of the 1/(d-1)! coefficient)
         return math.sqrt(result)/math.factorial(d-1)
-
