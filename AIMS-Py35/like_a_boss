@@ -1,0 +1,16 @@
+#!/bin/bash
+
+cd /home/bmr135/GridCLESAIMS_He/
+rm -f *.mod.txt
+echo "Cleared!"
+find . -name "*.tgz" > files
+python master_script.py
+chmod 755 extract
+./extract
+echo "complete"
+find . -name "*.mod.txt" > structure
+sed 's/\.\///g' structure > structure.lis
+echo "complete"
+python master_list.py
+echo "complete"
+python list_correction.py

@@ -1,0 +1,38 @@
+Occurences of print "text" changed to print("text")
+{print "text" not supported in Python 3}
+
+Occurences of xrange() changed to range()
+{range in Python 3 received same function as xrange in Python 2, xrange no longer exists in Python 3}
+
+Line 723 in AIMS.py:
+ add_constraint(self,(name,distribution)):
+changed to
+ add_constraint(self,name_distribution):
+and tuple is unpacked inside function as
+ name, distribution = name_distribution
+{tuple parameter unpacking no longer permitted in Python 3}
+
+Tab spacing that was permitted in Python 2 prevented code execution in Python 3 and has been fixed
+
+Changed file read/write from "r"/"w" to "rb"/"wb" respectively
+{Python 3 reads from/writes to files differently to Python 2}
+
+Model binaries have to be written again
+{old binaries generated using Python 2 incompatible with Python 3}
+
+All occurences of map() changed to list(map())
+{Python 2 map() returns object of type 'list' but Python 3 map() returns interator object of type 'map'}
+{which raises an error for functions expecting type 'list' so map iterator must first be converted to list}
+
+Occurences of zip() changed to list(zip()) where the intended assignment was of a 'list' type
+{Python 2 zip() returns object of type 'list' but Python 3 zip() returns interator object of type 'zip'}
+{which raises an error for functions expecting type 'list' so zip iterator must first be converted to list}
+
+duplicate_ages() checks models within the track in pairs, if a single model track is checked for duplicates,
+it returns None and this breaks the code. if statement was inserted to detect and flag up single model tracks
+
+List and tuple formatting in write_readme() changed by embedding list/tuple in str()
+{Python 3 raised TypeError when a list/tuple was not explicitly converted into string representation}
+
+Integer division where the desired result is an integer has correct // symbol.
+{Python 3 division returns a 'float' type even if division is between two integers.
