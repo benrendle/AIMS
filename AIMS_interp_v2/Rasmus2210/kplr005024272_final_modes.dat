@@ -1,0 +1,19 @@
+# Column 1: Order (n)
+# Column 2: Degree (l)
+# Column 3: Frequency (microHz)
+# Column 4: Frequency positive error (microHz)
+# Column 5: Frequency negative error (microHz)
+# Column 6: Linewidth (microHz)
+# Column 7: Linewidth positive error (microHz)
+# Column 8: Linewidth negative error (microHz)
+# Column 9: Height (ppm^2/microHz)
+# Column 10: Height positive error (ppm^2/microHz)
+# Column 11: Height negative error (ppm^2/microHz)
+#-------------------------------------------------
+  5  0  13.4943  0.0259  0.0497  0.1220  0.3005  0.0722  13010.1509  16635.0069  9470.5391
+  6  0  15.3828  0.0177  0.0221  0.1240  0.0654  0.0532  23557.2639  17518.2984  7672.3398
+  6  2  17.0465  0.0627  0.0470  0.4387  0.0458  0.0633  5484.6578  1719.6114  1415.2771
+  7  0  17.3222  0.0205  0.0174  0.0998  0.0198  0.0321  24408.6641  10529.3696  6954.5186
+  7  2  19.0805  0.0391  0.0674  0.1923  0.1361  0.0298  8904.9579  5178.5143  2505.9014
+  8  0  19.3780  0.0113  0.0126  0.0654  0.0277  0.0191  43176.5237  20186.7475  16345.7313
+  8  2  21.1319  0.0258  0.0123  0.0519  0.2639  0.0230  8554.7107  10531.5598  4178.5422
