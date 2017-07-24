@@ -29,9 +29,9 @@ parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10 # number of temperatures
-nwalkers    = 400     # number of walkers (this number should be even)
-nsteps0     = 500     # number of burn-in steps
-nsteps      = 3000     # number of steps
+nwalkers    = 40     # number of walkers (this number should be even)
+nsteps0     = 50     # number of burn-in steps
+nsteps      = 300     # number of steps
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
 PT          = True   # use parallel tempering?
@@ -125,7 +125,7 @@ grid_params = ("Mass","log_Z")   # primary grid parameters (excluding age)	<----
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_MS_DIFF" # binary file with model grid
+binary_grid = "grid_MS_v2" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
