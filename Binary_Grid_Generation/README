@@ -28,10 +28,10 @@ PROCEDURE (based on having frequencies with a .tgz folder)
 5) The extracted file names are then filtered into a list called "structure". This list in turn has the input file names modified such that they are consistent with
    the format required for input into AIMS. This new file is called "structure.lis" and is used in "master_list.py".
 
-6) Execution of "master_list.py" - this script acts to create the basic input file to read by AIMS when generating the binary grid. The list containing the file names 
+6) Execution of "master_list.py" - this script acts to create the basic input file to be read by AIMS when generating the binary grid. The list containing the file names 
    of the models within the grid, "struture.lis", is read in here. This file is read in line by line, with the model name being used to locate the respective summary 
    file for the extraction of the required stellar parameters. It is outlined within the AIMS documentation what the minimum column headers required are and the 
-   parameters to fulfil this, plus any other additional parameters you requrie, are calculated here. The comments outline the alterations necessary when including 
+   parameters to fulfil this, plus any other additional parameters you require, are calculated here. The comments outline the alterations necessary when including 
    additional parameters as well as the units in which the parameters are being converted to. Please ensure that the solar constants used here are consistent with those
    used in the generation of the grid otherwise an offset from the expected values will occur. The file is not quite complete at this point and requires a further 
    modification. This file is therefore saved out as "master" and to be read in by "list_correction.py".
