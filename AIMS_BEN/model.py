@@ -46,6 +46,7 @@ import math
 import numpy as np
 import random
 import sys
+import os
 from operator import methodcaller
 import matplotlib
 if (config.backend is not None): matplotlib.use(config.backend)
@@ -333,25 +334,19 @@ class Model:
         freqlim = config.cutoff*self.cutoff
         exceed_freqlim = False
         freqfile = open(filename)
-        #freqfile.readline() # skip head, CLES
-        for i in range(0,7,1): #MESA
-            freqfile.readline()
+        freqfile.readline() # skip head
         mode_temp = []
         for line in freqfile:
             line = line.strip()
             columns = line.split()
             n = int(columns[1])
-            #freq = utilities.to_float(columns[2]) # CLES
-            freq = utilities.to_float(columns[4]) # MESA
+            freq = utilities.to_float(columns[2])
             # remove frequencies above AIMS_configure.cutoff*nu_{cut-off}
-           # print self.cutoff
-           # print freq
             if (freq > freqlim):
                 exceed_freqlim = True
                 continue
             if (config.npositive and (n < 0)): continue  # remove g-modes if need be
-           # mode_temp.append((n,int(columns[0]),freq,utilities.to_float(columns[4]))) # CLES
-            mode_temp.append((n,int(columns[0]),freq,utilities.to_float(columns[7]))) #MESA
+            mode_temp.append((n,int(columns[0]),freq,utilities.to_float(columns[4])))
         freqfile.close()
         self.modes = np.array(mode_temp,dtype=modetype)
 
@@ -653,7 +648,7 @@ class Model:
         D = np.sum(w)*np.sum(w*x**2) - np.sum(w*x)**2
         Dn = mN/D
 	#print Dn
-        
+
         return Dn
 
 
@@ -757,7 +752,7 @@ class Model:
 
             :math:`\\frac{\\nu_{\\mathrm{max}}}{\\nu_{\\mathrm{max},\odot}} \
                       = \\left(\\frac{M}{M_{\\odot}}\\right)                \
-                        \\left(\\frac{R}{R_{\\odot}}\\right)^-2              \
+                        \\left(\\frac{R}{R_{\\odot}}\\right)^2              \
                         \\left(\\frac{T_{\\mathrm{eff}}}{T_{\\mathrm{eff},\\odot}}\\right)^{-1/2}`
 
         :return: the :math:`\\nu_{\\mathrm{max}}` value
@@ -767,7 +762,9 @@ class Model:
           The relevant values are given in :py:mod:`constants`
         """
 
-        return constants.solar_numax*(self.glb[imass]/constants.solar_mass) / ( (self.glb[iradius]/constants.solar_radius)**2 * math.sqrt(self.glb[itemperature]/constants.solar_temperature) )
+        return constants.solar_numax*(self.glb[imass]/constants.solar_mass) \
+                                    /((self.glb[iradius]/constants.solar_radius)**2 \
+                                    *math.sqrt(self.glb[itemperature]/constants.solar_temperature))
 
     @property
     def cutoff(self):
@@ -788,8 +785,10 @@ class Model:
         .. note::
           The relevant values are given in :py:mod:`constants`
         """
-        
-        return constants.solar_cutoff*(self.glb[imass]/constants.solar_mass) * (self.glb[iradius]/constants.solar_radius)**-2 * math.sqrt(constants.solar_temperature/self.glb[itemperature])
+
+        return constants.solar_cutoff*(self.glb[imass]/constants.solar_mass) \
+                                     /((self.glb[iradius]/constants.solar_radius)**2 \
+                                     *math.sqrt(self.glb[itemperature]/constants.solar_temperature))
 
     def freq_sorted(self):
         """
@@ -915,10 +914,15 @@ class Track:
             This method should only be applied after the track has been
             sorted.
         """
-
+        dup_list = []
+        dupl = False
         for i in xrange(len(self.models)-1):
 	    if self.models[i].glb[iage] == self.models[i+1].glb[iage]:
-	        return [True, self.models[i].name, self.models[i+1].name]
+                dupl = True
+            dup_list.append(self.models[i+1].name)
+	        #return [True, self.models[i].name, self.models[i+1].name]
+        if dupl:
+            return [True, dup_list]
 	return [False,]
 
     def interpolate_model(self, age):
@@ -951,7 +955,10 @@ class Track:
         mu = (age - self.models[istart].glb[iage]) \
            / (self.models[istop].glb[iage] - self.models[istart].glb[iage])
 
-        return combine_models(self.models[istart],1.0-mu,self.models[istop],mu)
+        # print self.models[istart].name
+        # print self.models[istop].name
+        return combine_models(self.models[istart],1.0-mu,self.models[istop],mu), \
+                self.models[istart].name
 
     def find_combination(self, age, coef):
         """
@@ -1065,7 +1072,7 @@ class Track:
 
             result[i-nincr,0:ndim-1] = self.params
             result[i-nincr,ndim-1] = self.models[i].glb[iage]
-            print self.models[i].glb[0]
+            # print self.models[i].glb[0]
             result[i-nincr,ndim:ndim+nglb+6] = compare_models(aModel,self.models[i])
 
         return result
@@ -1105,7 +1112,7 @@ class Model_grid:
         self.prefix = None
         """Root folder with grid of models (including final slash)."""
 
-        self.postfix = ".freq"
+        self.postfix = ".freq2"
         """Last part of the filenames which contain the model frequencies (default = ".freq")."""
 
         self.user_params = config.user_params
@@ -1138,7 +1145,7 @@ class Model_grid:
 
         :type filename: string
         """
-        
+
         self.grid_params = config.grid_params
 
         # set the correct dimension:
@@ -1159,7 +1166,6 @@ class Model_grid:
         for line in listfile:
             line = line.strip()
             columns = line.split()
-            #print columns
             glb = np.empty((nglb,),dtype = gtype)
             glb[imass]        = utilities.to_float(columns[1])
             glb[iradius]      = utilities.to_float(columns[2])
@@ -1174,7 +1180,7 @@ class Model_grid:
                 glb[user_params_index[name]] = utilities.to_float(columns[i])
                 i += 1
 
-#            print glb[0]
+            # print glb[0]
             aModel = Model(glb, _name = columns[0])
             exceed_freqlim = aModel.read_file(self.prefix + columns[0] + self.postfix)
             aModel.multiply_modes(1.0/aModel.glb[ifreq_ref])  # make frequencies non-dimensional
@@ -1203,14 +1209,17 @@ class Model_grid:
         for track in self.tracks: track.sort()
 
         # sanity check:
+        dup = False
         for track in self.tracks:
 	    duplicate = track.duplicate_ages()
             if duplicate[0]:
                 print "ERROR: the track ",track.grid_params," = ",track.params
                 print "       has models with the same age.  Please remove"
                 print "       duplicate models."
-                print "       Check models:", duplicate[1], duplicate[2]
-                sys.exit(1)
+                print "       Check models:", duplicate#[1], duplicate[2]
+                dup = True
+        if dup:
+		    sys.exit(1)
 
         # update list of indices:
         self.ndx = range(len(self.tracks))
@@ -1256,7 +1265,7 @@ class Model_grid:
         plt.ylabel(string_to_latex(self.grid_params[1]))
         plt.savefig("tessellation.eps")
 
-    def test_interpolation(self):
+    def test_interpolation(self,grid):
         """
         Test interpolation between different evolutionary tracks in a given grid.
 
@@ -1276,23 +1285,56 @@ class Model_grid:
         # initialisation
         results = []
         ndim = self.ndim+1
+        # print ndim
+        output_folder = '/home/bmr135/git_AIMS/George_Smetana/AIMS-Interp/'
+        filename = os.path.join(output_folder,"combinations_Delaunay.txt")
+        f2 = os.path.join(output_folder,"Delaunay_RGB_Models_non_scaled_age.txt")
+        f3 = os.path.join(output_folder,"Delaunay_RGB_Mod_vals_nsa.txt")
+        output_file = open(filename,"w")
+        out2 = open(f2,"w")
+        out3 = open(f3,"w")
 
         for j in ndx1:
             nmodels = len(self.tracks[j].models)
             aResult = np.empty((nmodels,ndim+nglb+6),dtype=gtype)
             pt = self.tracks[j].params + [0.0,]
+            # print self.tracks[j].params
 
             for i in xrange(nmodels):
                 aModel1 = self.tracks[j].models[i]
                 pt[-1] = aModel1.glb[iage]
-                aModel2 = interpolate_model(self,pt,tessellation,ndx2)
+                aModel2 = interpolate_model(self,pt,tessellation,ndx2,aModel1.name,aModel1,out2,out3)
                 aResult[i,0:ndim] = pt
+                print aModel1.name, 1
+                # print names, 'n1'
+                # print name2, 'n2'
+                # print aResult[0,:]
                 if (aModel2 is None):
                     aResult[i,ndim:ndim+nglb+6] = np.nan
                 else:
                     aResult[i,ndim:ndim+nglb+6] = compare_models(aModel1,aModel2)
 
+                    res = find_combination(grid,pt)
+                    if (res is None): continue  # filter out combinations outside the grid
+                    output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                                        len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
+                                        aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
+                                        aModel1.glb[ix0],aModel1.glb[iage], \
+                                        aModel1.glb[itemperature]))
+
+                    output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                                        len(res), aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
+                                        aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
+                                        aModel2.glb[ix0],aModel2.glb[iage], \
+                                        aModel2.glb[itemperature]))
+                    for (coef,model_name) in res:
+                        output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
+                    output_file.write("\n")
+
             results.append(aResult)
+        output_file.close()
+        out2.close()
+        out3.close()
 
         return results, ndx1, ndx2, tessellation
 
@@ -1355,6 +1397,8 @@ class Model_grid:
                 epsilon = model.find_epsilon(ltarget)
                 if (epsilon != 0.0): epsilons.append(epsilon)
         return epsilons
+
+
 
 def init_user_param_dict():
     """
@@ -1453,6 +1497,8 @@ def compare_models(model1,model2):
 
     :rtype: np.array
     """
+    # print model1.glb
+    # print model2.glb
 
     # initialisation:
     n_radial = 0
@@ -1558,17 +1604,28 @@ def find_interpolation_coefficients(grid,pt,tessellation,ndx):
     if (tessellation is None): return None, None
     pt1 = np.asarray(pt[0:-1],dtype=gtype)
     val = tessellation.find_simplex(pt1.reshape((1,grid.ndim)))[0]
+    # print tessellation.find_simplex(pt1.reshape((1,grid.ndim)))[0]
 
     # see if point is outside tessellation
     if (val == -1): return None, None
     mat = tessellation.transform[val]
-
+    # print mat[:grid.ndim]
     # make sure the transformation matrix is defined:
     if (math.isnan(np.sum(mat))): return None, None
 
     b = mat[:grid.ndim].dot(pt1-mat[grid.ndim])
+    # print pt1-mat[grid.ndim]
+    # print b
     coefs = np.r_[b, 1.0-b.sum()]
+    # print coefs
     ind = tessellation.simplices[val]
+    # print ind
+    # print tessellation.points[tessellation.simplices[ind,0],0]
+    # print tessellation.points[tessellation.simplices[ind,0],1]
+    # print tessellation.simplices[ind,:]
+    # print tessellation.simplices[ind,0]
+    # print tessellation.simplices[ind,0][0]
+
 
     # check to make sure you're not outside the grid:
     for coef in coefs:
@@ -1644,7 +1701,7 @@ def find_ages(coefs, tracks, age):
 
     return ages
 
-def interpolate_model(grid,pt,tessellation,ndx):
+def interpolate_model(grid,pt,tessellation,ndx,Name,mod,out2,out3):
     """
     Interpolate model in grid using provided parameters.
 
@@ -1682,11 +1739,9 @@ def interpolate_model(grid,pt,tessellation,ndx):
     # find simplex interpolation coefficients
     coefs,tracks = find_interpolation_coefficients(grid,pt,tessellation,ndx)
     if (coefs is None): return None
-
     # find ages:
     ages = find_ages(coefs,tracks,pt[-1])
     if (ages is None): return None
-
     n = len(tracks)
 
     # treat the case where there is only 1 model:
@@ -1696,15 +1751,51 @@ def interpolate_model(grid,pt,tessellation,ndx):
         return tracks[0].interpolate_model(ages[0])
 
     # treat the case where there are at least 2 models:
-    aModel1 = tracks[0].interpolate_model(ages[0])
+    aModel1, name1 = tracks[0].interpolate_model(ages[0])
     if (aModel1 is None): return None
-    aModel2 = tracks[1].interpolate_model(ages[1])
+    if (name1 is None): return None
+    mod1 = aModel1
+    aModel2, name2 = tracks[1].interpolate_model(ages[1])
     if (aModel2 is None): return None
+    if (name2 is None): return None
     aModel1 = combine_models(aModel1,coefs[0],aModel2,coefs[1])
     for i in xrange(2,n):
-        aModel2 = tracks[i].interpolate_model(ages[i])
+        aModel2, name2 = tracks[i].interpolate_model(ages[i])
         if (aModel2 is None): return None
+        if (name2 is None): return None
         aModel1 = combine_models(aModel1,1.0,aModel2,coefs[i]);
+
+    out2.write(Name+"\n")
+    out2.write(name1+"\n")
+    out2.write(name2+"\n\n")
+    # out2.write("interp\n\n")
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    1, mod.glb[imass]/constants.solar_mass, mod.glb[iradius]/constants.solar_radius, \
+                    mod.glb[iluminosity]/constants.solar_luminosity,mod.glb[iz0], \
+                    mod.glb[ix0],mod.glb[iage], \
+                    mod.glb[itemperature]))
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    2, mod1.glb[imass]/constants.solar_mass, mod1.glb[iradius]/constants.solar_radius, \
+                    mod1.glb[iluminosity]/constants.solar_luminosity,mod1.glb[iz0], \
+                    mod1.glb[ix0],mod1.glb[iage], \
+                    mod1.glb[itemperature]))
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    3, aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
+                    aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
+                    aModel2.glb[ix0],aModel2.glb[iage], \
+                    aModel2.glb[itemperature]))
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n\n".format( \
+                    4, aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
+                    aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
+                    aModel1.glb[ix0],aModel1.glb[iage], \
+                    aModel1.glb[itemperature]))
+
+    print name1, aModel1.glb[imass]
+
     return aModel1
 
 def find_combination(grid,pt):
