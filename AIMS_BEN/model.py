@@ -267,6 +267,8 @@ class Model:
         :type _name: string
         :type _modes: list of (int, int, float, float)
         """
+        self.name = _name
+        """Name of the model, typically the second part of its path"""
 
         # check inputs
         assert (_glb[imass] >= 0.0),        "A star cannot have a negative mass!"
@@ -276,10 +278,8 @@ class Model:
         assert (_glb[ix0] >= 0.0),          "A star cannot have a negative hydrogen abundance!"
         assert (_glb[iage] >= 0.0),         "A star cannot have a negative age!"
         assert (_glb[itemperature] >= 0.0), "A star cannot have a negative temperature!"
-        # assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass!"
+        assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
 
-        self.name = _name
-        """Name of the model, typically the second part of its path"""
 
         self.glb = _glb
         """Array which will contain various global quantities"""
@@ -1645,8 +1645,9 @@ def combine_models(model1,coef1,model2,coef2):
 
     # this first part is simply a linear combination:
     glb = np.empty((nglb,),dtype=gtype)
+    print(coef1,coef2,model1.glb[5],model2.glb[5])
     glb[0:nlin] = coef1*model1.glb[0:nlin] + coef2*model2.glb[0:nlin]
-
+    # print(glb[5],coef1,coef2,model1.glb[5],model2.glb[5])
     # this next part depends on previous results:
     glb[iradius] = (glb[imass]/(coef1*model1.glb[imass]/model1.glb[iradius]**3
                  + coef2*model2.glb[imass]/model2.glb[iradius]**3))**(1.0/3.0)
@@ -1670,6 +1671,7 @@ def combine_models(model1,coef1,model2,coef2):
             coef1,model1.modes['n'],model1.modes['l'],model1.modes['freq'],model1.modes['inertia'], \
             coef2,model2.modes['n'],model2.modes['l'],model2.modes['freq'],model2.modes['inertia'], \
             nvalues,lvalues,fvalues,ivalues)
+        print(glb)
         return Model(glb, _modes=zip(nvalues[0:n3],lvalues[0:n3],fvalues[0:n3],ivalues[0:n3]))
 
 def compare_models(model1,model2):
