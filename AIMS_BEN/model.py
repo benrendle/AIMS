@@ -230,7 +230,7 @@ class Model:
         if (string.startswith("ln_")):  return math.log(self.string_to_param(string[3:]))
         if (string.startswith("exp_")): return math.exp(self.string_to_param(string[4:]))
         if (string == "Mass"):       return self.glb[imass]/constants.solar_mass
-        if (string == "mHe"):        return self.glb[imHe]#/constants.solar_mass
+        if (string == "mHe"):        return self.glb[imHe]/constants.solar_mass
         if (string == "Radius"):     return self.glb[iradius]/constants.solar_radius
         if (string == "Luminosity"): return self.glb[iluminosity]/constants.solar_luminosity
         if (string == "Z"):          return self.glb[iz0]
@@ -276,7 +276,7 @@ class Model:
         assert (_glb[ix0] >= 0.0),          "A star cannot have a negative hydrogen abundance!"
         assert (_glb[iage] >= 0.0),         "A star cannot have a negative age!"
         assert (_glb[itemperature] >= 0.0), "A star cannot have a negative temperature!"
-        assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass!"
+        # assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass!"
 
         self.name = _name
         """Name of the model, typically the second part of its path"""
@@ -1171,7 +1171,7 @@ class Track:
 
         # easy exit:
         if (mHe < self.models[0].glb[imHe]): return None
-        if (age > self.models[-1].glb[imHe]): return None
+        if (mHe > self.models[-1].glb[imHe]): return None
 
         istart = 0
         istop  = len(self.models)-1
@@ -1478,7 +1478,7 @@ class Model_grid:
         results = []
         ndim = self.ndim+1
         # print ndim
-        output_folder = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/'
+        output_folder = '/home/ben/AIMS/AIMS_BEN/'
         filename = os.path.join(output_folder,"combinations_Delaunay.txt")
         f2 = os.path.join(output_folder,"Delaunay_MS_Models_mHe.txt")
         f3 = os.path.join(output_folder,"Delaunay_MS_Mod_vals_mHe.txt")
@@ -1499,7 +1499,8 @@ class Model_grid:
                     aModel2 = interpolate_model(self,pt,tessellation,ndx2,aModel1.name,aModel1,out2,out3)
                 elif config.interp_type == "mHe":
                     pt[-1] = aModel1.glb[imHe]
-                    print(aModel1.glb[imHe])
+                    if aModel1.glb[imHe] < 0:
+                        print(aModel1.glb[imHe])
                     aModel2 = interpolate_model_mHe(self,pt,tessellation,ndx2,aModel1.name,aModel1,out2,out3)
                 aResult[i,0:ndim] = pt
                 print aModel1.name, 1
@@ -2062,10 +2063,9 @@ def find_mHes(coefs, tracks, mHe):
         mHe_f += coef*track.models[-1].glb[imHe]
 
     print(mHe, mHe_s, mHe_f)
-    print(track.models[2].glb[imHe])
     eta = (mHe-mHe_s)/(mHe_f-mHe_s)
 
-    # check to see if the age lies within the interpolated track:
+    # check to see if the mHe lies within the interpolated track:
     if (eta < 0.0): return None
     if (eta > 1.0): return None
 

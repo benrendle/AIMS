@@ -117,7 +117,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # (i.e. below the cutoff frequency as determined
                                  # by ADIPLS) in agsm files.  This test is in
                                  # addition to the above user-defined cutoff.
-list_grid     = "MS_CLES_mHe_list2"   # file with list of models and characteristics.
+list_grid     = "list_RGB_mHe2"   # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
@@ -125,7 +125,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_MS_mHe2" #NGC6819" # binary file with model grid
+binary_grid = "grid_RGB_mHe2" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -143,7 +143,7 @@ binary_grid = "grid_MS_mHe2" #NGC6819" # binary file with model grid
 # log of this parameter.
 
 #user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), ('mHe', 'Helium Mass'), ("DNl1", r'Period Spacing, $%sDNl1%s$'),)
 #user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
 #               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
 #               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
@@ -172,14 +172,14 @@ priors["A3_surf"]  = ("Uniform", [-1e-9, 1e-9])  # this too broad and should be 
 priors["Am1_surf"] = ("Uniform", [-1e-6, 1e-6])  # this too broad and should be set experimentally
 #########################   Interpolation    ###############################
 scale_age = True                 # use a scaled age when interpolating
-interp_type = "age"		 # options to use either "age" or "mHe" for interpolation
+interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation
 #########################   Interpolation tests    #########################
 test_interpolation = True       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interp_MS_mHe"#"interp_MS_He_v2.2"  # Name of the file to which to
+interpolation_file = "interp_RGB_mHe"#"interp_MS_He_v2.2"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.
@@ -188,7 +188,7 @@ interpolation_file = "interp_MS_mHe"#"interp_MS_He_v2.2"  # Name of the file to 
 #                       "M_H", "Age", "Teff", "Dnu", "Rho", "g"
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H")#,"DNl1")
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","DNl1")
 output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
 with_osm       = False         # decide whether to write output files for
