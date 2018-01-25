@@ -73,42 +73,42 @@ import utilities
 import aims_fortran
 
 # parameters associated with the grid
-grid             = None   
+grid             = None
 """ grid of models """
 
-grid_params_MCMC = ()     
+grid_params_MCMC = ()
 """ parameters used in the MCMC run (excluding surface correction parameters) """
 
-grid_params_MCMC_with_surf = ()     
+grid_params_MCMC_with_surf = ()
 """ parameters used in the MCMC run (including surface correction parameters) """
 
-ndims            = 0      
+ndims            = 0
 """ number of dimensions for MCMC parameters (includes :py:data:`nsurf`)  """
 
-nsurf            = 0      
+nsurf            = 0
 """ number of surface term parameters """
 
 # parameters associated with probabilities
-prob      = None          
+prob      = None
 """
 :py:class:`Probability` type object that represents the probability function
 which includes the likelihood and priors
 """
 
-log0      = -1e300        
+log0      = -1e300
 """ a large negative value used to represent ln(0) """
 
-threshold = -1e290        
+threshold = -1e290
 """ threshold for "accepted" models.  Needs to be greater than :py:const:`log0` """
 
 # variables associated with the best model from a scan of the entire grid:
-best_grid_model   = None  
+best_grid_model   = None
 """ best model from a scan of the entire grid """
 
-best_grid_params  = None  
+best_grid_params  = None
 """ parameters for the model :py:data:`best_grid_model`"""
 
-best_grid_result  = log0  
+best_grid_result  = log0
 """ ln(probability) result for the model :py:data:`best_grid_model`"""
 
 # variables associated with the best model from the MCMC run:
@@ -138,7 +138,7 @@ output_folder = None
 pool          = None
 """ pool from which to carry out parallel computations """
 
-my_map        = None      
+my_map        = None
 """ pointer to the map function (either the parallel or sequential versions) """
 
 accepted_parameters = []
@@ -152,7 +152,7 @@ class Distribution:
     """
     A class which represents a probability distribution, and can yield
     its value for a given input parameter, or provide a random realisation.
-    
+
     .. note::
       Derived from a class originally written by G. Davies.
     """
@@ -169,14 +169,14 @@ class Distribution:
 
         self.type = _type
         """Type of probability function ("Gaussian", "Uniform", or "Truncated_gaussian")"""
-        
+
         self.values = _values
         """List of parameters relevant to probability function"""
 
     def __call__(self, value):
         """
         Return ln of probability distribution function for a particular value.
-        
+
         :param value: value at which to evaluate ln of probability distribution function.
         :type value: float
 
@@ -332,7 +332,7 @@ class Distribution:
 
     def print_me(self):
         """Print type and parameters of probability distribution."""
-        
+
         print(self.type + " " + str(self.values[0:self.nparams]))
 
     def to_string(self):
@@ -343,7 +343,7 @@ class Distribution:
         :rtype: string
         """
         return self.type + " " + str(self.values[0:self.nparams])
-        
+
 class Prior_list:
     """
     A class which contains a list of priors as well as convenient methods for
@@ -353,15 +353,15 @@ class Prior_list:
     def __init__(self):
         self.priors = []
         """A list of probability distributions which correspond to priors."""
-    
+
     def add_prior(self, aPrior):
         """
         Add a prior to the list.
-        
+
         :param aPrior: prior which is to be added to the list.
         :type aPrior: :py:class:`Distribution`
         """
-        
+
         self.priors.append(aPrior)
 
     def realisation(self,size=None):
@@ -396,7 +396,7 @@ class Prior_list:
         :return: ln(prior probability)
         :rtype: float
 
-        .. warning::        
+        .. warning::
           The list of parameters should contain the same number of elements
           as the number of priors.
         """
@@ -411,12 +411,12 @@ class Mode:
     """
     A class which describes an *observed* pulsation mode.
     """
-    
+
     def __init__(self, _n, _l, _freq, _dfreq):
         """
         :param _n: radial order of observed mode
         :param _l: harmonic degree of observed mode.
-        :param _freq: pulsation frequency (in :math:`\mathrm{\mu Hz}`). 
+        :param _freq: pulsation frequency (in :math:`\mathrm{\mu Hz}`).
         :param _dfreq: error bar on pulsation frequency (in :math:`\mathrm{\mu Hz}`).
 
         :type _n: int
@@ -435,20 +435,20 @@ class Mode:
         assert (_dfreq >=0),            "I don't accept modes with negative error bars"
         self.n = _n
         """Radial order of observed mode."""
-        
+
         self.l = _l
         """Harmonic degree of observed mode."""
-        
+
         self.freq = _freq
         """Pulsation frequency (in :math:`\mathrm{\mu Hz}`)."""
-        
+
         self.dfreq = _dfreq
         """Error bar on pulsation frequency (in :math:`\mathrm{\mu Hz}`)."""
 
     def match(self,a_mode):
         """
         Check to see if input mode has the same (n,l) values as the current mode.
-        
+
         :param a_mode: input mode which is being compared with current mode.
         :type a_mode: :py:class:`Mode`
 
@@ -464,30 +464,30 @@ class Mode:
 class Combination:
     """
     A class which contains indices and coefficients which intervene in:
-    
+
     - linear combinations of frequencies
     - frequency ratios
     """
-    
+
     def __init__(self):
-        self.value = 0.0 
+        self.value = 0.0
         """Value of the frequency combination or ratio."""
-    
-        self.num = 0.0 
+
+        self.num = 0.0
         """Value of the frequency combination or numerator in a frequency ratio."""
-    
-        self.den = 0.0 
+
+        self.den = 0.0
         """Value of the denomenator in a frequency ratio."""
-    
+
         self.num_index = []
         """Indices in a linear combination or numerator of a frequency ratio."""
-        
+
         self.den_index = []
         """Indices in the denominator of a frequency ratio, otherwise empty."""
 
         self.num_coeff = []
         """Coefficients in a linear combination or numerator of a frequency ratio."""
-        
+
         self.den_coeff = []
         """Coefficients in the denominator of a frequency ratio, otherwise empty."""
 
@@ -495,7 +495,7 @@ class Combination:
         """
         Append the given index and coefficient to the list of numerator indices and
         coefficients.
-        
+
         :param j: index of the mode
         :param coeff: coefficient used in the frequency combination
 
@@ -505,12 +505,12 @@ class Combination:
 
         self.num_index.append(j)
         self.num_coeff.append(coeff)
-        
+
     def add_den(self,j,coeff):
         """
         Append the given index and coefficient to the list of denominator indices and
         coefficients.
-        
+
         :param j: index of the mode
         :param coeff: coefficient used in the frequency combination
 
@@ -533,7 +533,7 @@ class Combination:
         print "den = ",  self.den
         for i, coeff in zip(self.den_index,self.den_coeff):
             print "  ",i,"  ",coeff
-    
+
 class Likelihood:
     """
     A class which described the likelihood function and allows users to evaluate it.
@@ -545,10 +545,10 @@ class Likelihood:
 
         self.constraints = []
         """List of constraints which intervene in the likelihood function."""
-        
+
         self.cov = None
         """Covariance matrix which intervenes when calculating frequency combinations."""
-        
+
         self.invcov = None
         """Inverse of covariance matrix, :py:data:`Likelihood.cov`."""
 
@@ -636,13 +636,13 @@ class Likelihood:
         Sort the modes.  The ordering will depend on the value of ``use_n`` from the
         ``AIMS_configure.py`` file.
         """
-        
+
         if (config.use_n):
             self.modes.sort(key=attrgetter("l","n","freq"))
         else:
             self.modes.sort(key=attrgetter("l","freq","n"))
 
-    def create_mode_arrays(self): 
+    def create_mode_arrays(self):
         """
         Create arrays with mode parameters (n, l, freq), which can
         be interfaced with fortran methods more easily.
@@ -663,7 +663,7 @@ class Likelihood:
     def read_constraints(self,filename,factor=1.0):
         """
         Read a file with pulsation data and constraints.
-        
+
         :param filename: name of file with pulsation data.
         :param factor: multiplicative factor for pulsation frequencies.  Can
           be used for conversions.
@@ -671,7 +671,7 @@ class Likelihood:
         :type filename: string
         :type factor: float
         """
-        
+
         # read modes:
         self.modes = []
 
@@ -723,7 +723,7 @@ class Likelihood:
     def add_constraint(self,(name,distribution)):
         """
         Add a supplementary constraint to the list of constraints.
-        
+
         :param constraint: supplementary constraint
         :type constraint: (string, :py:class:`Distribution`)
         """
@@ -739,7 +739,7 @@ class Likelihood:
     def guess_dnu(self,with_n=False):
         """
         Guess the large frequency separation based on the radial modes.
-        
+
         :param with_n: specifies whether to use the n values
           already stored with each mode, when calculating the
           large frequency separation.
@@ -754,7 +754,7 @@ class Likelihood:
         if (with_n):
             ind = np.arange(nmodes)
         else:
-        
+
             # find index with mode order according to (l,freq):
             ind = np.lexsort(([mode.freq for mode in self.modes], \
                                  [mode.l for mode in self.modes]))  # sorts by l, then freq
@@ -767,14 +767,14 @@ class Likelihood:
                 diff = self.modes[ind[i]].freq - self.modes[ind[i-1]].freq
                 # the following condition is "nan-resistant":
                 if (not min_diff < diff): min_diff = diff
-        
+
             # easy exit:
             if (min_diff != min_diff):
                 print "WARNING: cannot find large frequency separation"
                 return np.nan
-            
+
         # refine large frequency separation using a least squares approach
-        # on the radial modes, using temporary radial orders based on the 
+        # on the radial modes, using temporary radial orders based on the
         # previous estimate of the large frequency separation.
         ntemp = 0
         one = n = nn = nu = nnu = 0.0
@@ -793,11 +793,11 @@ class Likelihood:
             return np.nan
         else:
             return (nnu*one-nu*n)/(nn*one-n**2)
-        
+
     def guess_n(self):
         """
         Guess the radial order of the observed pulsations modes.
-        
+
         This method uses the large frequency separation, as calculated with
         :py:meth:`guess_dnu`, to estimate the radial orders.  These orders are
         subsequently adjusted to avoid multiple modes with the same
@@ -805,14 +805,14 @@ class Likelihood:
         offset, but this is not too problematic when computing frequency
         combinations or ratios.
         """
-        
+
         # obtain large frequency separation
         # (and sort modes according to (l,freq))
         dnu = self.guess_dnu(with_n=False)
-        
+
         # easy exit:
         if (np.isnan(dnu)): return
- 
+
         # assign radial orders
         for mode in self.modes:
             mode.n = int(round(mode.freq/dnu - 1.0 - mode.l/2.0))
@@ -834,9 +834,9 @@ class Likelihood:
         :param my_model: input model
         :type my_model: :py:class:`model.Model`
         """
-        
+
         mode_map, nmissing = self.find_map(my_model, False)
-        
+
         # easy exit:
         if (nmissing > 0):
             print "WARNING: unable to assign radial orders due to unmatched modes"
@@ -852,7 +852,7 @@ class Likelihood:
         combinations, and associated covariance matrix and its inverse are
         reinitialised.
         """
-        
+
         self.cov = None
         self.invcov = None
         self.combinations = []
@@ -860,13 +860,13 @@ class Likelihood:
     def add_seismic_constraint(self,string):
         """
         Add seismic contraints based on the keyword given in ``string``.
-        
+
         :param string: keyword which specifies the type of constraint to be added.
           Current options include:
 
           - ``nu``: individual frequencies
           - ``nu0``: individual frequencies (radial modes only)
-          - ``nu_min0``: radial mode with minimum frequency 
+          - ``nu_min0``: radial mode with minimum frequency
           - ``r02``: :math:`r_{02}` frequency ratios
           - ``r01``: :math:`r_{01}` frequency ratios
           - ``r10``: :math:`r_{10}` frequency ratios
@@ -927,7 +927,7 @@ class Likelihood:
     def find_l_list(self, l_targets):
         """
         Find a list of l values with the following properties:
-        
+
         - each l value only occurs once
         - each l value given in the parameter ``l_targets`` is
           in the result l list, except if there is 1 or less
@@ -952,12 +952,12 @@ class Likelihood:
         else:
             for l in l_targets:
                 if (l not in l_list): l_list.append(l)
-        
+
         # count the number of modes with different l values
         l_num = np.zeros(len(l_list),dtype=np.int16)
         for mode in self.modes:
             if (mode.l in l_list): l_num[l_list.index(mode.l)] += 1
-        
+
         # remove l values from list if there are less than 2 modes with
         # that value (iterate backwards to avoid problems with shifting
         # indices).
@@ -970,31 +970,31 @@ class Likelihood:
         Add the large frequency separation as a contraint.  The coefficients
         are obtained via a least-squares approach.  The approach taken here
         has two advantages:
-        
+
         1. Correlations between the large frequency separation and other
            seismic constraints will be taken into account.
         2. The same modes will be used in the same way, both for the
            observations and the models.
-           
+
         :param l_targets: specifies for which l values the large frequency
           separation is to be calculated.  If ``None`` is supplied, all
           modes will be used.
         :type l_targets: list of int
 
-        .. note::           
+        .. note::
           This uses a matrix approach and is therefore *not* the
           prefered method.
         """
 
         l_list = self.find_l_list(l_targets)
-        
+
         # easy exit:
         if (len(l_list) == 0):
             print "WARNING: unable to find large frequency separation for given l targets."
             print "Try including other l values in l_targets, or expanding your set of"
             print "observations."
             return
-        
+
         # set up linear system and invert it:
         n   = len(l_list) + 1
         mat = np.zeros((n,n),dtype=np.float64)
@@ -1032,12 +1032,12 @@ class Likelihood:
         Add the large frequency separation as a contraint.  The coefficients
         are obtained via a least-squares approach.  The approach taken here
         has two advantages:
-        
+
         1. Correlations between the large frequency separation and other
            seismic constraints will be taken into account.
         2. The same modes will be used in the same way, both for the
            observations and the models.
-           
+
         :param l_targets: specifies for which l values the large frequency
           separation is to be calculated.  If ``None`` is supplied, all
           modes will be used.
@@ -1056,7 +1056,7 @@ class Likelihood:
             print "Try including other l values in l_targets, or expanding your set of"
             print "observations."
             return
-        
+
         # find various summed quantities:
         n  = len(l_list)
         m  = np.zeros((n,2),dtype=np.float64)
@@ -1071,7 +1071,7 @@ class Likelihood:
 
         det = nn
         for i in xrange(n): det -= m[i,1]*m[i,1]/m[i,0]
-            
+
         # create associated mode combination
         a_combination = Combination()
         value = 0.0
@@ -1133,7 +1133,7 @@ class Likelihood:
         ratio, as specified by the mandatory and optional arguments.  These indices,
         the relevant coefficients, the numerator, the denominator, and the resultant
         value of the combination are stored in the :py:data:`combinations` variable.
-        
+
         :param num_list: list of relative mode identifications and coefficients used
           to define a frequency combination or the numerator of a frequency ratio.
           This list contains tuples of the form (delta n, delta l, coeff).
@@ -1148,12 +1148,12 @@ class Likelihood:
         :type den_list: list of (int,int,float)
         :type target_ell: int
         """
-        
+
         # find indices of modes which follow the specified pattern
         n = 0
         for i in xrange(len(self.modes)):
             if ((target_ell is not None) and (self.modes[i].l != target_ell)): continue
-            
+
             a_combination = Combination()
             skipMode = False
 
@@ -1182,7 +1182,7 @@ class Likelihood:
                 else:
                     skipMode = True
                     break
-                    
+
             if (skipMode): continue
 
             if (len(den_list) > 0):
@@ -1203,14 +1203,14 @@ class Likelihood:
         This prepares the covariance matrix and its inverse based on the frequency
         combinations in :py:data:`combinations`.
 
-        .. warning::        
+        .. warning::
           This method should be called *after* all of the methods which
           add to the list of frequency combinations.
         """
 
         n = len(self.combinations)
         self.cov = np.zeros((n,n),dtype=np.float64)
-        
+
         for i in xrange(n):
             vec1 = self.find_vec(self.combinations[i])
             for j in xrange(n):
@@ -1224,7 +1224,7 @@ class Likelihood:
         """
         This finds a set of coefficients which intervene when constructing the
         coviance matrix for frequency combinations.
-        
+
         :param a_combination: variable which specifies the frequency combination.
         :type a_combination: :py:class:`Combination`
 
@@ -1237,7 +1237,7 @@ class Likelihood:
             for j, coeff in zip(a_combination.num_index, a_combination.num_coeff):
                 vec[j] += coeff
         else:
-            
+
             num = 0.0
             for j, coeff in zip(a_combination.num_index, a_combination.num_coeff):
                 vec[j] += coeff/a_combination.den
@@ -1260,7 +1260,7 @@ class Likelihood:
             if (nmax < n0): nmax = n0
             n1 = len(comb.den_index)
             if (nmax < n1): nmax = n1
- 
+
         self.values = np.empty((ncomb),dtype=model.ftype)
         self.ncoeff = np.empty((2,ncomb),dtype=np.int)
         self.coeff  = np.empty((nmax,2,ncomb),dtype=model.ftype)
@@ -1284,7 +1284,7 @@ class Likelihood:
         """
         Calculate a :math:`\chi^2` value for the set of constraints (excluding
         seismic constraints based on mode frequencies).
-        
+
         :param my_model: model for which the :math:`\chi^2` value is being calculated
         :type my_model: :py:class:`model.Model`
 
@@ -1333,7 +1333,7 @@ class Likelihood:
                     # one from AIMS_configure.py.
             # NOTE: this assumes the observed modes are sorted according to (l,n)
             return aims_fortran.find_map_n(self.nvalues,self.lvalues,my_model.modes['n'],\
-                                 my_model.modes['l'],mode_map) 
+                                 my_model.modes['l'],mode_map)
 
         else:
             # NOTE: this assumes the observed modes are sorted according to (l,freq)
@@ -1350,7 +1350,7 @@ class Likelihood:
         """
         This finds a :math:`\chi^2` value based on a comparison of frequencies
         combinations, as defined in the :py:data:`combinations` variable.
-        
+
         :param my_model: model for which the :math:`\chi^2` value is being calculated
         :param mode_map: a mapping which relates observed modes to theoretical ones
         :param a: parameters of surface correction terms
@@ -1373,8 +1373,8 @@ class Likelihood:
 
         freq = my_model.get_freq(surface_option=config.surface_option,a=a) \
              * my_model.glb[model.ifreq_ref]
-      
-        dvalues = np.zeros((n,),dtype=model.ftype) 
+
+        dvalues = np.zeros((n,),dtype=model.ftype)
         dvalues = aims_fortran.compare_frequency_combinations(freq,mode_map,
                   self.values,self.ncoeff,self.coeff,self.indices,dvalues)
 
@@ -1384,7 +1384,7 @@ class Likelihood:
         """
         Find optimal surface correction amplitude, for the surface correction
         specified by ``surface_option``.
-        
+
         :param my_model: the model for which we're finding the surface correction amplitude
         :param mode_map: a mapping which relates observed modes to theoretical ones
 
@@ -1442,7 +1442,7 @@ class Likelihood:
         """
         Calculate ln of likelihood function (i.e. a :math:`\chi^2` value) for a given
         model.
-        
+
         :param my_model: model for which the :math:`\chi^2` value is being calculated
         :type my_model: :py:class:`model.Model`
 
@@ -1461,7 +1461,7 @@ class Likelihood:
             chi2 += self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map)
             return chi2
         else:
-            if (nmissing > 0): return log0, [0.0]*nsurf 
+            if (nmissing > 0): return log0, [0.0]*nsurf
             optimal_amplitudes = self.get_optimal_surface_amplitudes(my_model, mode_map)
             chi2 += self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map,a=optimal_amplitudes)
             return chi2, optimal_amplitudes
@@ -1470,7 +1470,7 @@ class Likelihood:
         """
         Calculate ln of likelihood function (i.e. a :math:`\chi^2` value) for a given
         set of parameters.
-        
+
         :param params: set of parmaeters for which the :math:`\chi^2` value is being
           calculated.
         :type params: array-like
@@ -1478,7 +1478,7 @@ class Likelihood:
         :return: the :math:`\chi^2` value
         :rtype: float
 
-        .. note:: 
+        .. note::
           If surface corrections are applied, then the last element(s)
           of params is/are assumed to be surface correction amplitude(s).
         """
@@ -1498,7 +1498,7 @@ class Likelihood:
         Test to see if the given set of parameters lies outside the grid of
         models.  This is done by evaluate the probability and seeing if
         the result indicates this.
-        
+
         :param params: input set of parameters
         :type params: array-like
 
@@ -1536,7 +1536,7 @@ class Probability:
         Evalulate the ln of the product of the priors and likelihood function,
         i.e. the probability, for a given model, to within an additive
         constant.
-        
+
         :param my_model: input model
         :type my_model: :py:class:`model.Model`
 
@@ -1561,7 +1561,7 @@ class Probability:
         Evalulate the ln of the product of the priors and likelihood function,
         i.e. the probability, for a given model, to within an additive
         constant.
-        
+
         :return: the ln of the probability
         :rtype: float
 
@@ -1572,7 +1572,7 @@ class Probability:
         result1 = self.likelihood(params)
         result2 = self.priors(params)
         return result1 + result2
-        
+
 def check_configuration():
     """
     Test the values of the variables in check_configuration to make
@@ -1587,7 +1587,7 @@ def check_configuration():
 def write_binary_data(infile,outfile):
     """
     Read an ascii file with a grid of models, and write corresponding binary file.
-    
+
     :param infile: input ascii file name
     :param outfile: output binary file name
 
@@ -1606,7 +1606,7 @@ def write_binary_data(infile,outfile):
 def load_binary_data(filename):
     """
     Read a binary file with a grid of models.
-    
+
     :param filename: name of file with grid in binary format
     :type filename: string
 
@@ -1658,7 +1658,7 @@ def write_list_file(filename):
             output.write("%17.15f "%(amodel.string_to_param("Xc")))   # le Xc
             output.write("%22.15e\n"%(amodel.string_to_param("Tc")))  # la température centrale
     output.close()
-    
+
 def find_best_model():
     """
     Scan through grid of models to find "best" model for a given probability
@@ -1706,7 +1706,7 @@ def find_best_model_in_track(ntrack):
     """
     Scan through an evolutionary track to find "best" model for :py:data:`prob`,
     the probability function (i.e. the product of priors and a likelihood function).
-    
+
     :param ntrack: number of the evolutionary track
     :type ntrack: int
 
@@ -1755,7 +1755,7 @@ def init_walkers():
         for i in xrange(ndims):
             initial_distributions.priors[i].re_centre(best_grid_params[i])
             # deal with surface terms:
-            if (i >= ndims-nsurf): 
+            if (i >= ndims-nsurf):
                 initial_distributions.priors[i].re_normalise(abs(best_grid_params[i]))
 
     else:
@@ -1765,7 +1765,7 @@ def init_walkers():
 
     if (config.PT):
         p0 = np.zeros([config.ntemps, config.nwalkers, ndims])
-        
+
         for k in xrange(config.ntemps):
             for j in xrange(config.nwalkers):
                 params = None
@@ -1783,7 +1783,7 @@ def init_walkers():
 
     else:
         p0 = np.zeros([config.nwalkers, ndims])
-    
+
         for j in xrange(config.nwalkers):
             params = None
             counter = 0
@@ -1843,7 +1843,7 @@ def find_blobs(samples):
     """
     Find blobs (i.e. supplementary output parameters) from a set of samples
     (i.e. for multiple models).
-    
+
     :param samples: input set of samples
     :type samples: list/array of array-like
 
@@ -1858,7 +1858,7 @@ def find_a_blob(params):
     """
     Find a blob (i.e. supplementary output parameters) for a given set of parameters
     (for one model).  The blob also includes the log(P) value as a first entry.
-    
+
     :param params: input set of parameters
     :type params: array-like
 
@@ -1872,7 +1872,7 @@ def find_a_blob(params):
 def write_samples(filename, labels, samples):
     """
     Write raw samples to a file.
-        
+
     :param filename: name of file in which to write the samples
     :param labels:   names of relevant variables (used to write a header)
     :param samples:  samples for which statistical properties are calculated
@@ -1881,7 +1881,7 @@ def write_samples(filename, labels, samples):
     :type labels:   list of strings
     :type samples:  array-like
     """
-    
+
     # write results to file
     (m,n) = np.shape(samples)
     output_file = open(filename,"w")
@@ -1898,11 +1898,11 @@ def write_statistics(filename, labels, samples):
     """
     Write statistical properties based on a sequence of realisations to a file.
     The results include:
-    
+
     - average values for each variable (statistical mean)
     - error bars for each variable (standard mean deviation)
     - correlation matrix between the different variables
-    
+
     :param filename: name of file in which to write the statistical properties
     :param labels:   names of relevant variables
     :param samples:  samples for which statistical properties are calculated
@@ -1946,7 +1946,7 @@ def write_statistics(filename, labels, samples):
 
 def write_LEGACY_summary(filename, KIC, labels, samples):
     """
-    Write a one line summary of the statistical properties based on a 
+    Write a one line summary of the statistical properties based on a
     sequence of realisations to a file.  The format matches that of the
     LEGACY project.
 
@@ -1954,7 +1954,7 @@ def write_LEGACY_summary(filename, KIC, labels, samples):
 
     - average values for each variable (statistical mean)
     - error bars for each variable (standard mean deviation)
-    
+
     :param filename: name of file in which to write the statistical properties
     :param KIC: KIC number of the star
     :param labels:   names of relevant variables
@@ -2029,15 +2029,15 @@ def write_readme(filename, elapsed_time):
     :param filename: name of file in which to write the statistical properties
     :type filename: string
     """
-    
+
     # various format related strings:
     boolean2str = ("False","True")
     str_decimal = "{0:40}{1:d}\n"
     str_string  = "{0:40}{1:40}\n"
     str_float   = "{0:40}{1:22.15e}\n"
-    
+
     output_file = open(filename,"w")
-    
+
     output_file.write(string_to_title("Observational constraints"))
     output_file.write(str_decimal.format("Number of modes",len(prob.likelihood.modes)))
     output_file.write("# NOTE: the radial orders may have been recalculated (see Radial orders section)\n")
@@ -2058,7 +2058,7 @@ def write_readme(filename, elapsed_time):
     output_file.write(string_to_title("Priors"))
     for name,distribution in zip(grid_params_MCMC_with_surf, prob.priors.priors):
         output_file.write(str_string.format("Prior on "+name,distribution.to_string()))
-    
+
     nseismic = len(prob.likelihood.combinations)
     nclassic = len(prob.likelihood.constraints)
     output_file.write(string_to_title("Weighting"))
@@ -2067,12 +2067,12 @@ def write_readme(filename, elapsed_time):
     output_file.write(str_float.format("Absolute classic weight",prob.likelihood.classic_weight))
     output_file.write(str_float.format("Relative seismic weight",prob.likelihood.seismic_weight*float(nseismic)/float(nclassic)))
     output_file.write(str_float.format("Relative classic weight",prob.likelihood.classic_weight))
-    
+
     output_file.write(string_to_title("Radial orders"))
     output_file.write(str_string.format("Radial orders from input file",boolean2str[config.read_n]))
     output_file.write(str_string.format("Radial orders from best model",boolean2str[config.assign_n]))
     output_file.write(str_string.format("Use radial orders in mode map",boolean2str[config.use_n]))
-    
+
     output_file.write(string_to_title("The grid and interpolation"))
     output_file.write(str_string.format("Binary grid",config.binary_grid))
     output_file.write(str_string.format("User defined parameters",[x[0] for x in config.user_params]))
@@ -2093,7 +2093,7 @@ def write_readme(filename, elapsed_time):
         for name in grid_params_MCMC_with_surf:
             output_file.write(str_string.format("Tight ball range on "+name, \
                 config.tight_ball_range[name]))
-    
+
     output_file.write(string_to_title("Output"))
     output_file.write(str_string.format("List of output parameters",config.output_params))
     output_file.write(str_string.format("Write OSM files",boolean2str[config.with_osm]))
@@ -2126,14 +2126,14 @@ def write_combinations(filename,samples):
     :type filename: string
     :type samples: np.array
     """
-    
+
     output_file = open(filename,"w")
 
     output_file.write("{0:s} {1:e}\n".format(grid.prefix,constants.G))
     for params in samples:
         results = model.find_combination(grid,params[0:ndims-nsurf])
         my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-    
+
         if (results is None): continue  # filter out combinations outside the grid
         output_file.write("{0:d} {1:.15e} {2:.15e} {3:.15e} {4:.5f} {5:.5f} {6:.15e} {7:.5f}\n".format(
                           len(results), my_model.glb[model.imass], my_model.glb[model.iradius],
@@ -2149,7 +2149,7 @@ def write_combinations(filename,samples):
 def write_model(my_model,my_params,my_result,model_name):
     """
     Write text file with caracteristics of input model.
-    
+
     :param my_model: model for which we're writing a text file
     :param my_params: parameters of the model
     :param my_result: ln(P) value obtained for the model
@@ -2169,7 +2169,7 @@ def write_model(my_model,my_params,my_result,model_name):
     str_float   = "{0:40}{1:22.15e}\n"
     param_names = grid_params_MCMC_with_surf + config.output_params
     mode_map, nmissing = prob.likelihood.find_map(my_model, config.use_n)
-    
+
     output_file = open(os.path.join(output_folder,model_name+"_model.txt"),"w")
     output_file.write(string_to_title("Model: "+model_name))
     output_file.write(str_float.format("ln(P)",my_result))
@@ -2204,7 +2204,7 @@ def write_model(my_model,my_params,my_result,model_name):
 def string_to_title(string):
     """
     Create fancy title from string.
-    
+
     :param string: string from which the title is created.
     :type string: string
 
@@ -2225,20 +2225,20 @@ def write_osm_frequencies(filename, my_model):
     """
     Write file with frequencies for Optimal Stellar Model (OSM), written
     by R. Samadi.
-    
+
     :param filename: name of file which will contain the frequencies
     :type filename: string
 
     :param my_model: model from which are derived the radial orders
     :type my_model: :py:class:`model.Model`
-    
+
     .. note::
       Written by B. Herbert.
     """
 
     # initialisations:
     mode_map, nmissing = prob.likelihood.find_map(my_model, config.use_n)
-    
+
     output_file = open(os.path.join(config.output_osm,filename+"_freq.dat"),"w")
     output_file.write("# {0:4} {1:4} {2:17} {3:17} \n".format("n", "l",\
                           "nu[muHz]", "sigma [muHz]"))
@@ -2250,13 +2250,13 @@ def write_osm_frequencies(filename, my_model):
                            prob.likelihood.modes[i].dfreq))
 
     output_file.close()
-    
+
 
 def write_osm_don(filename, my_model):
     """
     Write file with choice of physical ingredients to be used by CESAM or CESTAM
     and OSM.
-    
+
     :param filename: name of file which will contain the physical ingredients
     :type filename: string
 
@@ -2365,7 +2365,7 @@ def write_osm_don(filename, my_model):
 def write_osm_xml(filename,my_params, my_model):
     """
     Write file with classic constraints for OSM
-    
+
     :param filename: name of file with classic constraints
     :type filename: string
 
@@ -2588,7 +2588,7 @@ def append_osm_surface_effects(modes_osm, name, numax, values):
 def echelle_diagram(my_model,my_params,model_name):
     """
     Write text file with caracteristics of input model.
-    
+
     :param my_model: model for which we're writing a text file
     :param my_params: parameters of the model
     :param model_name: name used to describe this model.  This is also used
@@ -2602,7 +2602,7 @@ def echelle_diagram(my_model,my_params,model_name):
     # sanity checks
     if (my_model is None): return
     if (len(prob.likelihood.modes) == 0): return
- 
+
     # initialisations:
     lmax = int(max([mode.l for mode in prob.likelihood.modes]))
     msize = 6
@@ -2630,7 +2630,7 @@ def echelle_diagram(my_model,my_params,model_name):
         freq_surf = my_model.get_freq(surface_option=config.surface_option, \
                     a=my_params[ndims-nsurf:ndims]) \
                   * my_model.glb[model.ifreq_ref]
-    
+
     # obtain frequency sets (and limits)
     nu_min = 1e300
     nu_max =-1e300
@@ -2669,13 +2669,13 @@ def echelle_diagram(my_model,my_params,model_name):
 
     for l in xrange(lmax+1):
         plt.plot(nu_theo[l]%dnu, nu_theo[l], "b"+style[l], markersize=msize)
-    
+
     plt.title("Model: "+model_name)
     plt.xlabel(r"Reduced frequency, $\nu$ mod "+dnu_str+r" $\mu$Hz")
     plt.ylabel(r"Frequency, $\nu$ (in $\mu$Hz)")
     plt.xlim((0.0,dnu*1.4))
     plt.ylim((nu_min,nu_max))
-    
+
     # create a legend
     handles = [mpatches.Patch(color='red')]
     labels  = [r'$\nu_{\mathrm{obs}}$']
@@ -2699,7 +2699,7 @@ def echelle_diagram(my_model,my_params,model_name):
 def plot_walkers(samples, labels, filename, nw=3):
     """
     Plot individual walkers.
-    
+
     :param samples: samples from the emcee run
     :param labels: labels for the different dimensions in parameters space
     :param filename: specify name of file in which to save plots of walkers.
@@ -2710,11 +2710,11 @@ def plot_walkers(samples, labels, filename, nw=3):
     :type filename: string
     :type nw: int
 
-    .. warning::    
+    .. warning::
       This method must be applied before the samples are reshaped,
       and information on individual walkers lost.
     """
-    
+
     plt.figure()
     itr = np.arange(config.nsteps)
     for i in xrange(nw):
@@ -2731,7 +2731,7 @@ def plot_walkers(samples, labels, filename, nw=3):
 def plot_histograms(samples, names, fancy_names, truths=None):
     """
     Plot a histogram based on a set of samples.
-    
+
     :param samples: samples form the emcee run
     :param names: names of the quantities represented by the samples.  This will
       be used when naming the file with the histogram
@@ -2777,7 +2777,7 @@ def interpolation_tests(filename):
     titles = map(model.string_to_latex,grid.grid_params+("Age",))
     results_age1 = [track.test_interpolation(1) for track in grid.tracks]
     results_age2 = [track.test_interpolation(2) for track in grid.tracks]
-    results_track, ndx1, ndx2, tessellation = grid.test_interpolation()
+    results_track, ndx1, ndx2, tessellation = grid.test_interpolation(grid)
     output = open(filename,"w")
     dill.dump([grid.ndim+1, model.nglb, titles, grid.grid, ndx1, ndx2, tessellation, \
                results_age1, results_age2, results_track],output)
@@ -2826,7 +2826,7 @@ if __name__ == "__main__":
                          config.output_osm))
         else:
             os.makedirs(config.output_osm)
-    
+
     # seed random number generator (NOTE: this is not thread-safe):
     np.random.seed()
 
@@ -2914,7 +2914,7 @@ if __name__ == "__main__":
     samples = samples.reshape((config.nwalkers*config.nsteps,ndims),order='C')
     lnprob  = lnprob.reshape((config.nwalkers*config.nsteps,1),order='C')
     samples = np.concatenate((lnprob,samples),axis=1)
-    
+
     thin_samples = samples[0::config.thin,:]
     blobs = find_blobs(thin_samples[:,1:])
     samples_big = np.concatenate((thin_samples,blobs),axis=1)
