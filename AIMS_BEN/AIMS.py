@@ -65,6 +65,8 @@ import corner
 from lxml import etree
 from operator import attrgetter
 from multiprocessing import Pool
+import ptemcee
+from tqdm import tqdm
 
 # import modules from the AIMS package
 import model
@@ -1484,7 +1486,10 @@ class Likelihood:
         """
 
         if (params is None): return log0
-        my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        if config.interp_type == "age":
+            my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        else:# config.interp_type == "mHe":
+            my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
         if (my_model is None): return log0
         mode_map, nmissing = self.find_map(my_model, config.use_n)
         if (nmissing > 0): return log0
@@ -1496,7 +1501,7 @@ class Likelihood:
     def is_outside(self, params):
         """
         Test to see if the given set of parameters lies outside the grid of
-        models.  This is done by evaluate the probability and seeing if
+        models.  This is done by evaluating the probability and seeing if
         the result indicates this.
 
         :param params: input set of parameters
@@ -1759,9 +1764,9 @@ def init_walkers():
                 initial_distributions.priors[i].re_normalise(abs(best_grid_params[i]))
 
     else:
-
        # set the initial distributions to the priors
        initial_distributions = prob.priors
+
 
     if (config.PT):
         p0 = np.zeros([config.ntemps, config.nwalkers, ndims])
@@ -1865,8 +1870,10 @@ def find_a_blob(params):
     :return: list of supplementary output parameters
     :rtype: list of floats
     """
-
-    my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+    if config.interp_type == "age":
+        my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+    elif config.interp_type == "mHe":
+        my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     return map(my_model.string_to_param,config.output_params)
 
 def write_samples(filename, labels, samples):
@@ -2132,7 +2139,11 @@ def write_combinations(filename,samples):
     output_file.write("{0:s} {1:e}\n".format(grid.prefix,constants.G))
     for params in samples:
         results = model.find_combination(grid,params[0:ndims-nsurf])
-        my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        if config.interp_type == "age":
+            my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        if config.interp_type == "mHe":
+            my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+
 
         if (results is None): continue  # filter out combinations outside the grid
         output_file.write("{0:d} {1:.15e} {2:.15e} {3:.15e} {4:.5f} {5:.5f} {6:.15e} {7:.5f}\n".format(
@@ -2841,7 +2852,10 @@ if __name__ == "__main__":
 
     # load grid and associated quantities
     grid = load_binary_data(config.binary_grid)
-    grid_params_MCMC = grid.grid_params + ("Age",)
+    if config.interp_type == "age":
+        grid_params_MCMC = grid.grid_params + ("Age",)
+    elif config.interp_type == "mHe":
+        grid_params_MCMC = grid.grid_params + ("mHe",)
     grid_params_MCMC_with_surf = grid_params_MCMC \
                                + model.get_surface_parameter_names(config.surface_option)
     nsurf            = len(model.get_surface_parameter_names(config.surface_option))
@@ -2871,7 +2885,6 @@ if __name__ == "__main__":
     else:
         pool = None
         my_map = map
-
     # initialised walkers:
     p0 = init_walkers()
 
@@ -2944,7 +2957,10 @@ if __name__ == "__main__":
     best_MCMC_result = lnprob[ndx_max,0]
     best_MCMC_params = samples[ndx_max,1:]
     best_MCMC_params.reshape(ndims)
-    best_MCMC_model  = model.interpolate_model(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+    if config.interp_type == "age":
+        best_MCMC_model  = model.interpolate_model(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+    elif config.interp_type == "mHe":
+        best_MCMC_model  = model.interpolate_model_mHe(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     best_MCMC_params = list(best_MCMC_params) + map(best_MCMC_model.string_to_param,config.output_params)
     write_model(best_MCMC_model,best_MCMC_params,best_MCMC_result,"best_MCMC")
     write_combinations(os.path.join(output_folder,"combinations_best_MCMC.txt"),[best_MCMC_params])
@@ -2955,7 +2971,10 @@ if __name__ == "__main__":
     statistical_params = samples[:,1:].sum(axis=0, dtype=np.float64)/(1.0*config.nwalkers*config.nsteps)
     statistical_params.reshape(ndims)
     statistical_result = prob(statistical_params)
-    statistical_model  = model.interpolate_model(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+    if config.interp_type == "age":
+        statistical_model  = model.interpolate_model(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+    elif config.interp_type == "mHe":
+        statistical_model  = model.interpolate_model_mHe(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     if (statistical_model is not None):
         statistical_params = list(statistical_params) + map(statistical_model.string_to_param,config.output_params)
         write_model(statistical_model,statistical_params,statistical_result,"statistical")
@@ -2995,11 +3014,15 @@ if __name__ == "__main__":
                 plt.close('all')
 
     if (config.with_triangles):
-        fig = corner.corner(samples[:,1:], truths=best_grid_params, labels=labels[1:])
+        try :
+            fig = corner.corner(samples[:,1:], truths=best_grid_params, labels=labels[1:])
+        except ValueError: pass
         for ext in config.tri_extensions:
             fig.savefig(os.path.join(output_folder,"triangle."+ext))
             plt.close('all')
-        fig = corner.corner(samples_big[:,1:], truths=best_grid_params, labels=labels_big[1:])
+        try:
+            fig = corner.corner(samples_big[:,1:], truths=best_grid_params, labels=labels_big[1:])
+        except ValueError: pass
         for ext in config.tri_extensions:
             fig.savefig(os.path.join(output_folder,"triangle_big."+ext))
             plt.close('all')
