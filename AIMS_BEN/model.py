@@ -278,7 +278,8 @@ class Model:
         assert (_glb[ix0] >= 0.0),          "A star cannot have a negative hydrogen abundance!"
         assert (_glb[iage] >= 0.0),         "A star cannot have a negative age!"
         assert (_glb[itemperature] >= 0.0), "A star cannot have a negative temperature!"
-        assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
+        if config.interp_type == "mHe":
+            assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
 
 
         self.glb = _glb
@@ -2052,7 +2053,7 @@ def find_combination(grid,pt):
 def find_mHes(coefs, tracks, mHe):
     """
     Find mHes to which each track needs to be interpolated for a specified
-    mHe.  Follows the same structure as get_ages() and uses the same scaled and
+    mHe.  Follows the same structure as find_ages() and uses the same scaled and
     fixed parameter for determining the method used to calculate the values.
     """
 
@@ -2207,7 +2208,7 @@ def find_combination_mHe(grid,pt):
     coefs,tracks = find_interpolation_coefficients(grid,pt,grid.tessellation,grid.ndx)
     if (coefs is None): return None
 
-    # find ages:
+    # find mHes:
     mHes = find_mHes(coefs,tracks,pt[-1])
     if (mHes is None): return None
 

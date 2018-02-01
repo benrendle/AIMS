@@ -365,6 +365,7 @@ class Prior_list:
         """
 
         self.priors.append(aPrior)
+        # print self.priors
 
     def realisation(self,size=None):
         """
@@ -407,6 +408,7 @@ class Prior_list:
         lnprior = 0.0
         for aPrior, param in zip(self.priors, params):
             lnprior += aPrior(param)
+            # print aPrior(param), lnprior
         return lnprior
 
 class Mode:
@@ -1816,22 +1818,73 @@ def run_emcee():
     print "Number of steps:      ", config.nsteps
 
     if (config.PT):
-        print "Number of temp.:      ", config.ntemps
-        sampler = emcee.PTSampler(config.ntemps, config.nwalkers, ndims, prob.likelihood, prob.priors, pool=pool)
+        ''' v1 of emcee sampler '''
+   #      print "Number of temp.:      ", config.ntemps
+   #      sampler = emcee.PTSampler(config.ntemps, config.nwalkers, ndims, prob.likelihood, prob.priors, pool=pool)
+   #      # print prob.likelihood
+   #      # print prob.priors
+   #      # initial burn-in:
+   #      for p, lnprob, lnlike in sampler.sample(p0, iterations = config.nsteps0): pass
+   #
+   #      # production run:
+   #      sampler.reset()
+   #      for p, lnprob, lnlike in sampler.sample(p, lnprob0 = lnprob, lnlike0 = lnlike, iterations = config.nsteps):
+   #          pass
+   #
+   #  else:
+   #      sampler = emcee.EnsembleSampler(config.nwalkers, ndims, prob, pool=pool)
+   #
+   #      # initial burn-in:
+   #      p, new_prob, state = sampler.run_mcmc(p0,config.nsteps0)
+   #
+   #      # production run:
+   #      sampler.reset()
+   #      p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
+   #
+   #  # Print acceptance fraction
+   #  print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
+   #  # Estimate the integrated autocorrelation time for the time series in each parameter.
+   # #  print "Autocorrelation time: ", sampler.get_autocorr_time()
 
+        ''' v2 of emcee sampler '''
+        print "Number of temp.:      ", config.ntemps
+        # print prob.likelihood.modes
+        # print prob.likelihood.create_mode_arrays()
+        # print prob.priors.realisation()
+        sampler = ptemcee.Sampler(config.nwalkers, ndims, prob.likelihood, prob.priors, ntemps=config.ntemps, threads=config.nprocesses)
+        print type(p0), np.shape(p0) #p0
+        print sampler._evaluate(p0)
         # initial burn-in:
-        for p, lnprob, lnlike in sampler.sample(p0, iterations = config.nsteps0): pass
+        for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
+	# Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
+    # or breaks if insufficient convergence to solution after burn in.
+        conv_accept = 0.02
+        med = np.median(sampler.chain[0,:,-config.nsteps0:-1,:],axis=0)
+        conv = np.std(med, axis=0) / np.median(med, axis=0)
+        if np.all(conv < conv_accept):
+            print "Sufficient convergence after burn-in: ", conv," < ", conv_accept
+	else:
+            print "Insufficient convergence: ", conv," > ", conv_accept
 
         # production run:
         sampler.reset()
-        for p, lnprob, lnlike in sampler.sample(p, lnprob0 = lnprob, lnlike0 = lnlike, iterations = config.nsteps):
-            pass
+        for p, lnprob, lnlike in tqdm(sampler.sample(p,adapt=True,storechain=True,iterations=config.nsteps),total=config.nsteps): pass
 
     else:
         sampler = emcee.EnsembleSampler(config.nwalkers, ndims, prob, pool=pool)
 
         # initial burn-in:
         p, new_prob, state = sampler.run_mcmc(p0,config.nsteps0)
+
+        # Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
+        # or breaks if insufficient convergence to solution after burn in.
+        conv_accept = 0.02
+        med = np.median(sampler.chain[0,:,-config.nsteps0:-1,:],axis=0)
+        conv = np.std(med, axis=0) / np.median(med, axis=0)
+        if np.all(conv < conv_accept):
+            print "Sufficient convergence after burn-in"
+        else:
+            print "Insufficient convergence"
 
         # production run:
         sampler.reset()
@@ -1840,7 +1893,8 @@ def run_emcee():
     # Print acceptance fraction
     print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
     # Estimate the integrated autocorrelation time for the time series in each parameter.
-   #  print "Autocorrelation time: ", sampler.get_autocorr_time()
+    print "Autocorrelation time: ", sampler.get_autocorr_time()
+
 
     return sampler
 
