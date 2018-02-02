@@ -1909,7 +1909,7 @@ def find_blobs(samples):
     :return: set of supplementary output parameters
     :rtype: np.array
     """
-
+    print samples[:][:][:][2]
     blobs = my_map(find_a_blob,samples)
     return np.asarray(blobs)
 

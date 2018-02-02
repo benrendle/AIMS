@@ -278,8 +278,8 @@ class Model:
         assert (_glb[ix0] >= 0.0),          "A star cannot have a negative hydrogen abundance!"
         assert (_glb[iage] >= 0.0),         "A star cannot have a negative age!"
         assert (_glb[itemperature] >= 0.0), "A star cannot have a negative temperature!"
-        # if config.interp_type == "mHe":
-        #     assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
+        if config.interp_type == "mHe":
+            assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
 
 
         self.glb = _glb
@@ -907,7 +907,7 @@ class Track:
             if (abs(param1/param2 - 1.0) > eps): return False
         return True
 
-    def sort(self):
+    def sort_age(self):
         """Sort models within evolutionary track according to age."""
 
         self.models.sort(key=methodcaller('get_age'))
@@ -1147,8 +1147,7 @@ class Track:
         mu = (mHe - self.models[istart].glb[imHe]) \
            / (self.models[istop].glb[imHe] - self.models[istart].glb[imHe])
 
-        # print self.models[istart].name
-        # print self.models[istop].name
+
         return combine_models(self.models[istart],1.0-mu,self.models[istop],mu), \
                 self.models[istart].name
 
@@ -1401,7 +1400,10 @@ class Model_grid:
         output.close()
 
         # sort tracks:
-        for track in self.tracks: track.sort()
+        if config.interp_type == 'age':
+            for track in self.tracks: track.sort_age()
+        elif config.interp_type == 'mHe':
+            for track in self.tracks: track.sort_mHe()
 
         # sanity check:
         dup = False
@@ -2131,7 +2133,7 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx): #,Name,mod,out2,out3):
         return tracks[0].interpolate_model(mHes[0])
 
     # treat the case where there are at least 2 models:
-    # print mHes
+    # print mHes[0]
     aModel1, name1 = tracks[0].interpolate_model_mHe(mHes[0])
     if (aModel1 is None): return None
     if (name1 is None): return None

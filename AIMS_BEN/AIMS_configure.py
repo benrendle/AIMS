@@ -29,8 +29,8 @@ parallel    = True #$$$True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10 #$$$5 # number of temperatures
-nwalkers    = 40 #$$$400     # number of walkers (this number should be even)
-nsteps0     = 200 #$$$200     # number of burn-in steps
+nwalkers    = 400 #$$$400     # number of walkers (this number should be even)
+nsteps0     = 2000 #$$$200     # number of burn-in steps
 nsteps      = 200 #$$$4000     # number of steps
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
