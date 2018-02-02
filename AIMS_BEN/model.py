@@ -278,8 +278,8 @@ class Model:
         assert (_glb[ix0] >= 0.0),          "A star cannot have a negative hydrogen abundance!"
         assert (_glb[iage] >= 0.0),         "A star cannot have a negative age!"
         assert (_glb[itemperature] >= 0.0), "A star cannot have a negative temperature!"
-        if config.interp_type == "mHe":
-            assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
+        # if config.interp_type == "mHe":
+        #     assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
 
 
         self.glb = _glb
@@ -1189,7 +1189,7 @@ class Track:
 
     def find_modes_mHe(self, ntarget, ltarget):
         """
-        Return two lists, one with the ages of the models and the other
+        Return two lists, one with the mHes of the models and the other
         with the mode frequencies corresponding to target n and l values.
 
         This function is useful for seeing how the frequency of a particular
@@ -1201,7 +1201,7 @@ class Track:
         :type ntarget: int
         :type ltarget: int
 
-        :return: lists of ages and frequencies
+        :return: lists of mHes and frequencies
         :rtype: list, list
         """
 
@@ -2128,7 +2128,7 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx): #,Name,mod,out2,out3):
     if (n == 1):
         if (abs(coefs[0]-1.0) > eps):
             print "WARNING: erroneous interpolation coefficient: ",coefs[0]
-        return tracks[0].interpolate_model(ages[0])
+        return tracks[0].interpolate_model(mHes[0])
 
     # treat the case where there are at least 2 models:
     # print mHes

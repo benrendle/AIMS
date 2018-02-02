@@ -2197,17 +2197,17 @@ def write_combinations(filename,samples):
             my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
         if config.interp_type == "mHe":
             my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-
-
-        if (results is None): continue  # filter out combinations outside the grid
-        output_file.write("{0:d} {1:.15e} {2:.15e} {3:.15e} {4:.5f} {5:.5f} {6:.15e} {7:.5f}\n".format(
-                          len(results), my_model.glb[model.imass], my_model.glb[model.iradius],
-                          my_model.glb[model.iluminosity],my_model.glb[model.iz0],
-                          my_model.glb[model.ix0],my_model.glb[model.iage],
-                          my_model.glb[model.itemperature]))
-        for (coef,model_name) in results:
-           output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
-        output_file.write("\n")
+        if isinstance(my_model,tuple) == True: pass
+        else:
+            if (results is None): continue  # filter out combinations outside the grid
+            output_file.write("{0:d} {1:.15e} {2:.15e} {3:.15e} {4:.5f} {5:.5f} {6:.15e} {7:.5f}\n".format( \
+                              len(results), my_model.glb[model.imass], my_model.glb[model.iradius], \
+                              my_model.glb[model.iluminosity],my_model.glb[model.iz0], \
+                              my_model.glb[model.ix0],my_model.glb[model.iage], \
+                              my_model.glb[model.itemperature]))
+            for (coef,model_name) in results:
+               output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
+            output_file.write("\n")
 
     output_file.close()
 

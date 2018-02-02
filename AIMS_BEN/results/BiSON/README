@@ -119,6 +119,6 @@ List of triangle plot extensions        ['png']
 ################################################################################
 With parallelisation                    True                                    
 Number of processes                     8
-Execution time (s)                       7.437342691421509e+01
+Execution time (s)                       4.224557113647461e+01
 Number of accepted models               16928
 Number of rejected models               14257

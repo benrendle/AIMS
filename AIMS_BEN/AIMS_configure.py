@@ -76,7 +76,7 @@ assign_n    = False  # use best model to reassign the radial order?
 #   - "Kjeldsen2008": use surface corrections based on Kjeldsen et al. (2008)
 #   - "Ball2014": use one-term surface corrections based on Ball & Gizon (2014)
 #   - "Ball2014_2": use two-term surface corrections based on Ball & Gizon (2014)
-surface_option = "Ball2014_2"
+surface_option = None#"Ball2014_2"
 b_Kjeldsen2008 = 4.9  # exponent used in the Kjeldsen et al. surface corrections
 
 # Set of seismic constraints to be used. Options include:
@@ -126,7 +126,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_MS_mHe2" #NGC6819" # binary file with model grid
+binary_grid = "grid_RGB_mHe3" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -144,7 +144,7 @@ binary_grid = "grid_MS_mHe2" #NGC6819" # binary file with model grid
 # log of this parameter.
 
 #user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)
 #user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
 #               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
 #               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
@@ -174,7 +174,7 @@ priors["A3_surf"]  = ("Uniform", [-1e-9, 1e-9])  # this too broad and should be 
 priors["Am1_surf"] = ("Uniform", [-1e-6, 1e-6])  # this too broad and should be set experimentally
 #########################   Interpolation    ###############################
 scale_age = True                 # use a scaled age when interpolating
-interp_type = "age"		 # options to use either "age" or "mHe" for interpolation. Should only be
+interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
 test_interpolation = False       # decide whether to test the interpolation.
@@ -191,7 +191,7 @@ interpolation_file = "interp_RGB_mHe"#"interp_MS_He_v2.2"  # Name of the file to
 #                       "M_H", "Age", "Teff", "Dnu", "Rho", "g"
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H")#,"DNl1")
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","DNl1")
 output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
 with_osm       = False         # decide whether to write output files for

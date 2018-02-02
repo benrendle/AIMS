@@ -76,9 +76,9 @@ Scaled age interpolation                True
 ################################################################################
 With parallel tempering                 True                                    
 Number of temperatures                  10
-Number of walkers                       400
+Number of walkers                       40
 Number of burn-in steps                 200
-Number of production steps              2000
+Number of production steps              200
 Thinning parameter                      10
 
 ################################################################################
@@ -106,6 +106,6 @@ List of triangle plot extensions        ['png']
 ################################################################################
 With parallelisation                    True                                    
 Number of processes                     8
-Execution time (s)                       1.207934741020203e+03
+Execution time (s)                       3.128249287605286e+01
 Number of accepted models               25002
 Number of rejected models               11585
