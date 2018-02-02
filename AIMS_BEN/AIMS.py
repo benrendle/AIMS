@@ -1492,13 +1492,17 @@ class Likelihood:
             my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
         else:# config.interp_type == "mHe":
             my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        # print type(my_model)
+        # print 'checking tuple'
+        if isinstance(my_model,tuple) == True:
+            return log0
         if (my_model is None): return log0
         mode_map, nmissing = self.find_map(my_model, config.use_n)
         if (nmissing > 0): return log0
         chi2 = self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map,a=params[ndims-nsurf:ndims])
         chi2 += self.classic_weight*self.apply_constraints(my_model)
-
         return chi2
+            # return log0
 
     def is_outside(self, params):
         """
@@ -1848,13 +1852,9 @@ def run_emcee():
 
         ''' v2 of emcee sampler '''
         print "Number of temp.:      ", config.ntemps
-        # print prob.likelihood.modes
-        # print prob.likelihood.create_mode_arrays()
-        # print prob.priors.realisation()
         sampler = ptemcee.Sampler(config.nwalkers, ndims, prob.likelihood, prob.priors, ntemps=config.ntemps, threads=config.nprocesses)
-        print type(p0), np.shape(p0) #p0
-        print sampler._evaluate(p0)
         # initial burn-in:
+
         for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
 	# Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
     # or breaks if insufficient convergence to solution after burn in.
@@ -2959,10 +2959,10 @@ if __name__ == "__main__":
     # Collect results:
     if (config.PT):
         samples = sampler.chain[0,...]
-        lnprob  = sampler.lnprobability[0,...]
+        lnprob  = sampler.logprobability[0,...]
     else:
         samples = sampler.chain
-        lnprob  = sampler.lnprobability
+        lnprob  = sampler.logprobability
 
     # Write file with parameters used in this run
     elapsed_time = time.time() - t0
