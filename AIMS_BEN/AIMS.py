@@ -1863,7 +1863,7 @@ def run_emcee():
         conv = np.std(med, axis=0) / np.median(med, axis=0)
         if np.all(conv < conv_accept):
             print "Sufficient convergence after burn-in: ", conv," < ", conv_accept
-	else:
+	    else:
             print "Insufficient convergence: ", conv," > ", conv_accept
 
         # production run:
