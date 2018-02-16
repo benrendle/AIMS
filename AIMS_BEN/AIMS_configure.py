@@ -25,20 +25,20 @@ import math
 #       the memory in each process.  To be more memory efficient, turn off
 #       parallelisation using the "parallel" parameter.
 nprocesses  = 8      # number of processes (if running in parallel)
-parallel    = True   # specifies whether to run in parallel
+parallel    = True #$$$True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
-ntemps      = 10 # number of temperatures
-nwalkers    = 40     # number of walkers (this number should be even)
-nsteps0     = 50     # number of burn-in steps
-nsteps      = 300     # number of steps
+ntemps      = 10 #$$$5 # number of temperatures
+nwalkers    = 400 #$$$400     # number of walkers (this number should be even)
+nsteps0     = 200 #$$$200     # number of burn-in steps
+nsteps      = 4000 #$$$4000     # number of steps
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
 PT          = True   # use parallel tempering?
 
 #########################   Initialisation   ###############################
 tight_ball   = True  # initialise with a tight ball around best solution
-max_iter     = 10000  # maximum number of iterations to find walker
+max_iter     = 100000 # maximum number of iterations to find walker
 
 # Ranges used around tight ball configuration for walkers.
 # NOTES:
@@ -55,8 +55,9 @@ tight_ball_range["Mass"]     = ("Gaussian", [0.0, 0.01])	# (29/06/16) edited the
 tight_ball_range["Z"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
 tight_ball_range["log_Z"]    = ("Gaussian", [0.0, 0.05])
 tight_ball_range["X"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
-tight_ball_range["log_X"]    = ("Gaussian", [0.0, 0.05])
+# tight_ball_range["log_X"]    = ("Gaussian", [0.0, 0.05])
 tight_ball_range["Age"]      = ("Gaussian", [0.0, 100.0])
+tight_ball_range["mHe"]      = ("Gaussian", [0.0, 0.05])
 tight_ball_range["numax"]    = ("Gaussian", [0.0, 0.5])
 tight_ball_range["Dnu"]      = ("Gaussian", [0.0, 0.5])
 tight_ball_range["Radius"]   = ("Gaussian", [0.0, 0.01])
@@ -67,7 +68,7 @@ tight_ball_range["Am1_surf"] = ("Gaussian", [0.0, 1.0])  # will be reset by AIMS
 #########################   Radial orders   ################################
 use_n       = True  # use radial orders when comparing observations with models?
 read_n      = True # read radial orders from input file?
-assign_n    = True  # use best model to reassign the radial order?
+assign_n    = False  # use best model to reassign the radial order?
                     # NOTE: this supersedes "read_n"
 #########################   Constraints   ##################################
 # Determines the type of surface correction to include.  Options include:
@@ -75,7 +76,7 @@ assign_n    = True  # use best model to reassign the radial order?
 #   - "Kjeldsen2008": use surface corrections based on Kjeldsen et al. (2008)
 #   - "Ball2014": use one-term surface corrections based on Ball & Gizon (2014)
 #   - "Ball2014_2": use two-term surface corrections based on Ball & Gizon (2014)
-surface_option = None
+surface_option = "Ball2014_2"
 b_Kjeldsen2008 = 4.9  # exponent used in the Kjeldsen et al. surface corrections
 
 # Set of seismic constraints to be used. Options include:
@@ -117,15 +118,17 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # (i.e. below the cutoff frequency as determined
                                  # by ADIPLS) in agsm files.  This test is in
                                  # addition to the above user-defined cutoff.
-list_grid     = "NGC6819_list"   # file with list of models and characteristics.
+grid_type = 'CLES'               # Define grid type for correct frequency file format
+
+list_grid     = "list_MS_v2"   # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
-grid_params = ("Mass","log_Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
+grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_MS_v2" # binary file with model grid
+binary_grid = "grid_MS_v2" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -143,7 +146,7 @@ binary_grid = "grid_MS_v2" # binary file with model grid
 # log of this parameter.
 
 #user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)#("mHe", r'Helium Mass'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
 #user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
 #               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
 #               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
@@ -160,25 +163,28 @@ user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacin
 #     which don't intervene. AIMS will simply ignore them.
 
 priors = {}                      # The priors will be defined thanks to this
-priors["Mass"]     = ("Uniform", [0.90, 1.15])
-priors["Z"]        = ("Uniform", [0.0090, 0.0390])
-priors["log_Z"]    = ("Uniform", [math.log10(0.0090), math.log10(0.0390)])
-priors["X"]        = ("Uniform", [0.672, 0.730])
-priors["log_X"]    = ("Uniform", [math.log10(0.672), math.log10(0.730)])
+priors["Mass"]     = ("Uniform", [0.9, 1.5])
+priors["Z"]        = ("Uniform", [0.0023, 0.0332])
+priors["log_Z"]    = ("Uniform", [math.log10(0.0023), math.log10(0.0332)])
+priors["X"]        = ("Uniform", [0.679, 0.746])
+# priors["log_X"]    = ("Uniform", [math.log10(0.68), math.log10(0.73)])
+priors["mHe"]      = ("Uniform", [0.0, 0.3])
 priors["Age"]      = ("Uniform", [0.0, 2e4])
 priors["numax"]    = ("Uniform", [0.0, 5.0e3])
 priors["A_surf"]   = ("Uniform", [-1.0, 1.0])  # this is too broad and will be sent by AIMS
-priors["A3_surf"]  = ("Uniform", [-1e-12, 1e-12])  # this too broad and should be set experimentally
+priors["A3_surf"]  = ("Uniform", [-1e-9, 1e-9])  # this too broad and should be set experimentally
 priors["Am1_surf"] = ("Uniform", [-1e-6, 1e-6])  # this too broad and should be set experimentally
 #########################   Interpolation    ###############################
 scale_age = True                 # use a scaled age when interpolating
+interp_type = "age"		 # options to use either "age" or "mHe" for interpolation. Should only be
+                        # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
 test_interpolation = False       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interp_RGB"  # Name of the file to which to
+interpolation_file = "interp_RGB_mHe"#"interp_MS_He_v2.2"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.
@@ -187,7 +193,7 @@ interpolation_file = "interp_RGB"  # Name of the file to which to
 #                       "M_H", "Age", "Teff", "Dnu", "Rho", "g"
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","Xc")#,"DNl1")
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H")#,"DNl1")
 output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
 with_osm       = False         # decide whether to write output files for
