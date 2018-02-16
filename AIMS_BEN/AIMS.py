@@ -1557,6 +1557,9 @@ class Probability:
         .. note::
           This avoids model interpolation and can be used to gain time.
         """
+        # output_folder = '/home/bmr135/AIMS_New/'
+        # filename = os.path.join(output_folder,"lnp_mass.txt")
+        # out = open(filename,"a")
 
         if (config.surface_option is None):
             result1 = self.likelihood.evaluate(my_model)
@@ -1736,6 +1739,7 @@ def find_best_model_in_track(ntrack):
             best_model_local  = model
         if (result >= threshold):
             accepted_parameters_local.append(map(model.string_to_param,grid_params_MCMC))
+            # print model.name
         else:
             rejected_parameters_local.append(map(model.string_to_param,grid_params_MCMC))
 
@@ -1863,7 +1867,7 @@ def run_emcee():
         conv = np.std(med, axis=0) / np.median(med, axis=0)
         if np.all(conv < conv_accept):
             print "Sufficient convergence after burn-in: ", conv," < ", conv_accept
-	    else:
+        else:
             print "Insufficient convergence: ", conv," > ", conv_accept
 
         # production run:
@@ -1889,7 +1893,7 @@ def run_emcee():
         # production run:
         sampler.reset()
         p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
-
+        
     # Print acceptance fraction
     print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
     # Estimate the integrated autocorrelation time for the time series in each parameter.
@@ -2906,10 +2910,7 @@ if __name__ == "__main__":
 
     # load grid and associated quantities
     grid = load_binary_data(config.binary_grid)
-    if config.interp_type == "age":
-        grid_params_MCMC = grid.grid_params + ("Age",)
-    elif config.interp_type == "mHe":
-        grid_params_MCMC = grid.grid_params + ("mHe",)
+    grid_params_MCMC = grid.grid_params + ("Age",)
     grid_params_MCMC_with_surf = grid_params_MCMC \
                                + model.get_surface_parameter_names(config.surface_option)
     nsurf            = len(model.get_surface_parameter_names(config.surface_option))

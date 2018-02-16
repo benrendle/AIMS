@@ -341,19 +341,35 @@ class Model:
         freqlim = config.cutoff*self.cutoff
         exceed_freqlim = False
         freqfile = open(filename)
-        freqfile.readline() # skip head
-        mode_temp = []
-        for line in freqfile:
-            line = line.strip()
-            columns = line.split()
-            n = int(columns[1])
-            freq = utilities.to_float(columns[2])
-            # remove frequencies above AIMS_configure.cutoff*nu_{cut-off}
-            if (freq > freqlim):
-                exceed_freqlim = True
-                continue
-            if (config.npositive and (n < 0)): continue  # remove g-modes if need be
-            mode_temp.append((n,int(columns[0]),freq,utilities.to_float(columns[4])))
+        if config.grid_type == 'CLES':
+            freqfile.readline() # skip head
+            mode_temp = []
+            for line in freqfile:
+                line = line.strip()
+                columns = line.split()
+                n = int(columns[1])
+                freq = utilities.to_float(columns[2])
+                # remove frequencies above AIMS_configure.cutoff*nu_{cut-off}
+                if (freq > freqlim):
+                    exceed_freqlim = True
+                    continue
+                if (config.npositive and (n < 0)): continue  # remove g-modes if need be
+                mode_temp.append((n,int(columns[0]),freq,utilities.to_float(columns[4]))) # CLES
+        if config.grid_type == 'MESA':
+            for i in range(0,7,1):
+               freqfile.readline()
+            mode_temp = []
+            for line in freqfile:
+                line = line.strip()
+                columns = line.split()
+                n = int(columns[1])
+                freq = utilities.to_float(columns[4])
+                # remove frequencies above AIMS_configure.cutoff*nu_{cut-off}
+                if (freq > freqlim):
+                    exceed_freqlim = True
+                    continue
+                if (config.npositive and (n < 0)): continue  # remove g-modes if need be
+                mode_temp.append((n,int(columns[0]),freq,utilities.to_float(columns[7])))
         freqfile.close()
         self.modes = np.array(mode_temp,dtype=modetype)
 
