@@ -3,18 +3,19 @@
 # Script to take a generated grid and convert it to a suitable format to be
 # read in by AIMS.
 
-cd /home/miglioa/GridNGC6819_Fep0.25/LOGS/ # location of generated grid files
-# rm -f *.mod.txt # Removal of any pre-existing files formatted for AIMS
-rm -f *FGONG # Removal of any pre-existing files formatted for AIMS
+cd /home/bmr135/GridSunClesDV2/models/ # location of generated grid files
+rm -f *.mod # Removal of any pre-existing files formatted for AIMS
+# rm -f *FGONG # Removal of any pre-existing files formatted for AIMS
 echo "Cleared!"
 # find . -name "*.tgz" > files  # Locates the .tgz containing frequency information
-find . -name "*.FGONG" > files  # Locates the .FGONG files in MESA
+find . -name "*.mod" > files  # Locates the .FGONG files in MESA
 python master_script.py # script designed to generate script for de-tarring files
 chmod 755 extract # make extract an executable file
 ./extract # extract information from .tgz files
 echo "complete"
-cd /home/miglioa/GridNGC6819_Fem0.25/LOGS/
-find . -name "*.FGONG" -maxdepth 1 > structure  # list all extracted files
+# cd /home/bmr135/GridSunClesDV2/models/
+find . -name "*.mod" -maxdepth 1 > structure  # list all extracted files
+# find . -name "*.FGONG" -maxdepth 1 > structure  # list all extracted files
 sed 's/\.\///g' structure > structure.lis # reformat file names
 echo "complete"
 python master_list.py # create initial grid input sheet for AIMS with all necessary coloumns
@@ -22,3 +23,4 @@ echo "complete"
 python list_correction.py # appends required prefix to the file locations to reach
                           # the necessary frequency files and outputs final format
                           # file to be read in by AIMS for binary grid generation
+rm -f *.mod # Removal of any pre-existing files formatted for AIMS

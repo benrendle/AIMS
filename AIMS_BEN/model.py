@@ -952,9 +952,10 @@ class Track:
         dup_list = []
         dupl = False
         for i in xrange(len(self.models)-1):
-	    if self.models[i].glb[iage] == self.models[i+1].glb[iage]:
+            if self.models[i].glb[iage] == self.models[i+1].glb[iage]:
+                print self.models[i].glb[iage], self.models[i+1].glb[iage]
                 dupl = True
-            dup_list.append(self.models[i+1].name)
+                dup_list.append(self.models[i+1].name)
 	        #return [True, self.models[i].name, self.models[i+1].name]
         if dupl:
             return [True, dup_list]

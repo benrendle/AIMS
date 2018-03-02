@@ -105,7 +105,7 @@ seismic_weight = 1.0
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = False            # set this to True if you want to write a
+write_data    = True            # set this to True if you want to write a
                                  # binary grid file
 mode_format   = "simple"         # specifies the format of the files with
                                  # the mode frequencies.  Options include:
@@ -120,7 +120,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # addition to the above user-defined cutoff.
 grid_type = 'CLES'               # Define grid type for correct frequency file format
 
-list_grid     = "list_MS_v2"   # file with list of models and characteristics.
+list_grid     = "CLES_RGB_v3"   # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
@@ -128,7 +128,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_MS_v2" #NGC6819" # binary file with model grid
+binary_grid = "grid_CLES_RGB_v3" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -146,7 +146,7 @@ binary_grid = "grid_MS_v2" #NGC6819" # binary file with model grid
 # log of this parameter.
 
 #user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)
 #user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
 #               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
 #               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
@@ -193,7 +193,7 @@ interpolation_file = "interp_RGB_mHe"#"interp_MS_He_v2.2"  # Name of the file to
 #                       "M_H", "Age", "Teff", "Dnu", "Rho", "g"
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H")#,"DNl1")
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","DNl1")
 output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
 with_osm       = False         # decide whether to write output files for
