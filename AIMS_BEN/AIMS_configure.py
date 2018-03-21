@@ -24,14 +24,15 @@ import math
 # NOTE: this is currently implemented with multiprocessing, which duplicates
 #       the memory in each process.  To be more memory efficient, turn off
 #       parallelisation using the "parallel" parameter.
-nprocesses  = 8      # number of processes (if running in parallel)
+nprocesses  = 4      # number of processes (if running in parallel)
 parallel    = True #$$$True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10 #$$$5 # number of temperatures
 nwalkers    = 400 #$$$400     # number of walkers (this number should be even)
-nsteps0     = 200 #$$$200     # number of burn-in steps
-nsteps      = 4000 #$$$4000     # number of steps
+nsteps0     = 2000 #$$$200     # number of burn-in steps
+nsteps      = 400 #$$$4000     # number of steps
+add_steps   = 500    # number of steps to add if convergence isn't achieved
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
 PT          = True   # use parallel tempering?
@@ -105,7 +106,7 @@ seismic_weight = 1.0
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = True            # set this to True if you want to write a
+write_data    = False            # set this to True if you want to write a
                                  # binary grid file
 mode_format   = "simple"         # specifies the format of the files with
                                  # the mode frequencies.  Options include:
@@ -120,7 +121,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # addition to the above user-defined cutoff.
 grid_type = 'CLES'               # Define grid type for correct frequency file format
 
-list_grid     = "CLES_RGB_v3"   # file with list of models and characteristics.
+list_grid     = "CLES_RGB_v3.1"   # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
@@ -128,7 +129,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_CLES_RGB_v3" #NGC6819" # binary file with model grid
+binary_grid = "grid_CLES_RGB_v3.2" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -163,11 +164,11 @@ user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing,
 #     which don't intervene. AIMS will simply ignore them.
 
 priors = {}                      # The priors will be defined thanks to this
-priors["Mass"]     = ("Uniform", [0.9, 1.5])
-priors["Z"]        = ("Uniform", [0.0023, 0.0332])
-priors["log_Z"]    = ("Uniform", [math.log10(0.0023), math.log10(0.0332)])
-priors["X"]        = ("Uniform", [0.679, 0.746])
-# priors["log_X"]    = ("Uniform", [math.log10(0.68), math.log10(0.73)])
+priors["Mass"]     = ("Uniform", [0.90, 1.50])
+priors["Z"]        = ("Uniform", [0.0032, 0.03])
+priors["log_Z"]    = ("Uniform", [math.log10(0.0032), math.log10(0.03)])
+priors["X"]        = ("Uniform", [0.691, 0.745])
+priors["log_X"]    = ("Uniform", [math.log10(0.691), math.log10(0.745)])
 priors["mHe"]      = ("Uniform", [0.0, 0.3])
 priors["Age"]      = ("Uniform", [0.0, 2e4])
 priors["numax"]    = ("Uniform", [0.0, 5.0e3])
@@ -175,8 +176,8 @@ priors["A_surf"]   = ("Uniform", [-1.0, 1.0])  # this is too broad and will be s
 priors["A3_surf"]  = ("Uniform", [-1e-9, 1e-9])  # this too broad and should be set experimentally
 priors["Am1_surf"] = ("Uniform", [-1e-6, 1e-6])  # this too broad and should be set experimentally
 #########################   Interpolation    ###############################
-scale_age = True                 # use a scaled age when interpolating
-interp_type = "age"		 # options to use either "age" or "mHe" for interpolation. Should only be
+scale_age = True                 # use a scaled interpolation parameter
+interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
 test_interpolation = False       # decide whether to test the interpolation.
@@ -184,7 +185,7 @@ test_interpolation = False       # decide whether to test the interpolation.
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interp_RGB_mHe"#"interp_MS_He_v2.2"  # Name of the file to which to
+interpolation_file = "interp_RGB_mHe2"#"interp_MS_He_v2.2"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.

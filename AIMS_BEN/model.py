@@ -953,7 +953,7 @@ class Track:
         dupl = False
         for i in xrange(len(self.models)-1):
             if self.models[i].glb[iage] == self.models[i+1].glb[iage]:
-                print self.models[i].glb[iage], self.models[i+1].glb[iage]
+                print self.models[i].glb[iage], self.models[i+1].glb[iage], i, i+1
                 dupl = True
                 dup_list.append(self.models[i+1].name)
 	        #return [True, self.models[i].name, self.models[i+1].name]

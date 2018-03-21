@@ -1862,13 +1862,19 @@ def run_emcee():
         for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
 	# Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
     # or breaks if insufficient convergence to solution after burn in.
+        max_conv = 5
         conv_accept = 0.02
-        med = np.median(sampler.chain[0,:,-config.nsteps0:-1,:],axis=0)
-        conv = np.std(med, axis=0) / np.median(med, axis=0)
-        if np.all(conv < conv_accept):
-            print "Sufficient convergence after burn-in: ", conv," < ", conv_accept
-        else:
-            print "Insufficient convergence: ", conv," > ", conv_accept
+        steps = config.nsteps0
+        for i in range(max_conv):
+            for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=steps),total=steps): pass
+            med = np.median(sampler.chain[0,:,-steps:-1,:],axis=0)
+            conv = np.std(med, axis=0) / np.median(med, axis=0)
+            if np.all(conv < conv_accept):
+                print "Sufficient convergence after burn-in (", steps,"): ", conv," < ", conv_accept
+                break
+            else:
+                print "Insufficient convergence(", steps,"): ", conv," > ", conv_accept
+                steps += config.add_steps
 
         # production run:
         sampler.reset()
@@ -1893,7 +1899,7 @@ def run_emcee():
         # production run:
         sampler.reset()
         p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
-        
+
     # Print acceptance fraction
     print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
     # Estimate the integrated autocorrelation time for the time series in each parameter.
@@ -2910,7 +2916,7 @@ if __name__ == "__main__":
 
     # load grid and associated quantities
     grid = load_binary_data(config.binary_grid)
-    grid_params_MCMC = grid.grid_params + ("Age",)
+    grid_params_MCMC = grid.grid_params + (config.interp_type,)
     grid_params_MCMC_with_surf = grid_params_MCMC \
                                + model.get_surface_parameter_names(config.surface_option)
     nsurf            = len(model.get_surface_parameter_names(config.surface_option))
