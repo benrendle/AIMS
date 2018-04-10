@@ -118,21 +118,21 @@ index of the parameter corresponding to the initial hydrogen content
 in the :py:data:`Model.glb` array
 """
 
-ifreq_ref    = 5 + len(config.user_params)
+imHe         = 5
+""" index of the parameter corresponding to He core mass in the :py:data:`Model.glb` array """
+
+ifreq_ref    = 6 + len(config.user_params)
 """
 index of the parameter corresponding to the reference frequency
 (used to non-dimensionalise the pulsation frequencies of the model)
 in the :py:data:`Model.glb` array
 """
 
-iradius      = 6 + len(config.user_params)
+iradius      = 7 + len(config.user_params)
 """ index of the parameter corresponding to radius in the :py:data:`Model.glb` array """
 
-iluminosity  = 7 + len(config.user_params)
+iluminosity  = 8 + len(config.user_params)
 """ index of the parameter corresponding to luminosity in the :py:data:`Model.glb` array """
-
-imHe  = 8 + len(config.user_params)
-""" index of the parameter corresponding to He core mass in the :py:data:`Model.glb` array """
 
 def string_to_latex(string,prefix="",postfix=""):
     """
@@ -280,7 +280,6 @@ class Model:
         assert (_glb[itemperature] >= 0.0), "A star cannot have a negative temperature!"
         if config.interp_type == "mHe":
             assert (_glb[imHe] >= 0.0),          "A star cannot have a negative He core mass! M = %f, %s"%(_glb[imHe],self.name)
-
 
         self.glb = _glb
         """Array which will contain various global quantities"""
@@ -953,7 +952,7 @@ class Track:
         dupl = False
         for i in xrange(len(self.models)-1):
             if self.models[i].glb[iage] == self.models[i+1].glb[iage]:
-                print self.models[i].glb[iage], self.models[i+1].glb[iage], i, i+1
+                print self.models[i].glb[iage], self.models[i+1].glb[iage]
                 dupl = True
                 dup_list.append(self.models[i+1].name)
 	        #return [True, self.models[i].name, self.models[i+1].name]
@@ -1138,7 +1137,7 @@ class Track:
         """
         Return a model at a given mHe which is obtained using linear interpolation.
 
-        :param mHe: mHe of desired model in :math:`\\mathrm{M_Sun}`
+        :param mHe: mHe of desired model in :math:`\\mathrm{g}`
         :type mHe: float
 
         :return: the interpolated model
@@ -1164,6 +1163,7 @@ class Track:
         mu = (mHe - self.models[istart].glb[imHe]) \
            / (self.models[istop].glb[imHe] - self.models[istart].glb[imHe])
 
+        print("%f %e %e %e %e %e %e %d"%(mu,self.models[istart].glb[imHe],mHe,self.models[istop].glb[imHe],self.models[0].glb[imHe],self.models[-2].glb[imHe],self.models[-1].glb[imHe],imHe))
 
         return combine_models(self.models[istart],1.0-mu,self.models[istop],mu), \
                 self.models[istart].name
@@ -1172,7 +1172,7 @@ class Track:
         """
         Return a model combination at a given mHe which is obtained using linear interpolation.
 
-        :param mHe: age of desired model in :math:`\\mathrm{M_Sun}`
+        :param mHe: age of desired model in :math:`\\mathrm{g}`
         :param coef: coefficient which multiplies this combination
 
         :type mHe: float
@@ -1386,12 +1386,16 @@ class Model_grid:
             glb[itemperature] = utilities.to_float(columns[7])
             glb[imHe]         = utilities.to_float(columns[8])
 
+            # print utilities.to_float(columns[8]), glb[imHe]
+
             i = 9
             for (name, name_latex) in config.user_params:
+                # print name, utilities.to_float(columns[i]), user_params_index[name]
                 glb[user_params_index[name]] = utilities.to_float(columns[i])
                 i += 1
 
-            # print glb[0]
+            # print utilities.to_float(columns[9]), glb[5], i
+            # sys.exit()
             aModel = Model(glb, _name = columns[0])
             exceed_freqlim = aModel.read_file(self.prefix + columns[0] + self.postfix)
             aModel.multiply_modes(1.0/aModel.glb[ifreq_ref])  # make frequencies non-dimensional
@@ -1500,7 +1504,7 @@ class Model_grid:
         results = []
         ndim = self.ndim+1
         # print ndim
-        output_folder = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/'
+        output_folder = '/home/buldgen/AIMS-master_New/AIMS_BEN/'
         filename = os.path.join(output_folder,"combinations_Delaunay.txt")
         f2 = os.path.join(output_folder,"Delaunay_MS_Models_mHe.txt")
         f3 = os.path.join(output_folder,"Delaunay_MS_Mod_vals_mHe.txt")
@@ -1525,6 +1529,7 @@ class Model_grid:
                     #     print(aModel1.glb[imHe])
                     aModel2 = interpolate_model_mHe(self,pt,tessellation,ndx2)# ,aModel1.name,aModel1,out2,out3)
                 aResult[i,0:ndim] = pt
+
                 # print aModel1.name, 1
                 # print names, 'n1'
                 # print name2, 'n2'
@@ -1630,7 +1635,7 @@ def init_user_param_dict():
     the :py:data:`Model.glb` array as well as the appropriate latex name.
     """
 
-    i = 5
+    i = 6
     for (name, latex_name) in config.user_params:
         user_params_index[name] = i
         user_params_latex[name] = latex_name
@@ -2137,20 +2142,22 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx): #,Name,mod,out2,out3):
 
     # find simplex interpolation coefficients
     coefs,tracks = find_interpolation_coefficients(grid,pt,tessellation,ndx)
+
+    #print pt
     if (coefs is None): return None
     # find mHes:
     mHes = find_mHes(coefs,tracks,pt[-1])
     if (mHes is None): return None
     n = len(tracks)
-
+    #print n, mHes
     # treat the case where there is only 1 model:
     if (n == 1):
         if (abs(coefs[0]-1.0) > eps):
             print "WARNING: erroneous interpolation coefficient: ",coefs[0]
-        return tracks[0].interpolate_model(mHes[0])
+        return tracks[0].interpolate_model_mHe(mHes[0])
 
     # treat the case where there are at least 2 models:
-    # print mHes[0]
+    #print tracks[0]
     aModel1, name1 = tracks[0].interpolate_model_mHe(mHes[0])
     if (aModel1 is None): return None
     if (name1 is None): return None
@@ -2225,6 +2232,7 @@ def find_combination_mHe(grid,pt):
 
     # find simplex interpolation coefficients
     coefs,tracks = find_interpolation_coefficients(grid,pt,grid.tessellation,grid.ndx)
+    #print pt
     if (coefs is None): return None
 
     # find mHes:

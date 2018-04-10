@@ -106,7 +106,7 @@ seismic_weight = 1.0
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = False            # set this to True if you want to write a
+write_data    = True            # set this to True if you want to write a
                                  # binary grid file
 mode_format   = "simple"         # specifies the format of the files with
                                  # the mode frequencies.  Options include:
@@ -121,7 +121,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # addition to the above user-defined cutoff.
 grid_type = 'CLES'               # Define grid type for correct frequency file format
 
-list_grid     = "CLES_RGB_v3.1"   # file with list of models and characteristics.
+list_grid     = "list_RGB_mHe3"   # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
@@ -129,7 +129,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_CLES_RGB_v3.2" #NGC6819" # binary file with model grid
+binary_grid = "grid_RGB_mHe3.1" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################

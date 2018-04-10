@@ -3,12 +3,12 @@
 # Script to take a generated grid and convert it to a suitable format to be
 # read in by AIMS.
 
-cd /home/bmr135/GridSunClesDV2/models/ # location of generated grid files
+cd /home/bmr135/SPACEINN/AIMS/project/GridCLESAIMS/Ov0.0G/ # location of generated grid files
 rm -f *.mod # Removal of any pre-existing files formatted for AIMS
 # rm -f *FGONG # Removal of any pre-existing files formatted for AIMS
 echo "Cleared!"
-# find . -name "*.tgz" > files  # Locates the .tgz containing frequency information
-find . -name "*.mod" > files  # Locates the .FGONG files in MESA
+find . -name "*.tgz" > files  # Locates the .tgz containing frequency information
+# find . -name "*.mod" > files  # Locates the .FGONG files in MESA
 python master_script.py # script designed to generate script for de-tarring files
 chmod 755 extract # make extract an executable file
 ./extract # extract information from .tgz files
