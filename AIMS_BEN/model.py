@@ -1504,13 +1504,13 @@ class Model_grid:
         results = []
         ndim = self.ndim+1
         # print ndim
-        output_folder = '/home/buldgen/AIMS-master_New/AIMS_BEN/'
-        filename = os.path.join(output_folder,"combinations_Delaunay.txt")
-        f2 = os.path.join(output_folder,"Delaunay_MS_Models_mHe.txt")
-        f3 = os.path.join(output_folder,"Delaunay_MS_Mod_vals_mHe.txt")
-        output_file = open(filename,"w")
-        out2 = open(f2,"w")
-        out3 = open(f3,"w")
+        # output_folder = '/home/buldgen/AIMS-master_New/AIMS_BEN/'
+        # filename = os.path.join(output_folder,"combinations_Delaunay.txt")
+        # f2 = os.path.join(output_folder,"Delaunay_MS_Models_mHe.txt")
+        # f3 = os.path.join(output_folder,"Delaunay_MS_Mod_vals_mHe.txt")
+        # output_file = open(filename,"w")
+        # out2 = open(f2,"w")
+        # out3 = open(f3,"w")
 
         for j in ndx1:
             nmodels = len(self.tracks[j].models)
@@ -1543,25 +1543,25 @@ class Model_grid:
                     elif config.interp_type == "mHe":
                         res = find_combination_mHe(grid,pt)
                     if (res is None): continue  # filter out combinations outside the grid
-                    output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-                                        len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
-                                        aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
-                                        aModel1.glb[ix0],aModel1.glb[iage], \
-                                        aModel1.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
-
-                    output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-                                        len(res), aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
-                                        aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
-                                        aModel2.glb[ix0],aModel2.glb[iage], \
-                                        aModel2.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
-                    for (coef,model_name) in res:
-                        output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
-                    output_file.write("\n")
+                    # output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    #                     len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
+                    #                     aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
+                    #                     aModel1.glb[ix0],aModel1.glb[iage], \
+                    #                     aModel1.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
+                    #
+                    # output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    #                     len(res), aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
+                    #                     aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
+                    #                     aModel2.glb[ix0],aModel2.glb[iage], \
+                    #                     aModel2.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
+                    # for (coef,model_name) in res:
+                    #     output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
+                    # output_file.write("\n")
 
             results.append(aResult)
-        output_file.close()
-        out2.close()
-        out3.close()
+        # output_file.close()
+        # out2.close()
+        # out3.close()
 
         return results, ndx1, ndx2, tessellation
 

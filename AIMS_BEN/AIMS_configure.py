@@ -106,7 +106,7 @@ seismic_weight = 1.0
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = True            # set this to True if you want to write a
+write_data    = False            # set this to True if you want to write a
                                  # binary grid file
 mode_format   = "simple"         # specifies the format of the files with
                                  # the mode frequencies.  Options include:
@@ -129,7 +129,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_RGB_mHe3.1" #NGC6819" # binary file with model grid
+binary_grid = "grid_Sun_DIFF2" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -147,7 +147,7 @@ binary_grid = "grid_RGB_mHe3.1" #NGC6819" # binary file with model grid
 # log of this parameter.
 
 #user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
 #user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
 #               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
 #               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
@@ -180,12 +180,12 @@ scale_age = True                 # use a scaled interpolation parameter
 interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
-test_interpolation = False       # decide whether to test the interpolation.
+test_interpolation = True       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interp_RGB_mHe2"#"interp_MS_He_v2.2"  # Name of the file to which to
+interpolation_file = "interp_Sun_DIFF2"#"interp_MS_He_v2.2"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.

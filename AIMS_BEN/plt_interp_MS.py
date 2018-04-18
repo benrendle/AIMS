@@ -174,14 +174,14 @@ def plot3D(results,error_ndx,tpe="max",title=None,truncate=0):
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     ax.plot_trisurf(x,y,z,cmap=cm.jet,linewidth=0.2)
-    ax.set_xlabel(titles[0],fontsize=40)
-    ax.set_ylabel(titles[1],fontsize=40)
-    ax.set_zlabel(r"$\log_{10}$(%s. error)"%(tpe),fontsize=40)
+    ax.set_xlabel(titles[0],fontsize=20)
+    ax.set_ylabel(titles[1],fontsize=20)
+    ax.set_zlabel(r"$\log_{10}$(%s. error)"%(tpe),fontsize=20)
     ax.xaxis.labelpad = 20
     ax.yaxis.labelpad = 20
     ax.zaxis.labelpad = 20
-    ax.tick_params(labelsize=30)
-    if (title is not None): ax.set_title(title,fontsize=40)
+    ax.tick_params(labelsize=15)
+    if (title is not None): ax.set_title(title,fontsize=20)
 
 def plot_grid(grid):
     """
@@ -219,9 +219,9 @@ def plot_grid(grid):
     plt.plot(grid[:,0],grid[:,1],'bo', picker=5)
     plt.xlim((xmin,xmax))
     plt.ylim((ymin,ymax))
-    plt.xlabel(titles[0],fontsize=40)
-    plt.ylabel(titles[1],fontsize=40)
-    plt.tick_params(labelsize=30)
+    plt.xlabel(titles[0],fontsize=20)
+    plt.ylabel(titles[1],fontsize=20)
+    plt.tick_params(labelsize=15)
     fig.canvas.mpl_connect('pick_event', onpick_age)
 
 def onpick_age(event):
@@ -273,12 +273,12 @@ def plot_slice_age(pos):
             for i in xrange(3):
                 plt.plot(results_age[j][pos][:,ndim-1],results_age[j][pos][:,ndim+i],
                      style[i+3*j],label=labels[i+3*j])
-        plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_age[0][pos][0,0],results_age[0][pos][0,1]),fontsize=40)
-        plt.ylabel(r"Error(radial)",fontsize=40)
+        plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_age[0][pos][0,0],results_age[0][pos][0,1]),fontsize=20)
+        plt.ylabel(r"Error(radial)",fontsize=20)
         plt.yscale('log')
         plt.xlim(xlim)
-        plt.tick_params(labelsize=30)
-        plt.legend(fontsize=25)
+        plt.tick_params(labelsize=15)
+        plt.legend(fontsize=15)
 
     plt.subplot(2,1,2)
     if (all_nan(results_age[0][pos][:,ndim+3:ndim+6]) and \
@@ -289,12 +289,12 @@ def plot_slice_age(pos):
             for i in xrange(3):
                 plt.plot(results_age[j][pos][:,ndim-1],results_age[j][pos][:,ndim+3+i],
                      style[i+3*j],label=labels[i+3*j])
-        plt.ylabel(r"Error(non radial)",fontsize=40)
+        plt.ylabel(r"Error(non radial)",fontsize=20)
         plt.yscale('log')
-        plt.xlabel(titles[ndim-1],fontsize=40)
+        plt.xlabel(titles[ndim-1],fontsize=20)
         plt.xlim(xlim)
-        plt.tick_params(labelsize=30)
-        plt.legend(fontsize=25)	##################################################################################################################
+        plt.tick_params(labelsize=15)
+        plt.legend(fontsize=15)	##################################################################################################################
     plt.show()
 
 def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
@@ -340,9 +340,9 @@ def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
     plt.triplot(grid[ndx2,0],grid[ndx2,1],tessellation.simplices.copy())
     plt.xlim((xmin,xmax))
     plt.ylim((ymin,ymax))
-    plt.xlabel(titles[0],fontsize=40)
-    plt.ylabel(titles[1],fontsize=40)
-    plt.tick_params(labelsize=30)
+    plt.xlabel(titles[0],fontsize=20)
+    plt.ylabel(titles[1],fontsize=20)
+    plt.tick_params(labelsize=15)
     fig.canvas.mpl_connect('pick_event', onpick_track)
 
 def onpick_track(event):
@@ -386,11 +386,11 @@ def plot_slice_track(pos):
         for i in xrange(3):
             plt.plot(results_track[pos][:,ndim-1],results_track[pos][:,ndim+i],
                      style[i],label=labels[i])
-        plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_track[pos][0,0],results_track[pos][0,1]),fontsize=40)
-        plt.ylabel(r"Error(radial)",fontsize=40)
+        plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_track[pos][0,0],results_track[pos][0,1]),fontsize=20)
+        plt.ylabel(r"Error(radial)",fontsize=20)
         plt.yscale('log')
         plt.xlim(xlim)
-        plt.tick_params(labelsize=30)
+        plt.tick_params(labelsize=15)
         plt.legend()
 
     plt.subplot(2,1,2)
@@ -400,11 +400,11 @@ def plot_slice_track(pos):
         for i in xrange(3):
             plt.plot(results_track[pos][:,ndim-1],results_track[pos][:,ndim+3+i],
                      style[i],label=labels[i])
-        plt.ylabel(r"Error(non radial)",fontsize=40)
+        plt.ylabel(r"Error(non radial)",fontsize=20)
         plt.yscale('log')
-        plt.xlabel(titles[ndim-1],fontsize=40)
+        plt.xlabel(titles[ndim-1],fontsize=20)
         plt.xlim(xlim)
-        plt.tick_params(labelsize=30)
+        plt.tick_params(labelsize=15)
         plt.legend()
     plt.show()
 
@@ -530,10 +530,10 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     plt.scatter(x, y, c=z1)
     cb = plt.colorbar()
-    plt.xlabel(titles[0],fontsize=40)
-    plt.ylabel(titles[1],fontsize=40)
-    plt.xticks(fontsize=30)
-    plt.yticks(fontsize=30)
+    plt.xlabel(titles[0],fontsize=20)
+    plt.ylabel(titles[1],fontsize=20)
+    plt.xticks(fontsize=15)
+    plt.yticks(fontsize=15)
     a = min(z1)
     b = max(z1)
     d = a-b
@@ -544,9 +544,9 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     cax = cb.ax
     cax.hlines(g1,0,1,colors='m',linewidth=2)
     cax.hlines(g2,0,1,colors='k',linewidth=2)
-    cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=40)	# %s %(tpe)
-    cax.tick_params(labelsize=30)
-    if (title is not None): plt.title(title,fontsize=40)
+    cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
+    cax.tick_params(labelsize=15)
+    if (title is not None): plt.title(title,fontsize=15)
 
     m = n = 0
     for i in z1:
@@ -587,7 +587,7 @@ if __name__ == "__main__":
 
     surface2D(1,results_age1,0,tpe="max",title="Max radial error (nincr = 1)",truncate=1)
     #surface2D(results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
-    #surface2D(results_track,0,tpe="max",title="Max radial error (nincr = struct)",truncate=1)
+    #surface2D(1,results_track,0,tpe="max",title="Max radial error (nincr = struct)",truncate=1)
 
     #surface2D(results_age1,1,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
     #surface2D(results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
@@ -610,6 +610,6 @@ if __name__ == "__main__":
     #plot3D(results_track,2,tpe="avg",title="numax radial error (struct)")
 
     plot_grid(grid)
-    #plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
+    plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
 
     plt.show()
