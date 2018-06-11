@@ -464,6 +464,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
             print "ERROR: unrecognised type: ",tpe
             sys.exit(1)
         if (value > 0.0):
+	    # print value
             z1.append(value)	# math.log10
 	    z2.append(math.log10(value))
             x.append(results[i][0,0])
@@ -472,9 +473,10 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     x = np.array(x,dtype = np.float64)
     y = np.array(y,dtype = np.float64)
     z1 = np.array(z1,dtype = np.float64)
+    z2 = np.array(z2,dtype = np.float64)
     xi, yi = np.linspace(x.min(),x.max(),200), np.linspace(y.min(),y.max(),200)
     xi, yi = np.meshgrid(xi,yi)
-    rbf = interp.Rbf(x,y,z1,function='linear')
+    rbf = interp.Rbf(x,y,z2,function='linear')
     zi = rbf(xi,yi)
     j = 0
     kkk = 0
@@ -527,8 +529,9 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 #	cont.collections[j].set_linestyle('dashed')
 #    except:
 #        pass
-
-    plt.scatter(x, y, c=z1)
+    circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
+    plt.gcf().gca().add_artist(circle1)
+    plt.scatter(x, y, c=z2)
     cb = plt.colorbar()
     plt.xlabel(titles[0],fontsize=20)
     plt.ylabel(titles[1],fontsize=20)
@@ -541,10 +544,12 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     g1 = f1/d
     f2 = a--0.640797
     g2 = f2/d
+    
     cax = cb.ax
-    cax.hlines(g1,0,1,colors='m',linewidth=2)
-    cax.hlines(g2,0,1,colors='k',linewidth=2)
-    cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
+    #cax.hlines(g1,0,1,colors='m',linewidth=2)
+    #cax.hlines(g2,0,1,colors='k',linewidth=2)
+    #cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
+    cax.text(3.5,0.7,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=20)
     cax.tick_params(labelsize=15)
     if (title is not None): plt.title(title,fontsize=15)
 
@@ -578,20 +583,20 @@ if __name__ == "__main__":
     input_data.close()
 
     # print grid # mass/met
-    print results_age1[0][0]
+    # print results_age1[0][0]
     #print ndx2
     # df = pd.DataFrame(list(results_track[0][:]))
     #print df
     # df1 = pd.DataFrame(list(results_age1[0][:]))
     #print df1
 
-    surface2D(1,results_age1,0,tpe="max",title="Max radial error (nincr = 1)",truncate=1)
+    #surface2D(1,results_age1,0,tpe="max",title="Max radial error (nincr = 1)",truncate=1)
     #surface2D(results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
-    #surface2D(1,results_track,0,tpe="max",title="Max radial error (nincr = struct)",truncate=1)
+    surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
 
     #surface2D(results_age1,1,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
     #surface2D(results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
-    #surface2D(results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
+    #surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
 
     #surface2D(1,results_age1,2,tpe="max",title="numax radial error (nincr = 1)",truncate=1)
     #surface2D(2,results_age2,2,tpe="max",title="numax radial error (nincr = 2)",truncate=1)
@@ -609,7 +614,7 @@ if __name__ == "__main__":
     #plot3D(results_age2,2,tpe="avg",title="numax radial error (nincr = 2)")
     #plot3D(results_track,2,tpe="avg",title="numax radial error (struct)")
 
-    plot_grid(grid)
-    plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
+    #plot_grid(grid)
+    #plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
 
     plt.show()

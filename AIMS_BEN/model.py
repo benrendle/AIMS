@@ -651,7 +651,7 @@ class Model:
         lmax = np.nanmax(self.modes['l'])
         return nmin, nmax, lmin, lmax
 
-    def find_large_separation2(self):
+    def find_large_separation(self):
         """
         Find large frequency separation using only radial modes.
 
@@ -667,7 +667,7 @@ class Model:
         return coeff[0]
 
 
-    def find_large_separation(self):
+    def find_large_separation1(self):
 	"""
 	Find large frequency separation using Gaussian fit around numax
 	"""
@@ -1163,7 +1163,7 @@ class Track:
         mu = (mHe - self.models[istart].glb[imHe]) \
            / (self.models[istop].glb[imHe] - self.models[istart].glb[imHe])
 
-        print("%f %e %e %e %e %e %e %d"%(mu,self.models[istart].glb[imHe],mHe,self.models[istop].glb[imHe],self.models[0].glb[imHe],self.models[-2].glb[imHe],self.models[-1].glb[imHe],imHe))
+        # print("%f %e %e %e %e %e %e %d"%(mu,self.models[istart].glb[imHe],mHe,self.models[istop].glb[imHe],self.models[0].glb[imHe],self.models[-2].glb[imHe],self.models[-1].glb[imHe],imHe))
 
         return combine_models(self.models[istart],1.0-mu,self.models[istop],mu), \
                 self.models[istart].name
@@ -1198,7 +1198,7 @@ class Track:
                 istop = itemp
             else:
                 istart = itemp
-        print mHe, self.models[istart].glb[imHe]
+        # print mHe, self.models[istart].glb[imHe]
         mu = (mHe - self.models[istart].glb[imHe]) \
            / (self.models[istop].glb[imHe] - self.models[istart].glb[imHe])
         return ((coef*(1.0-mu), self.models[istart].name), (coef*mu, self.models[istop].name))
@@ -1504,13 +1504,13 @@ class Model_grid:
         results = []
         ndim = self.ndim+1
         # print ndim
-        # output_folder = '/home/buldgen/AIMS-master_New/AIMS_BEN/'
-        # filename = os.path.join(output_folder,"combinations_Delaunay.txt")
-        # f2 = os.path.join(output_folder,"Delaunay_MS_Models_mHe.txt")
-        # f3 = os.path.join(output_folder,"Delaunay_MS_Mod_vals_mHe.txt")
-        # output_file = open(filename,"w")
-        # out2 = open(f2,"w")
-        # out3 = open(f3,"w")
+        output_folder = '/media/ben/SAMSUNG1/AIMS-interp-testing/'
+        filename = os.path.join(output_folder,"combinations_RGB_Delaunay.txt")
+        f2 = os.path.join(output_folder,"Delaunay_RGB_Models_mHe.txt")
+        f3 = os.path.join(output_folder,"Delaunay_RGB_Mod_vals_mHe.txt")
+        output_file = open(filename,"w")
+        out2 = open(f2,"w")
+        out3 = open(f3,"w")
 
         for j in ndx1:
             nmodels = len(self.tracks[j].models)
@@ -1519,49 +1519,57 @@ class Model_grid:
             # print self.tracks[j].params
 
             for i in xrange(nmodels):
+                # print i, nmodels
                 aModel1 = self.tracks[j].models[i]
                 if config.interp_type == "age":
                     pt[-1] = aModel1.glb[iage]
-                    aModel2 = interpolate_model(self,pt,tessellation,ndx2) #,aModel1.name,aModel1,out2,out3)
+                    aModel2 = interpolate_model(self,pt,tessellation,ndx2,aModel1.name,aModel1,out2,out3)
                 elif config.interp_type == "mHe":
                     pt[-1] = aModel1.glb[imHe]
                     # if aModel1.glb[imHe] < 0:
                     #     print(aModel1.glb[imHe])
-                    aModel2 = interpolate_model_mHe(self,pt,tessellation,ndx2)# ,aModel1.name,aModel1,out2,out3)
+                    aModel2 = interpolate_model_mHe(self,pt,tessellation,ndx2,aModel1.name,aModel1,out2,out3)
                 aResult[i,0:ndim] = pt
+                if (aModel2 is not None):
+                    # print aModel1.find_large_separation()*aModel1.glb[ifreq_ref]
+                    freqout = open('/media/ben/SAMSUNG1/AIMS-interp-testing/Interp_Freqs_RGB/'+aModel1.name[-33:-8],'w')
+                    freqout.write('Interp_Track: {0:s}\n'.format(aModel1.name))
+                    freqout.write('{0:.3f}\n'.format(aModel1.find_large_separation()*aModel1.glb[ifreq_ref]))
+                    for k in range(len(aModel2.modes)):
+                        freqout.write("{0:d} {1:d} {2:.6f} {3:.9f}\n".format( \
+                                        aModel2.modes[k][0],aModel2.modes[k][1],aModel2.modes[k][2]*aModel1.glb[ifreq_ref],aModel2.modes[k][3]*aModel2.glb[ifreq_ref]))
+                    freqout.close()
 
-                # print aModel1.name, 1
-                # print names, 'n1'
-                # print name2, 'n2'
-                # print aResult[0,:]
                 if (aModel2 is None):
                     aResult[i,ndim:ndim+nglb+6] = np.nan
                 else:
+                    # print i, nmodels
+                    # print aResult[i,ndim:ndim+nglb+6]
                     aResult[i,ndim:ndim+nglb+6] = compare_models(aModel1,aModel2)
                     if config.interp_type == "age":
                         res = find_combination(grid,pt)
                     elif config.interp_type == "mHe":
                         res = find_combination_mHe(grid,pt)
                     if (res is None): continue  # filter out combinations outside the grid
-                    # output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-                    #                     len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
-                    #                     aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
-                    #                     aModel1.glb[ix0],aModel1.glb[iage], \
-                    #                     aModel1.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
-                    #
-                    # output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-                    #                     len(res), aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
-                    #                     aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
-                    #                     aModel2.glb[ix0],aModel2.glb[iage], \
-                    #                     aModel2.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
-                    # for (coef,model_name) in res:
-                    #     output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
-                    # output_file.write("\n")
+                    output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                                        len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
+                                        aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
+                                        aModel1.glb[ix0],aModel1.glb[iage], \
+                                        aModel1.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
+
+                    output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                                        len(res), aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
+                                        aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
+                                        aModel2.glb[ix0],aModel2.glb[iage], \
+                                        aModel2.glb[itemperature], aModel1.glb[imHe]/constants.solar_mass))
+                    for (coef,model_name) in res:
+                        output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
+                    output_file.write("\n")
 
             results.append(aResult)
-        # output_file.close()
-        # out2.close()
-        # out3.close()
+        output_file.close()
+        out2.close()
+        out3.close()
 
         return results, ndx1, ndx2, tessellation
 
@@ -1727,7 +1735,7 @@ def compare_models(model1,model2):
 
     :rtype: np.array
     """
-    # print model1.glb
+    # print model1.modes
     # print model2.glb
 
     # initialisation:
@@ -1798,6 +1806,7 @@ def compare_models(model1,model2):
 
     # absolute differences on global parameters:
     result[6:6+nglb] = np.absolute(model1.glb - model2.glb)
+    # print np.shape(result)
 
     return result
 
@@ -1931,7 +1940,7 @@ def find_ages(coefs, tracks, age):
 
     return ages
 
-def interpolate_model(grid,pt,tessellation,ndx):#,Name,mod,out2,out3):
+def interpolate_model(grid,pt,tessellation,ndx,Name,mod,out2,out3):
     """
     Interpolate model in grid using provided parameters.
 
@@ -1996,7 +2005,7 @@ def interpolate_model(grid,pt,tessellation,ndx):#,Name,mod,out2,out3):
         if (aModel2 is None): return None
         if (name2 is None): return None
         aModel1 = combine_models(aModel1,1.0,aModel2,coefs[i]);
-    '''
+
     out2.write(Name+"\n")
     out2.write(name1+"\n")
     out2.write(name2+"\n\n")
@@ -2025,7 +2034,7 @@ def interpolate_model(grid,pt,tessellation,ndx):#,Name,mod,out2,out3):
                     aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
                     aModel1.glb[ix0],aModel1.glb[iage], \
                     aModel1.glb[itemperature]))
-    '''
+
     # print name1, aModel1.glb[imass]
 
     return aModel1
@@ -2091,7 +2100,8 @@ def find_mHes(coefs, tracks, mHe):
         mHe_s += coef*track.models[0].glb[imHe]
         mHe_f += coef*track.models[-1].glb[imHe]
 
-    mHe = mHe * constants.solar_mass
+    # print mHe_f, mHe_s, mHe
+    # mHe = mHe * constants.solar_mass
     eta = (mHe-mHe_s)/(mHe_f-mHe_s)
 
     # check to see if the mHe lies within the interpolated track:
@@ -2105,7 +2115,7 @@ def find_mHes(coefs, tracks, mHe):
 
     return mHes
 
-def interpolate_model_mHe(grid,pt,tessellation,ndx): #,Name,mod,out2,out3):
+def interpolate_model_mHe(grid,pt,tessellation,ndx,Name,mod,out2,out3):
     """
     Interpolate model in grid using provided parameters.
 
@@ -2142,14 +2152,12 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx): #,Name,mod,out2,out3):
 
     # find simplex interpolation coefficients
     coefs,tracks = find_interpolation_coefficients(grid,pt,tessellation,ndx)
-
-    #print pt
     if (coefs is None): return None
     # find mHes:
     mHes = find_mHes(coefs,tracks,pt[-1])
+    # print mHes
     if (mHes is None): return None
     n = len(tracks)
-    #print n, mHes
     # treat the case where there is only 1 model:
     if (n == 1):
         if (abs(coefs[0]-1.0) > eps):
@@ -2172,38 +2180,36 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx): #,Name,mod,out2,out3):
         if (name2 is None): return None
         aModel1 = combine_models(aModel1,1.0,aModel2,coefs[i]);
 
-    ''' Write out models and parameters:
-    # out2.write(Name+"\n")
-    # out2.write(name1+"\n")
-    # out2.write(name2+"\n\n")
-    # # out2.write("interp\n\n")
-    #
-    # out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-    #                 1, mod.glb[imass]/constants.solar_mass, mod.glb[iradius]/constants.solar_radius, \
-    #                 mod.glb[iluminosity]/constants.solar_luminosity,mod.glb[iz0], \
-    #                 mod.glb[ix0],mod.glb[iage], \
-    #                 mod.glb[itemperature],mod.glb[imHe]/constants.solar_mass))
-    #
-    # out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-    #                 2, mod1.glb[imass]/constants.solar_mass, mod1.glb[iradius]/constants.solar_radius, \
-    #                 mod1.glb[iluminosity]/constants.solar_luminosity,mod1.glb[iz0], \
-    #                 mod1.glb[ix0],mod1.glb[iage], \
-    #                 mod1.glb[itemperature],mod1.glb[imHe]/constants.solar_mass))
-    #
-    # out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
-    #                 3, aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
-    #                 aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
-    #                 aModel2.glb[ix0],aModel2.glb[iage], \
-    #                 aModel2.glb[itemperature],aModel2.glb[imHe]/constants.solar_mass))
-    #
-    # out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n\n".format( \
-    #                 4, aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
-    #                 aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
-    #                 aModel1.glb[ix0],aModel1.glb[iage], \
-    #                 aModel1.glb[itemperature],aModel1.glb[imHe]/constants.solar_mass))
-    '''
+    ''' Write out models and parameters: '''
+    out2.write(Name+"\n")
+    out2.write(name1+"\n")
+    out2.write(name2+"\n\n")
+    # out2.write("interp\n\n")
 
-    # print name1, aModel1.glb[imass]
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    1, mod.glb[imass]/constants.solar_mass, mod.glb[iradius]/constants.solar_radius, \
+                    mod.glb[iluminosity]/constants.solar_luminosity,mod.glb[iz0], \
+                    mod.glb[ix0],mod.glb[iage], \
+                    mod.glb[itemperature],mod.glb[imHe]/constants.solar_mass))
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    2, mod1.glb[imass]/constants.solar_mass, mod1.glb[iradius]/constants.solar_radius, \
+                    mod1.glb[iluminosity]/constants.solar_luminosity,mod1.glb[iz0], \
+                    mod1.glb[ix0],mod1.glb[iage], \
+                    mod1.glb[itemperature],mod1.glb[imHe]/constants.solar_mass))
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
+                    3, aModel2.glb[imass]/constants.solar_mass, aModel2.glb[iradius]/constants.solar_radius, \
+                    aModel2.glb[iluminosity]/constants.solar_luminosity,aModel2.glb[iz0], \
+                    aModel2.glb[ix0],aModel2.glb[iage], \
+                    aModel2.glb[itemperature],aModel2.glb[imHe]/constants.solar_mass))
+
+    out3.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n\n".format( \
+                    4, aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
+                    aModel1.glb[iluminosity]/constants.solar_luminosity,aModel1.glb[iz0], \
+                    aModel1.glb[ix0],aModel1.glb[iage], \
+                    aModel1.glb[itemperature],aModel1.glb[imHe]/constants.solar_mass))
+
 
     return aModel1
 

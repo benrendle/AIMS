@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Track interpolation testing plotting program
+
+python AIMS_HRD.py
+python plt_interp_MS.py interp_RGB_mHe
+
