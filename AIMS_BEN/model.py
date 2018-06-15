@@ -1504,7 +1504,7 @@ class Model_grid:
         results = []
         ndim = self.ndim+1
         # print ndim
-        output_folder = '/media/ben/SAMSUNG1/AIMS-interp-testing/'
+        output_folder = '/media/ben/SAMSUNG/AIMS-interp-testing/'
         filename = os.path.join(output_folder,"combinations_RGB_Delaunay.txt")
         f2 = os.path.join(output_folder,"Delaunay_RGB_Models_mHe.txt")
         f3 = os.path.join(output_folder,"Delaunay_RGB_Mod_vals_mHe.txt")
@@ -1991,12 +1991,10 @@ def interpolate_model(grid,pt,tessellation,ndx,Name,mod,out2,out3):
 
     # treat the case where there are at least 2 models:
     aModel1, name1 = tracks[0].interpolate_model(ages[0])
-    # print(aModel1.glb[imHe])
     if (aModel1 is None): return None
     if (name1 is None): return None
     mod1 = aModel1
     aModel2, name2 = tracks[1].interpolate_model(ages[1])
-    # print(aModel2.glb[imHe])
     if (aModel2 is None): return None
     if (name2 is None): return None
     aModel1 = combine_models(aModel1,coefs[0],aModel2,coefs[1])

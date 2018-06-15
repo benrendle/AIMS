@@ -1632,6 +1632,22 @@ def load_binary_data(filename):
     grid = dill.load(input_data)
     input_data.close()
 
+        ### For extracting an artificial obs file if only access to the binary file is given
+    # for track in grid.tracks:
+    #     for model in track.models:
+    #         # print model.glb
+    #         # sys.exit()
+    #         # print(model.glb[1]/constants.solar_mass)
+    #         if (model.glb[1] == 2.52536e33) & (model.glb[3] == 0.01) & (model.glb[0] == 4098.55):
+    #             print model.glb
+    #             print model.get_freq()
+    #             model.write_file_simple('test')
+    #             print model.numax
+    #             print model.FeH
+    #             model.print_me()
+    #             print model.find_large_separation()
+    # sys.exit()
+
     if (grid.user_params != config.user_params):
         print "Mismatch between the user_params in the binary grid file and AIMS_configure.py"
         print "  Binary grid file:  ",grid.user_params

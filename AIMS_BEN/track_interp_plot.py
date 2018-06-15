@@ -25,15 +25,15 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 matplotlib.rcParams.update({'font.size': 20})
 
 ''' Track Parameters '''
-m = 1.17
-x = 0.741
-z = 0.0046
+m = 0.91
+x = 0.732
+z = 0.0090
 
 ''' Delaunay tessellation models formatting to save files (formatting
 is time consuming therefore save out and read in later on). '''
 
-dy = pd.read_csv('/media/ben/SAMSUNG1/AIMS-interp-testing/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
-df = pd.read_csv('/media/ben/SAMSUNG1/AIMS-interp-testing/Delaunay_MS_Mod_vals_mHe.txt',\
+dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
+df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing/Delaunay_MS_Mod_vals_mHe.txt',\
                     names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
 
 
@@ -118,21 +118,21 @@ if len(df1) > 0:
         ax.add_line(lines.Line2D([df4['teff'][k],df3['teff'][k]], [df4['lumo'][k],df3['lumo'][k]+.5], \
                             linewidth=1, color='k', linestyle='--', axes=ax, alpha=0.3))
 
-    ax.plot(df1['teff'],df1['lumo'],label=r'Orig. Track',alpha=0.5)
-    ax.scatter(df2['teff'],df2['lumo']-.5,label=r'M:%s, Z:%s, X:%s'%(df2['mass'][0],df2['z'][0],df2['x'][0]),marker='.')
-    ax.plot(df2['teff'],df2['lumo']-.5,alpha=0.3,label='_nolegend_')
-    ax.scatter(df3['teff'],df3['lumo']+.5,label=r'M:%s, Z:%s, X:%s'%(df3['mass'][0],df3['z'][0],df3['x'][0]),marker='.')
-    ax.plot(df3['teff'],df3['lumo']+.5,alpha=0.3,label='_nolegend_')
-    ax.scatter(df4['teff'],df4['lumo'],label=r'Interp. Models',color='r',marker='3')
+    ax.plot(df1['teff'],df1['lumo'],label=r'Orig. Track',alpha=0.5,linewidth=2)
+    ax.scatter(df2['teff'],df2['lumo']-.5,label=r'M:%s, Z:%s, X:%s'%(df2['mass'][0],df2['z'][0],df2['x'][0]),marker='.',s=75)
+    # ax.plot(df2['teff'],df2['lumo']-.5,alpha=0.3,label='_nolegend_',linewidth=2)
+    ax.scatter(df3['teff'],df3['lumo']+.5,label=r'M:%s, Z:%s, X:%s'%(df3['mass'][0],df3['z'][0],df3['x'][0]),marker='.',s=75)
+    # ax.plot(df3['teff'],df3['lumo']+.5,alpha=0.3,label='_nolegend_',linewidth=2)
+    ax.scatter(df4['teff'],df4['lumo'],label=r'Interp. Models',color='r',marker='3',linewidths=2,s=75)
     # ax.set_xlabel(r'T$_{\rm{eff}}$ [K]')
     ax.set_ylabel(r'L [L$_{\odot}$]')
     ax.set_xlim(tmax+50,tmin-50)
     ax.set_ylim(lmin-1,lmax+1)
     # ax.set_title(r'M = %s M$_{\odot}$, Z = %s, X = %s' %(df1['mass'][0],df1['z'][0],df1['x'][0]),fontsize=20)
-    ax.legend(prop={'size':10},loc=2)
+    ax.legend(prop={'size':13},loc=2)
 
-    axT.scatter(df1['teff'],dL['res_L'],marker='+')
-    axL.scatter(dT['res_T'],df1['lumo'],marker='+')
+    axT.scatter(df1['teff'],dL['res_L'],marker='+',s=75)
+    axL.scatter(dT['res_T'],df1['lumo'],marker='+',s=75)
 
     # no labels
     nullfmt = NullFormatter()
@@ -142,10 +142,12 @@ if len(df1) > 0:
     axL.set_ylim(ax.get_ylim())
     axL.get_yaxis().set_ticklabels([])
     axT.set_xlabel(r'T$_{\rm{eff}}$ [K]')#,fontsize=20)
-    axT.set_ylabel(r'$\Delta$L')
-    axL.set_xlabel(r'$\Delta$T$_{\rm{eff}}$')
+    axT.set_ylabel(r'$\Delta$L/L')
+    axL.set_xlabel(r'$\Delta$T/T')
 axL.xaxis.set_major_locator(plt.MaxNLocator(3))
+axL.set_xlim(-0.005,0.005)
 axT.yaxis.set_major_locator(plt.MaxNLocator(3))
+axT.set_ylim(-0.005,0.005)
 ax.text(0.975, 0.1, '(C)', horizontalalignment='center',\
       verticalalignment='center', transform=ax.transAxes)
 
@@ -157,7 +159,7 @@ axSc = plt.subplot(gs01[0,0])
 axCol = plt.subplot(gs01[0,1])
 
 
-filename = '/home/ben/AIMS/AIMS_BEN/interp_MS_test'
+filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_MS_test'
 input_data = open(filename,"r")
 [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     results_age2, results_track] = dill.load(input_data)
@@ -200,6 +202,7 @@ for i in range(len(results)):
         z2.append(math.log10(value))
         x1.append(results[i][0,0])
         y1.append(results[i][0,1])
+        print results[i][0,0],results[i][0,1], value
 x1 = np.array(x1,dtype = np.float64)
 y1 = np.array(y1,dtype = np.float64)
 z1 = np.array(z1,dtype = np.float64)
@@ -234,8 +237,8 @@ print(max(z2))
 ''' Echelle Diagram '''
 
 # theo = pd.read_csv('') # Theoretical Frequencies
-filename = '/media/ben/SAMSUNG1/SPACEINN/AIMS/project/GridCLESAIMS/Ov0.0/M1.17.X0.741.Z0.0046/AIMS/M1.17.X0.741.Z0.0046-0101.mod.txt.freq'
-filename1 = '/media/ben/SAMSUNG1/AIMS-interp-testing/Interp_Freqs_MS/M1.17.X0.741.Z0.0046-0101'
+filename = '/media/bmr135/SAMSUNG/SPACEINN/AIMS/project/GridCLESAIMS/Ov0.0/M0.91.X0.732.Z0.0090/AIMS/M0.91.X0.732.Z0.0090-0102.mod.txt.freq'
+filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing/Interp_Freqs_MS/M0.91.X0.732.Z0.0090-0102'
 freqfile = open(filename)
 freqfile.readline() # skip head
 mode_temp = []
@@ -265,12 +268,60 @@ for line in freqfile1:
 
 axE = plt.subplot(gs[0,0])
 
-axE.scatter(mode_temp[0][2]%dnu,mode_temp[0][2],label='Original')
-axE.scatter(mode_temp1[0][2]%dnu,mode_temp1[0][2],color='r',label='Interpolated')
+l0, l1, l2 = [], [], []
 for i in mode_temp:
-    if i>0: axE.scatter(i[2]%dnu,i[2])
-for j in mode_temp1:
-    if j>0: axE.scatter(j[2]%dnu,j[2],color='r')
+    if i[1] == 0: l0.append(i)
+    if i[1] == 1: l1.append(i)
+    if i[1] == 2: l2.append(i)
+l01, l11, l21 = [], [], []
+for i in mode_temp1:
+    if i[1] == 0: l01.append(i)
+    if i[1] == 1: l11.append(i)
+    if i[1] == 2: l21.append(i)
+n = 10
+m = 20
+# axE.scatter((mode_temp[n][2]+6)%dnu,mode_temp[n][2],label='Original: $l=0$')
+# axE.scatter((mode_temp1[n][2]+6)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+
+axE.scatter((l0[n][2]+16)%dnu,l0[n][2],label='Original: $l=0$')
+axE.scatter((l01[n][2]+16)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+axE.scatter((l1[n][2]+16)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
+axE.scatter((l11[n][2]+16)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
+axE.scatter((l2[n][2]+16)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
+axE.scatter((l21[n][2]+16)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
+
+# k=0
+# for i in mode_temp:
+#     if (k>n) & (k<m): axE.scatter((i[2]+6)%dnu,i[2])
+#     k+=1
+k=0
+for i in l0:
+    if k>n: axE.scatter((i[2]+16)%dnu,i[2])
+    k+=1
+k=0
+for i in l1:
+    if k>n-3: axE.scatter((i[2]+16)%dnu,i[2],marker='D')
+    k+=1
+k=0
+for i in l2:
+    if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],marker='^')
+    k+=1
+# k=0
+# for i in mode_temp1:
+#     if (k>n) & (k<m): axE.scatter((i[2]+6)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+#     k+=1
+k=0
+for i in l01:
+    if k>n: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+    k+=1
+k=0
+for i in l11:
+    if k>n-4: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
+    k+=1
+k=0
+for i in l21:
+    if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
+    k+=1
 
 # axE.legend()
 axE.text(0.96, 0.075, '(A)', horizontalalignment='center',\
@@ -280,7 +331,7 @@ axE.text(0.96, 0.075, '(A)', horizontalalignment='center',\
 axE.set_xlabel(r"Reduced frequency, $\nu$ mod "+str(dnu)+r" $\mu$Hz")
 axE.set_ylabel(r"Frequency, $\nu$ (in $\mu$Hz)")
 axE.set_xlim(0.0,dnu)
-axE.legend(loc=9)
-
+axE.legend(prop={'size':13})
+print(dnu)
 # plt.tight_layout()
 plt.show()
