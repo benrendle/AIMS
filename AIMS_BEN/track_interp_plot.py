@@ -25,15 +25,15 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 matplotlib.rcParams.update({'font.size': 20})
 
 ''' Track Parameters '''
-m = 0.91
-x = 0.732
-z = 0.0090
+m = 0.83
+x = 0.731
+z = 0.0100
 
 ''' Delaunay tessellation models formatting to save files (formatting
 is time consuming therefore save out and read in later on). '''
 
-dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
-df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing/Delaunay_MS_Mod_vals_mHe.txt',\
+dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Models_mHe.txt',names=['model'],delimiter=r'\s+')
+df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Mod_vals_mHe.txt',\
                     names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
 
 
@@ -159,7 +159,7 @@ axSc = plt.subplot(gs01[0,0])
 axCol = plt.subplot(gs01[0,1])
 
 
-filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_MS_test'
+filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_RGB_V3.6'
 input_data = open(filename,"r")
 [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     results_age2, results_track] = dill.load(input_data)
@@ -213,7 +213,7 @@ rbf = interpol.Rbf(x1,y1,z2,function='linear')
 zi = rbf(xi,yi)
 track = axSc.contourf(xi,yi,zi,100,cmap=colormaps.parula)
 
-elle = Ellipse(xy=[m,np.log10(z)], width=0.01, height=0.04, fill=None, linewidth=2, color='r')
+elle = Ellipse(xy=[m,np.log10(z)], width=0.03, height=0.03, fill=None, linewidth=2, color='r')
 # circle1 = plt.Circle((m, np.log10(z)), .0075, color='k', fill=False,linewidth=3)
 axSc.add_artist(elle)
 axSc.scatter(x1, y1, facecolors='none', linewidths=1.5)
@@ -231,14 +231,13 @@ cbar.set_label(r"$\log_{10}$(Max. error)", labelpad=20, rotation=270)
 # if (title is not None): axSc.set_title(title,fontsize=15)
 axSc.text(0.97, 0.075, '(B)', horizontalalignment='center',\
       verticalalignment='center', transform=axSc.transAxes)
-print(max(z2))
 
 
 ''' Echelle Diagram '''
 
 # theo = pd.read_csv('') # Theoretical Frequencies
-filename = '/media/bmr135/SAMSUNG/SPACEINN/AIMS/project/GridCLESAIMS/Ov0.0/M0.91.X0.732.Z0.0090/AIMS/M0.91.X0.732.Z0.0090-0102.mod.txt.freq'
-filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing/Interp_Freqs_MS/M0.91.X0.732.Z0.0090-0102'
+filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M083_RGB'
+filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_RGB/M0.83.X0.731.Z0.0100-atm-0595'
 freqfile = open(filename)
 freqfile.readline() # skip head
 mode_temp = []
@@ -280,48 +279,48 @@ for i in mode_temp1:
     if i[1] == 2: l21.append(i)
 n = 10
 m = 20
-# axE.scatter((mode_temp[n][2]+6)%dnu,mode_temp[n][2],label='Original: $l=0$')
-# axE.scatter((mode_temp1[n][2]+6)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+axE.scatter((mode_temp[n][2]+0.5)%dnu,mode_temp[n][2],label='Original: $l=0$')
+axE.scatter((mode_temp1[n][2]+0.5)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
 
-axE.scatter((l0[n][2]+16)%dnu,l0[n][2],label='Original: $l=0$')
-axE.scatter((l01[n][2]+16)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
-axE.scatter((l1[n][2]+16)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
-axE.scatter((l11[n][2]+16)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
-axE.scatter((l2[n][2]+16)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
-axE.scatter((l21[n][2]+16)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
+# axE.scatter((l0[n][2]+16)%dnu,l0[n][2],label='Original: $l=0$')
+# axE.scatter((l01[n][2]+16)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+# axE.scatter((l1[n][2]+16)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
+# axE.scatter((l11[n][2]+16)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
+# axE.scatter((l2[n][2]+16)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
+# axE.scatter((l21[n][2]+16)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
 
-# k=0
-# for i in mode_temp:
-#     if (k>n) & (k<m): axE.scatter((i[2]+6)%dnu,i[2])
-#     k+=1
 k=0
-for i in l0:
-    if k>n: axE.scatter((i[2]+16)%dnu,i[2])
-    k+=1
-k=0
-for i in l1:
-    if k>n-3: axE.scatter((i[2]+16)%dnu,i[2],marker='D')
-    k+=1
-k=0
-for i in l2:
-    if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],marker='^')
+for i in mode_temp:
+    if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2])
     k+=1
 # k=0
-# for i in mode_temp1:
-#     if (k>n) & (k<m): axE.scatter((i[2]+6)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+# for i in l0:
+#     if k>n: axE.scatter((i[2]+16)%dnu,i[2])
+#     k+=1
+# k=0
+# for i in l1:
+#     if k>n-3: axE.scatter((i[2]+16)%dnu,i[2],marker='D')
+#     k+=1
+# k=0
+# for i in l2:
+#     if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],marker='^')
 #     k+=1
 k=0
-for i in l01:
-    if k>n: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+for i in mode_temp1:
+    if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
     k+=1
-k=0
-for i in l11:
-    if k>n-4: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
-    k+=1
-k=0
-for i in l21:
-    if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
-    k+=1
+# k=0
+# for i in l01:
+#     if k>n: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+#     k+=1
+# k=0
+# for i in l11:
+#     if k>n-4: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
+#     k+=1
+# k=0
+# for i in l21:
+#     if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
+#     k+=1
 
 # axE.legend()
 axE.text(0.96, 0.075, '(A)', horizontalalignment='center',\

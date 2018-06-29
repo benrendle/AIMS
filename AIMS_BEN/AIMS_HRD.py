@@ -197,19 +197,19 @@ if __name__ == '__main__':
     if sys.argv[1] == '3':
         ''' Delaunay tessellation models formatting to save files (formatting
         is time consuming therefore save out and read in later on). '''
-        ext = '/media/bmr135/SAMSUNG/AIMS-interp-testing/Interp_HRDs_RGB/'
+        ext = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_HRDs_RGB/'
         # ext = '/home/bmr135/git_AIMS/George_Smetana/AIMS-Interp/results/Interp_HRDs/'
         # s_hrd = 'MS_HRD/M'
         s_hrd = 'RGB_mHe_HRD/M'
 
         # dy = pd.read_csv('/home/bmr135/git_AIMS/George_Smetana/AIMS-Interp/Delaunay_MS_Models.txt',names=['model'],delimiter=r'\s+')
         # dy = pd.read_csv('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
-        dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing/Delaunay_RGB_Models_mHe.txt',names=['model'],delimiter=r'\s+')
+        dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Models_mHe.txt',names=['model'],delimiter=r'\s+')
         # df = pd.read_csv('/home/bmr135/git_AIMS/George_Smetana/AIMS-Interp/Delaunay_MS_Mod_vals.txt',\
         #                     names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
         # df = pd.read_csv('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/Delaunay_RGB_Mod_vals_mHe.txt',\
         #                    names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
-        df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing/Delaunay_RGB_Mod_vals_mHe.txt',\
+        df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Mod_vals_mHe.txt',\
                             names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
 
         dy['mass'], dy['x'], dy['z'], dy['n'] = 0, 0, 0, 0
@@ -234,9 +234,9 @@ if __name__ == '__main__':
         # orig.to_csv('/home/bmr135/git_AIMS/George_Smetana/AIMS-Interp/Del_MS_B_mods', index=False)
 
 
-        m = np.linspace(0.9,1.5,61)
-        x = [0.679,0.713,0.732,0.741,0.746]
-        z = [0.0332,0.0175,0.0090,0.0046,0.0023]
+        m = np.linspace(0.75,2.25,76)
+        x = [0.691,0.716,0.731,0.740,0.745]
+        z = [0.0300,0.0175,0.0100,0.0057,0.0032]
         # m = [1.17]
         # x = [0.746]
         # z = [0.0023]

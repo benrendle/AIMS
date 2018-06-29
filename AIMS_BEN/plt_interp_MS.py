@@ -486,81 +486,43 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     kk = np.array(k)
 
-    # print kk
+    print kk
 
-#    try:
-#        j = np.where(kk == -1.3979)[0][0]
-#        cont.collections[j].set_color('m')
-
-#    except:
-#	pass
-
-#    try:
-#	if p == 1:
-#	    j = 76
-#	    cont.collections[j].set_color('m')
- #   except:
-  #      pass
-
-#    try:
- #       if p == 2:
-#	    j = 39
-#	    cont.collections[j].set_color('m')
- #   except:
-#	pass
-
- #   try:
-  #      if p == 3:
-#	    j = 15
-#	    cont.collections[j].set_color('m')
- #   except:
-#	pass
-
-#    try:
-#        j = np.where(kk == -0.640797)[0][0]
-#        cont.collections[j].set_color('k')
-#	cont.collections[j].set_linestyle('dashed')
-#    except:
-#        pass
-
-#    try:
-#        j = np.where(kk == -1.775)[0][0]
-#        cont.collections[j].set_color('m')
-#	cont.collections[j].set_linestyle('dashed')
-#    except:
-#        pass
-    circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
-    plt.gcf().gca().add_artist(circle1)
+    # cont.collections[-49].set_color('m')
+    # cont.collections[-56].set_color('k')
+    # circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
+    # plt.gcf().gca().add_artist(circle1)
     plt.scatter(x, y, c=z2)
     cb = plt.colorbar()
     plt.xlabel(titles[0],fontsize=20)
     plt.ylabel(titles[1],fontsize=20)
     plt.xticks(fontsize=15)
     plt.yticks(fontsize=15)
-    a = min(z1)
-    b = max(z1)
+    a = min(z2)
+    b = max(z2)
     d = a-b
-    f1 = a--1.3979
+    # print a, b, d
+    f1 = a--1.7447
     g1 = f1/d
-    f2 = a--0.640797
+    f2 = a--1.8539
     g2 = f2/d
-    
+
     cax = cb.ax
-    #cax.hlines(g1,0,1,colors='m',linewidth=2)
-    #cax.hlines(g2,0,1,colors='k',linewidth=2)
+    cax.hlines(g1,0,1,colors='m',linewidth=2)
+    cax.hlines(g2,0,1,colors='k',linewidth=2)
     #cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
     cax.text(3.5,0.7,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=20)
     cax.tick_params(labelsize=15)
     if (title is not None): plt.title(title,fontsize=15)
 
     m = n = 0
-    for i in z1:
-	if i <= 3:
-	    m += 1
-	else:
-	    n += 1
-    pp = float(m)/len(z1)
-    # print 'Pass percentage',p,': ',pp*100,'%'
+    for i in z2:
+    	if i <= -1.8539:
+    	    m += 1
+    	else:
+    	    n += 1
+    pp = float(m)/len(z2)
+    print 'Pass percentage',p,': ',pp*100,'%'
 
 
 
@@ -590,13 +552,13 @@ if __name__ == "__main__":
     # df1 = pd.DataFrame(list(results_age1[0][:]))
     #print df1
 
-    #surface2D(1,results_age1,0,tpe="max",title="Max radial error (nincr = 1)",truncate=1)
-    #surface2D(results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
-    surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
+    # surface2D(1,results_age1,0,tpe="max",title="Max radial error (nincr = 1)",truncate=1)
+    # surface2D(1,results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
+    # surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
 
-    #surface2D(results_age1,1,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
-    #surface2D(results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
-    #surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
+    surface2D(1,results_age1,1,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
+    surface2D(1,results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
+    # surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
 
     #surface2D(1,results_age1,2,tpe="max",title="numax radial error (nincr = 1)",truncate=1)
     #surface2D(2,results_age2,2,tpe="max",title="numax radial error (nincr = 2)",truncate=1)

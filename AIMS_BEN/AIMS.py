@@ -97,6 +97,9 @@ prob      = None
 which includes the likelihood and priors
 """
 
+tight_ball_distributions = None
+""" :py:class:`Prior_list` type object with the distributions for the initial tight ball """
+
 log0      = -1e300
 """ a large negative value used to represent ln(0) """
 
@@ -112,6 +115,9 @@ best_grid_params  = None
 
 best_grid_result  = log0
 """ ln(probability) result for the model :py:data:`best_grid_model`"""
+
+best_age_range    = 0.0
+""" Age or mHe range on track with :py:data:`best_model_model`"""
 
 # variables associated with the best model from the MCMC run:
 best_MCMC_model   = None
@@ -162,7 +168,8 @@ class Distribution:
     def __init__(self, _type, _values):
         """
         :param _type: type of probability function (current options include
-                       "Gaussian", "Truncated_gaussian", "Uniform")
+                       "Gaussian", "Truncated_gaussian", "Uniform", "IMF1",
+                       "IMF2", "Uninformative")
         :param _values: list of parameters relevant to the probability function
 
         :type _type: string
@@ -170,7 +177,10 @@ class Distribution:
         """
 
         self.type = _type
-        """Type of probability function ("Gaussian", "Uniform", or "Truncated_gaussian")"""
+        """
+        Type of probability function ("Uniform", "Gaussian", "Truncated_gaussian",
+        "IMF1", "IMF2", or "Uninformative")
+        """
 
         self.values = _values
         """List of parameters relevant to probability function"""
@@ -201,6 +211,23 @@ class Distribution:
                 return log0
             else:
                 return 0.0
+        elif self.type == "IMF1":
+            # values[0] < values[1] = mass limits
+            # values[2] = exponent
+            if (self.values[0] <= value <= self.values[1]):
+                return -self.values[2]*math.log(value/self.values[0])
+            else:
+                return log0
+        elif self.type == "IMF2":
+            # values[0] < values[1] < values[2] = mass limits
+            # values[3], values[4] = exponents
+            if (self.values[0] <= value <= self.values[1]):
+                return -self.values[3]*math.log(value/self.values[0])
+            elif (self.values[1] < value <= self.values[2]):
+                return -self.values[3]*math.log(self.values[1]/self.values[0]) \
+                       -self.values[4]*math.log(value/self.values[1])
+            else:
+                return log0
         elif self.type == "Uninformative":
             return 0.0
         else:
@@ -224,6 +251,26 @@ class Distribution:
                                  scale=self.values[1],size=size)
         elif self.type == "Uniform":
             return np.random.uniform(self.values[0],self.values[1],size=size)
+        elif self.type == "IMF1":
+            cnst2 = self.values[0]**(1.0-self.values[2])
+            cnst1 = self.values[1]**(1.0-self.values[2]) - cnst2
+            return (cnst1*np.random.uniform(0.0,1.0,size=size)+cnst2)**(1.0/(1.0-self.values[2]))
+        elif self.type == "IMF2":
+            rlim  = 1.0/(1.0 + ((1.0-self.values[3])/(1.0-self.values[4]))                       \
+                  * self.values[1]**(self.values[4]-self.values[3])                              \
+                  * (self.values[2]**(1.0-self.values[4])-self.values[1]**(1.0-self.values[4]))  \
+                  / (self.values[1]**(1.0-self.values[3])-self.values[0]**(1.0-self.values[3])))
+            cnst2 = self.values[0]**(1.0-self.values[3])
+            cnst1 = (self.values[1]**(1.0-self.values[3]) - cnst2)/rlim
+            cnst4 = self.values[1]**(1.0-self.values[4])
+            cnst3 = (self.values[2]**(1.0-self.values[4]) - cnst4)/(1.0-rlim)
+            def Finv(r):
+                if (r <= rlim):
+                    return (cnst1*r+cnst2)**(1.0/(1.0-self.values[3]))
+                else:
+                    return (cnst3*(r-rlim)+cnst4)**(1.0/(1.0-self.values[4]))
+            vFinv = np.vectorize(Finv)    
+            return vFinv(np.random.uniform(0.0,1.0,size=size))
         elif self.type == "Uninformative":
             sys.exit("Unable to produce a realisation for an uninformative distribution")
         else:
@@ -245,6 +292,10 @@ class Distribution:
             dist = (self.values[1] - self.values[0])/2.0
             self.values[0] = value - dist
             self.values[1] = value + dist
+        elif self.type == "IMF1":
+            sys.exit("re_centre method not implemented for IMF1")
+        elif self.type == "IMF2":
+            sys.exit("re_centre method not implemented for IMF2")
         elif self.type == "Uninformative":
             # do nothing
             pass
@@ -268,6 +319,10 @@ class Distribution:
             centre = (self.values[0] + self.values[1])/2.0
             self.values[0] = centre - value
             self.values[1] = centre + value
+        elif self.type == "IMF1":
+            sys.exit("re_normalise method not implemented for IMF1")
+        elif self.type == "IMF2":
+            sys.exit("re_normalise method not implemented for IMF2")
         elif self.type == "Uninformative":
             sys.exit("Unable to renormalise an uninformative distribution")
         else:
@@ -287,6 +342,21 @@ class Distribution:
             return self.values[0]
         elif self.type == "Uniform":
             return (self.values[0] + self.values[1])/2.0
+        elif self.type == "IMF1":
+            return ((1.0-self.values[2]) / (2.0-self.values[2]))  \
+              * (self.values[1]**(2.0-self.values[2])-self.values[0]**(2.0-self.values[2])) \
+              / (self.values[1]**(1.0-self.values[2])-self.values[0]**(1.0-self.values[2]))
+        elif self.type == "IMF2":
+            k = 1.0/((self.values[1]**(1.0-self.values[3])-self.values[0]**(1.0-self.values[3])) \
+              / ((1.0-self.values[3])*self.values[0]**(-self.values[3]))                         \
+              + (self.values[1]/self.values[0])**(-self.values[3])                               \
+              * (self.values[2]**(1.0-self.values[4])-self.values[1]**(1.0-self.values[4]))      \
+              / ((1.0-self.values[4])*self.values[1]**(-self.values[4])))
+            return k*((self.values[1]**(2.0-self.values[3])-self.values[0]**(2.0-self.values[3])) \
+              / ((2.0-self.values[3])*self.values[0]**(-self.values[3]))                         \
+              + (self.values[1]/self.values[0])**(-self.values[3])                               \
+              * (self.values[2]**(2.0-self.values[4])-self.values[1]**(2.0-self.values[4]))      \
+              / ((2.0-self.values[4])*self.values[1]**(-self.values[4])))
         elif self.type == "Uninformative":
             return np.nan
         else:
@@ -308,6 +378,31 @@ class Distribution:
             return self.values[1]
         elif self.type == "Uniform":
             return (self.values[1] - self.values[0])/2.0
+        elif self.type == "IMF1":
+            k = (1.0-self.values[2]) \
+              / (self.values[1]**(1.0-self.values[2])-self.values[0]**(1.0-self.values[2]))
+            mean1 = (self.values[1]**(2.0-self.values[2])-self.values[0]**(2.0-self.values[2])) \
+              * k / (2.0-self.values[2])
+            mean2 = (self.values[1]**(3.0-self.values[2])-self.values[0]**(3.0-self.values[2])) \
+              * k / (3.0-self.values[2])
+            return math.sqrt(mean2 - mean1*mean1)
+        elif self.type == "IMF2":
+            k = 1.0/((self.values[1]**(1.0-self.values[3])-self.values[0]**(1.0-self.values[3])) \
+              / ((1.0-self.values[3])*self.values[0]**(-self.values[3]))                         \
+              + (self.values[1]/self.values[0])**(-self.values[3])                               \
+              * (self.values[2]**(1.0-self.values[4])-self.values[1]**(1.0-self.values[4]))      \
+              / ((1.0-self.values[4])*self.values[1]**(-self.values[4])))
+            mean1 = k*((self.values[1]**(2.0-self.values[3])-self.values[0]**(2.0-self.values[3])) \
+              / ((2.0-self.values[3])*self.values[0]**(-self.values[3]))                         \
+              + (self.values[1]/self.values[0])**(-self.values[3])                               \
+              * (self.values[2]**(2.0-self.values[4])-self.values[1]**(2.0-self.values[4]))      \
+              / ((2.0-self.values[4])*self.values[1]**(-self.values[4])))
+            mean2 = k*((self.values[1]**(3.0-self.values[3])-self.values[0]**(3.0-self.values[3])) \
+              / ((3.0-self.values[3])*self.values[0]**(-self.values[3]))                         \
+              + (self.values[1]/self.values[0])**(-self.values[3])                               \
+              * (self.values[2]**(3.0-self.values[4])-self.values[1]**(3.0-self.values[4]))      \
+              / ((3.0-self.values[4])*self.values[1]**(-self.values[4])))
+            return math.sqrt(mean2 - mean1*mean1)
         elif self.type == "Uninformative":
             return np.nan
         else:
@@ -327,6 +422,10 @@ class Distribution:
             return 3
         elif self.type == "Uniform":
             return 2
+        elif self.type == "IMF1":
+            return 3
+        elif self.type == "IMF2":
+            return 5
         elif self.type == "Uninformative":
             return 0
         else:
@@ -1092,6 +1191,7 @@ class Likelihood:
         a_combination.den   = 1.0
 
         print "Number of added seismic constraints:  1"
+
         self.combinations.append(a_combination)
 
     def add_nu_min_constraint(self, target_ell=0, min_n=False):
@@ -1488,21 +1588,25 @@ class Likelihood:
         """
 
         if (params is None): return log0
-        if config.interp_type == "age":
+        if (config.interp_type == "Age"):
             my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-        else:# config.interp_type == "mHe":
-            my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-        # print type(my_model)
-        # print 'checking tuple'
-        if isinstance(my_model,tuple) == True:
-            return log0
-        if (my_model is None): return log0
+            if (my_model is None): return log0
+            log_slope = 0.0
+        elif (config.interp_type == "mHe"):  
+            my_model, slope = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+            if (my_model is None): return log0
+            log_slope = math.log(slope)
+        else:
+            sys.exit("An unexpected error occurred.  Please contact the authors of AIMS.")
+
+        # print 'checking tuple'  (Ask Ben why this was introduced)
+        # if isinstance(my_model,tuple) == True:
+        #    return log0
         mode_map, nmissing = self.find_map(my_model, config.use_n)
         if (nmissing > 0): return log0
         chi2 = self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map,a=params[ndims-nsurf:ndims])
         chi2 += self.classic_weight*self.apply_constraints(my_model)
-        return chi2
-            # return log0
+        return chi2 + log_slope
 
     def is_outside(self, params):
         """
@@ -1557,7 +1661,7 @@ class Probability:
         .. note::
           This avoids model interpolation and can be used to gain time.
         """
-        # output_folder = '/home/bmr135/AIMS_New/'
+        # output_folder = '/home/buldgen/AIMS-master_New/AIMS_BEN/'
         # filename = os.path.join(output_folder,"lnp_mass.txt")
         # out = open(filename,"a")
 
@@ -1632,22 +1736,6 @@ def load_binary_data(filename):
     grid = dill.load(input_data)
     input_data.close()
 
-        ### For extracting an artificial obs file if only access to the binary file is given
-    # for track in grid.tracks:
-    #     for model in track.models:
-    #         # print model.glb
-    #         # sys.exit()
-    #         # print(model.glb[1]/constants.solar_mass)
-    #         if (model.glb[1] == 2.52536e33) & (model.glb[3] == 0.01) & (model.glb[0] == 4098.55):
-    #             print model.glb
-    #             print model.get_freq()
-    #             model.write_file_simple('test')
-    #             print model.numax
-    #             print model.FeH
-    #             model.print_me()
-    #             print model.find_large_separation()
-    # sys.exit()
-
     if (grid.user_params != config.user_params):
         print "Mismatch between the user_params in the binary grid file and AIMS_configure.py"
         print "  Binary grid file:  ",grid.user_params
@@ -1699,19 +1787,20 @@ def find_best_model():
     # find best models in each track, in a parallelised way:
     results = my_map(find_best_model_in_track,aux)
 
-    global best_grid_model, best_grid_params, best_grid_result
+    global best_grid_model, best_grid_params, best_grid_result, best_age_range
     global accepted_parameters, rejected_parameters
 
     best_grid_result = log0
     best_grid_model  = None
     accepted_parameters = []
     rejected_parameters = []
-    for (result,model,accepted,rejected) in results:
+    for (result,model,accepted,rejected,age_range) in results:
         accepted_parameters += accepted
         rejected_parameters += rejected
         if (result > best_grid_result):
             best_grid_result = result
             best_grid_model  = model
+            best_age_range   = age_range
 
     if (best_grid_model is None):
         print "ERROR:  Unable to find a model in the grid which matches your"
@@ -1748,18 +1837,29 @@ def find_best_model_in_track(ntrack):
     best_model_local  = None
     rejected_parameters_local = []
     accepted_parameters_local = []
-    for model in grid.tracks[ntrack].models:
+    nmodels = len(grid.tracks[ntrack].models) 
+    for i in range(nmodels):
+        model = grid.tracks[ntrack].models[i]
         result = prob.evaluate(model)
+        if (config.interp_type == "mHe"):
+            istart = max(i-1,0)
+            istop  = min(i+1,nmodels-1)
+            log_slope = math.log(abs((grid.tracks[ntrack].models[istop].string_to_param("Age")   \
+                                    - grid.tracks[ntrack].models[istart].string_to_param("Age")) \
+                                    /(grid.tracks[ntrack].models[istop].string_to_param("mHe")   \
+                                    - grid.tracks[ntrack].models[istart].string_to_param("mHe"))))
+        else:
+            log_slope = 0.0
+        result += log_slope
         if (result > best_result_local):
             best_result_local = result
             best_model_local  = model
         if (result >= threshold):
             accepted_parameters_local.append(map(model.string_to_param,grid_params_MCMC))
-            # print model.name
         else:
             rejected_parameters_local.append(map(model.string_to_param,grid_params_MCMC))
 
-    return (best_result_local, best_model_local, accepted_parameters_local, rejected_parameters_local)
+    return (best_result_local, best_model_local, accepted_parameters_local, rejected_parameters_local, grid.tracks[ntrack].age_range)
 
 def init_walkers():
     """
@@ -1771,28 +1871,43 @@ def init_walkers():
 
     # set up initial distributions according to the value of config.tight_ball:
 
-    if (config.tight_ball):
+    global tight_ball_distributions
 
-        # create probability distributions for a tight ball:
-        initial_distributions = Prior_list() # just reuse the same class as for the priors
-        for param_name in grid_params_MCMC_with_surf:
-            # the star notation unpacks the tuple:
-            initial_distributions.add_prior(Distribution(*config.tight_ball_range[param_name]))
+    if (config.tight_ball):
 
         # find the best model:
         find_best_model()
 
-        # recentre tight ball around best model and renormalise if need be:
+        # create probability distributions for a tight ball:
+        tight_ball_distributions = Prior_list() # just reuse the same class as for the priors
+
+        #for param_name in grid_params_MCMC:
         for i in xrange(ndims):
-            initial_distributions.priors[i].re_centre(best_grid_params[i])
-            # deal with surface terms:
-            if (i >= ndims-nsurf):
-                initial_distributions.priors[i].re_normalise(abs(best_grid_params[i]))
+            param_name = grid_params_MCMC_with_surf[i]
+            # the star notation unpacks the tuple:
+            if (param_name in config.tight_ball_range):
+                new_distrib = Distribution(*config.tight_ball_range[param_name])
+                new_distrib.re_centre(best_grid_params[i])
+                tight_ball_distributions.add_prior(new_distrib)
+            else:
+                if ((param_name == "Age") or (param_name == "mHe")):
+                    tight_ball_distributions.add_prior(Distribution("Gaussian",[best_grid_params[i],best_age_range/30.0]))
+                else:
+                    if (i >= ndims-nsurf):
+                        # the parameter is an surface correction parameter
+                        param_range = abs(best_grid_params[i])
+                    else:
+                        # the parameter is not an age surface correction parameter
+                        param_range = grid.range(param_name)
+                        param_range = (param_range[1]-param_range[0])/30.0
+                    tight_ball_distributions.add_prior(Distribution("Gaussian",[best_grid_params[i],param_range]))
 
     else:
        # set the initial distributions to the priors
-       initial_distributions = prob.priors
+       tight_ball_distributions = prob.priors
 
+    for i in range(ndims):
+        print("Tight ball distrib. %s: %s"%(grid_params_MCMC_with_surf[i],tight_ball_distributions.priors[i].to_string()))
 
     if (config.PT):
         p0 = np.zeros([config.ntemps, config.nwalkers, ndims])
@@ -1804,7 +1919,7 @@ def init_walkers():
                 while (prob.likelihood.is_outside(params)):
                     if (counter > config.max_iter):
                         sys.exit("ERROR: too many iterations to produce walker.  Aborting")
-                    params = initial_distributions.realisation()
+                    params = tight_ball_distributions.realisation()
                     counter+=1
                 p0[k,j,:] = params
 
@@ -1821,7 +1936,7 @@ def init_walkers():
             while (prob.likelihood.is_outside(params)):
                 if (counter > config.max_iter):
                     sys.exit("ERROR: too many iterations to produce walker.  Aborting")
-                params = initial_distributions.realisation()
+                params = tight_ball_distributions.realisation()
                 counter+=1
             p0[j,:] = params
 
@@ -1915,7 +2030,7 @@ def run_emcee():
         # production run:
         sampler.reset()
         p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
-
+        
     # Print acceptance fraction
     print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
     # Estimate the integrated autocorrelation time for the time series in each parameter.
@@ -1950,10 +2065,10 @@ def find_a_blob(params):
     :return: list of supplementary output parameters
     :rtype: list of floats
     """
-    if config.interp_type == "age":
+    if config.interp_type == "Age":
         my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     elif config.interp_type == "mHe":
-        my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        my_model, slope = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     return map(my_model.string_to_param,config.output_params)
 
 def write_samples(filename, labels, samples):
@@ -2141,7 +2256,6 @@ def write_readme(filename, elapsed_time):
     if (config.surface_option == "Sonoi2015"):
         output_file.write(str_float.format("Surface parameter, beta",config.beta_Sonoi2015))
 
-
     output_file.write(string_to_title("Priors"))
     for name,distribution in zip(grid_params_MCMC_with_surf, prob.priors.priors):
         output_file.write(str_string.format("Prior on "+name,distribution.to_string()))
@@ -2177,14 +2291,16 @@ def write_readme(filename, elapsed_time):
     output_file.write(string_to_title("Initialisation"))
     output_file.write(str_string.format("Initialise with a tight ball",boolean2str[config.tight_ball]))
     if (config.tight_ball):
-        for name in grid_params_MCMC_with_surf:
-            output_file.write(str_string.format("Tight ball range on "+name, \
-                config.tight_ball_range[name]))
+        for i in range(ndims):
+            name = grid_params_MCMC_with_surf[i]
+            output_file.write(str_string.format("Tight ball distrib. on "+name, \
+                tight_ball_distributions.priors[i].to_string()))
 
     output_file.write(string_to_title("Output"))
     output_file.write(str_string.format("List of output parameters",config.output_params))
     output_file.write(str_string.format("Write OSM files",boolean2str[config.with_osm]))
     output_file.write(str_string.format("Plot walkers",boolean2str[config.with_walkers]))
+    output_file.write(str_string.format("Plot iterated distributions",boolean2str[config.with_distrib_iter]))
     output_file.write(str_string.format("Plot echelle diagrams",boolean2str[config.with_echelle]))
     output_file.write(str_string.format("Plot histograms",boolean2str[config.with_histograms]))
     output_file.write(str_string.format("Plot triangle plots",boolean2str[config.with_triangles]))
@@ -2219,10 +2335,10 @@ def write_combinations(filename,samples):
     output_file.write("{0:s} {1:e}\n".format(grid.prefix,constants.G))
     for params in samples:
         results = model.find_combination(grid,params[0:ndims-nsurf])
-        if config.interp_type == "age":
+        if config.interp_type == "Age":
             my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
         if config.interp_type == "mHe":
-            my_model = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+            my_model, slope = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
         if isinstance(my_model,tuple) == True: pass
         else:
             if (results is None): continue  # filter out combinations outside the grid
@@ -2819,6 +2935,42 @@ def plot_walkers(samples, labels, filename, nw=3):
 
     plt.clf()
 
+def plot_distrib_iter(samples, labels, folder):
+    """
+    Plot individual distribution of walkers as a function of iterations.
+    
+    :param samples: samples from the emcee run
+    :param labels: labels for the different dimensions in parameters space
+    :param folder: specify name of file in which to save plots of walkers.
+
+    :type samples: np.array
+    :type labels: list of strings
+    :type folder: string
+
+    .. warning::    
+      This method must be applied before the samples are reshaped,
+      and information on individual walkers lost.
+    """
+
+    
+    mid_values  = np.empty((config.nsteps,),dtype=np.float64)
+    yfill       = np.empty((2*config.nsteps,),dtype=np.float64)
+    xfill       = np.array(list(range(config.nsteps))+list(range(config.nsteps-1,-1,-1)))
+    for i in range(ndims):
+        plt.figure()
+        for j in range(config.nsteps):
+            mid_values[j] = np.percentile(samples[:,j,i],50.0)
+            yfill[j] = np.percentile(samples[:,j,i],25.0)
+            yfill[-j-1] = np.percentile(samples[:,j,i],75.0)
+        plt.fill(xfill,yfill,"c")
+        plt.plot(xfill[:config.nsteps],mid_values,"b")
+        plt.title(labels[i])
+        plt.xlabel(r"Iteration, $n$")
+        plt.ylabel(r"Walker distribution")
+        for ext in config.plot_extensions:
+            plt.savefig(os.path.join(output_folder,"distrib_iter_"+grid_params_MCMC_with_surf[i]+"."+ext))
+        plt.clf()
+
 def plot_histograms(samples, names, fancy_names, truths=None):
     """
     Plot a histogram based on a set of samples.
@@ -2940,9 +3092,21 @@ if __name__ == "__main__":
 
     # define priors:
     priors = Prior_list()
-    for param_name in grid_params_MCMC_with_surf:
+    for param_name in grid_params_MCMC:
         # the star notation unpacks the tuple:
-        priors.add_prior(Distribution(*config.priors[param_name]))
+        if (param_name in config.priors):
+            priors.add_prior(Distribution(*config.priors[param_name]))
+        else:
+            if (config.tight_ball):
+                priors.add_prior(Distribution("Uninformative",[]))
+            else:
+                priors.add_prior(Distribution("Uniform",grid.range(param_name)))
+            
+    for param_name in model.get_surface_parameter_names(config.surface_option):
+        if (config.tight_ball):
+            priors.add_prior(Distribution("Uninformative", []))
+        else:
+            sys.exit("Please define prior for surface effects in configuration file.")
 
     # combine the above:
     prob = Probability(priors,like)
@@ -2995,6 +3159,9 @@ if __name__ == "__main__":
     if (config.with_walkers):
         plot_walkers(samples, labels[1:], os.path.join(output_folder,"walkers."), nw = 3)
 
+    if (config.with_distrib_iter):
+        plot_distrib_iter(samples, labels[1:], output_folder)
+
     # Reshape the samples and obtain auxiliary quantities:
     # NOTE: choosing order='C' leads to much better sub-sampling since the
     #       the thin_samples array is much more likely to draw from all of the
@@ -3034,10 +3201,10 @@ if __name__ == "__main__":
     best_MCMC_result = lnprob[ndx_max,0]
     best_MCMC_params = samples[ndx_max,1:]
     best_MCMC_params.reshape(ndims)
-    if config.interp_type == "age":
+    if config.interp_type == "Age":
         best_MCMC_model  = model.interpolate_model(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     elif config.interp_type == "mHe":
-        best_MCMC_model  = model.interpolate_model_mHe(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        best_MCMC_model, slope  = model.interpolate_model_mHe(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     best_MCMC_params = list(best_MCMC_params) + map(best_MCMC_model.string_to_param,config.output_params)
     write_model(best_MCMC_model,best_MCMC_params,best_MCMC_result,"best_MCMC")
     write_combinations(os.path.join(output_folder,"combinations_best_MCMC.txt"),[best_MCMC_params])
@@ -3048,10 +3215,10 @@ if __name__ == "__main__":
     statistical_params = samples[:,1:].sum(axis=0, dtype=np.float64)/(1.0*config.nwalkers*config.nsteps)
     statistical_params.reshape(ndims)
     statistical_result = prob(statistical_params)
-    if config.interp_type == "age":
+    if config.interp_type == "Age":
         statistical_model  = model.interpolate_model(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     elif config.interp_type == "mHe":
-        statistical_model  = model.interpolate_model_mHe(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
+        statistical_model, slope  = model.interpolate_model_mHe(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     if (statistical_model is not None):
         statistical_params = list(statistical_params) + map(statistical_model.string_to_param,config.output_params)
         write_model(statistical_model,statistical_params,statistical_result,"statistical")

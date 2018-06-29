@@ -77,7 +77,7 @@ assign_n    = False  # use best model to reassign the radial order?
 #   - "Kjeldsen2008": use surface corrections based on Kjeldsen et al. (2008)
 #   - "Ball2014": use one-term surface corrections based on Ball & Gizon (2014)
 #   - "Ball2014_2": use two-term surface corrections based on Ball & Gizon (2014)
-surface_option = "Ball2014_2"
+surface_option = None #"Ball2014_2"
 b_Kjeldsen2008 = 4.9  # exponent used in the Kjeldsen et al. surface corrections
 
 # Set of seismic constraints to be used. Options include:
@@ -129,7 +129,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_RGB_mHe3.1" #NGC6819" # binary file with model grid
+binary_grid = "grid_RGB_v3.7" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -180,7 +180,7 @@ scale_age = True                 # use a scaled interpolation parameter
 interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
-test_interpolation = True       # decide whether to test the interpolation.
+test_interpolation = False       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
