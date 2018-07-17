@@ -25,15 +25,15 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 matplotlib.rcParams.update({'font.size': 20})
 
 ''' Track Parameters '''
-m = 0.83
+m = 1.27
 x = 0.731
 z = 0.0100
 
 ''' Delaunay tessellation models formatting to save files (formatting
 is time consuming therefore save out and read in later on). '''
 
-dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Models_mHe.txt',names=['model'],delimiter=r'\s+')
-df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Mod_vals_mHe.txt',\
+dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
+df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_MS_Mod_vals_mHe.txt',\
                     names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
 
 
@@ -159,7 +159,7 @@ axSc = plt.subplot(gs01[0,0])
 axCol = plt.subplot(gs01[0,1])
 
 
-filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_RGB_V3.6'
+filename = '/home/bmr135/bison/Sim2/AIMS_Gael/interp_MS_test'
 input_data = open(filename,"r")
 [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     results_age2, results_track] = dill.load(input_data)
@@ -236,8 +236,8 @@ axSc.text(0.97, 0.075, '(B)', horizontalalignment='center',\
 ''' Echelle Diagram '''
 
 # theo = pd.read_csv('') # Theoretical Frequencies
-filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M083_RGB'
-filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_RGB/M0.83.X0.731.Z0.0100-atm-0595'
+filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M127_MS'
+filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_MS/M1.27.X0.731.Z0.0100-atm-0595'
 freqfile = open(filename)
 freqfile.readline() # skip head
 mode_temp = []
