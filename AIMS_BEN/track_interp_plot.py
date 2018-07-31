@@ -147,7 +147,7 @@ if len(df1) > 0:
 axL.xaxis.set_major_locator(plt.MaxNLocator(3))
 axL.set_xlim(-0.005,0.005)
 axT.yaxis.set_major_locator(plt.MaxNLocator(3))
-axT.set_ylim(-0.005,0.005)
+axT.set_ylim(-0.005,0.025)
 ax.text(0.975, 0.1, '(C)', horizontalalignment='center',\
       verticalalignment='center', transform=ax.transAxes)
 
@@ -236,8 +236,8 @@ axSc.text(0.97, 0.075, '(B)', horizontalalignment='center',\
 ''' Echelle Diagram '''
 
 # theo = pd.read_csv('') # Theoretical Frequencies
-filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M127_MS'
-filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_MS/M1.27.X0.731.Z0.0100-atm-0595'
+filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M127_MS_386' # Original Frequencies
+filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_MS/M1.27.X0.731.Z0.0100-atm-0386' # Interpolated Frequencies
 freqfile = open(filename)
 freqfile.readline() # skip head
 mode_temp = []
@@ -277,50 +277,51 @@ for i in mode_temp1:
     if i[1] == 0: l01.append(i)
     if i[1] == 1: l11.append(i)
     if i[1] == 2: l21.append(i)
-n = 10
+n = 0
 m = 20
-axE.scatter((mode_temp[n][2]+0.5)%dnu,mode_temp[n][2],label='Original: $l=0$')
-axE.scatter((mode_temp1[n][2]+0.5)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+shift = 20
+# axE.scatter((mode_temp[n][2]+0.5)%dnu,mode_temp[n][2],label='Original: $l=0$')
+# axE.scatter((mode_temp1[n][2]+0.5)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
 
-# axE.scatter((l0[n][2]+16)%dnu,l0[n][2],label='Original: $l=0$')
-# axE.scatter((l01[n][2]+16)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
-# axE.scatter((l1[n][2]+16)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
-# axE.scatter((l11[n][2]+16)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
-# axE.scatter((l2[n][2]+16)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
-# axE.scatter((l21[n][2]+16)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
+axE.scatter((l0[n][2]+shift)%dnu,l0[n][2],label='Original: $l=0$')
+axE.scatter((l01[n][2]+shift)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+axE.scatter((l1[n][2]+shift)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
+axE.scatter((l11[n][2]+shift)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
+axE.scatter((l2[n][2]+shift)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
+axE.scatter((l21[n][2]+shift)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
 
-k=0
-for i in mode_temp:
-    if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2])
-    k+=1
 # k=0
-# for i in l0:
-#     if k>n: axE.scatter((i[2]+16)%dnu,i[2])
-#     k+=1
-# k=0
-# for i in l1:
-#     if k>n-3: axE.scatter((i[2]+16)%dnu,i[2],marker='D')
-#     k+=1
-# k=0
-# for i in l2:
-#     if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],marker='^')
+# for i in mode_temp:
+#     if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2])
 #     k+=1
 k=0
-for i in mode_temp1:
-    if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+for i in l0:
+    if k>n: axE.scatter((i[2]+shift)%dnu,i[2])
+    k+=1
+k=0
+for i in l1:
+    if k>n-3: axE.scatter((i[2]+shift)%dnu,i[2],marker='D')
+    k+=1
+k=0
+for i in l2:
+    if k>n-2: axE.scatter((i[2]+shift)%dnu,i[2],marker='^')
     k+=1
 # k=0
-# for i in l01:
-#     if k>n: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+# for i in mode_temp1:
+#     if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
 #     k+=1
-# k=0
-# for i in l11:
-#     if k>n-4: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
-#     k+=1
-# k=0
-# for i in l21:
-#     if k>n-2: axE.scatter((i[2]+16)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
-#     k+=1
+k=0
+for i in l01:
+    if k>n: axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+    k+=1
+k=0
+for i in l11:
+    if k>n-4: axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
+    k+=1
+k=0
+for i in l21:
+    if k>n-2: axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
+    k+=1
 
 # axE.legend()
 axE.text(0.96, 0.075, '(A)', horizontalalignment='center',\

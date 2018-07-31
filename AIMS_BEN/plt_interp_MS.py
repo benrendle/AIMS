@@ -513,7 +513,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     #cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
     cax.text(3.5,0.7,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=20)
     cax.tick_params(labelsize=15)
-    if (title is not None): plt.title(title,fontsize=15)
+    # if (title is not None): plt.title(title,fontsize=15)
 
     m = n = 0
     for i in z2:

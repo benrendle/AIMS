@@ -28,7 +28,7 @@ df = pd.read_csv('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/M127_MS_386t',delimiter=r'
 nmx = 1332.62326228
 
 x = np.linspace(100,2500,2401)
-x3 = ((df['nu_theo']-nmx) * (2*df['nu_theo']-nmx)**2 * 1e-9)/30 + 0.14
+x3 = ((df['nu_theo']-nmx) * (2*df['nu_theo']-nmx)**2 * 1e-9)/30 + 0.04
 
 # plt.figure()
 # plt.scatter(df['nu_theo'],x3)
