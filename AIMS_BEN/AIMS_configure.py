@@ -24,14 +24,14 @@ import math
 # NOTE: this is currently implemented with multiprocessing, which duplicates
 #       the memory in each process.  To be more memory efficient, turn off
 #       parallelisation using the "parallel" parameter.
-nprocesses  = 4      # number of processes (if running in parallel)
+nprocesses  = 3      # number of processes (if running in parallel)
 parallel    = True #$$$True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10 #$$$5 # number of temperatures
 nwalkers    = 400 #$$$400     # number of walkers (this number should be even)
-nsteps0     = 2000 #$$$200     # number of burn-in steps
-nsteps      = 400 #$$$4000     # number of steps
+nsteps0     = 1000 #$$$200     # number of burn-in steps
+nsteps      = 2000 #$$$4000     # number of steps
 add_steps   = 500    # number of steps to add if convergence isn't achieved
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
@@ -129,7 +129,7 @@ grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding 
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_RGB_v3.7" #NGC6819" # binary file with model grid
+binary_grid = "grid_RGB_v3.7.1" #NGC6819" # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
 #########################   User-defined parameters   ######################
@@ -164,12 +164,12 @@ user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing,
 #     which don't intervene. AIMS will simply ignore them.
 
 priors = {}                      # The priors will be defined thanks to this
-priors["Mass"]     = ("Uniform", [0.90, 1.50])
+priors["Mass"]     = ("Uniform", [0.75, 2.25])
 priors["Z"]        = ("Uniform", [0.0032, 0.03])
 priors["log_Z"]    = ("Uniform", [math.log10(0.0032), math.log10(0.03)])
 priors["X"]        = ("Uniform", [0.691, 0.745])
 priors["log_X"]    = ("Uniform", [math.log10(0.691), math.log10(0.745)])
-priors["mHe"]      = ("Uniform", [0.0, 0.3])
+priors["mHe"]      = ("Uniform", [0.0, 0.2])
 priors["Age"]      = ("Uniform", [0.0, 2e4])
 priors["numax"]    = ("Uniform", [0.0, 5.0e3])
 priors["A_surf"]   = ("Uniform", [-1.0, 1.0])  # this is too broad and will be sent by AIMS
@@ -185,7 +185,7 @@ test_interpolation = False       # decide whether to test the interpolation.
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interp_RGB_test" #"interp_MS_He_v2.2"  # Name of the file to which to
+interpolation_file = "interp_RGB_3.5.1" #"interp_MS_He_v2.2"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.
@@ -195,12 +195,13 @@ interpolation_file = "interp_RGB_test" #"interp_MS_He_v2.2"  # Name of the file 
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
 output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","DNl1")
-output_dir    = "results"      # name of the root folder with the MSresults
+output_dir    = "/home/bmr135/" #"results"      # name of the root folder with the MSresults
 output_osm    = "osm"          # name of the root folder with the OSM files
 with_osm       = False         # decide whether to write output files for
                                # OSM (=Optimal Stellar Model by R. Samadi)
 with_combinations = True       # decide whether to write file with model combinations
 with_walkers    = True         # decide whether to plot walkers
+with_distrib_iter = True         # decide whether to plot distrib_iter
 with_echelle    = True         # decide whether to plot echelle diagrams
 with_histograms = True         # decide whether to plot histograms
 with_triangles  = True         # decide whether to make triangle plots

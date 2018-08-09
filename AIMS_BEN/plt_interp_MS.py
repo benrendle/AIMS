@@ -466,7 +466,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
         if (value > 0.0):
 	    # print value
             z1.append(value)	# math.log10
-	    z2.append(math.log10(value))
+            z2.append(math.log10(value))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
 
@@ -488,8 +488,9 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     print kk
 
-    # cont.collections[-49].set_color('m')
-    # cont.collections[-56].set_color('k')
+    # print kk[-33], kk[-37]
+    # cont.collections[-33].set_color('m')
+    # cont.collections[-37].set_color('k')
     # circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
     # plt.gcf().gca().add_artist(circle1)
     plt.scatter(x, y, c=z2)
@@ -502,9 +503,9 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     b = max(z2)
     d = a-b
     # print a, b, d
-    f1 = a--1.7447
+    f1 = a--1.097
     g1 = f1/d
-    f2 = a--1.8539
+    f2 = a--1.398
     g2 = f2/d
 
     cax = cb.ax
@@ -514,6 +515,10 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     cax.text(3.5,0.7,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=20)
     cax.tick_params(labelsize=15)
     # if (title is not None): plt.title(title,fontsize=15)
+
+    plt.figure()
+    plt.hist(z2,bins=50)
+    plt.xlabel(r'$\sigma_{\nu_{\rm{i}}}$')
 
     m = n = 0
     for i in z2:

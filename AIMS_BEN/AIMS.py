@@ -269,7 +269,7 @@ class Distribution:
                     return (cnst1*r+cnst2)**(1.0/(1.0-self.values[3]))
                 else:
                     return (cnst3*(r-rlim)+cnst4)**(1.0/(1.0-self.values[4]))
-            vFinv = np.vectorize(Finv)    
+            vFinv = np.vectorize(Finv)
             return vFinv(np.random.uniform(0.0,1.0,size=size))
         elif self.type == "Uninformative":
             sys.exit("Unable to produce a realisation for an uninformative distribution")
@@ -1592,7 +1592,7 @@ class Likelihood:
             my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
             if (my_model is None): return log0
             log_slope = 0.0
-        elif (config.interp_type == "mHe"):  
+        elif (config.interp_type == "mHe"):
             my_model, slope = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
             if (my_model is None): return log0
             log_slope = math.log(slope)
@@ -1736,6 +1736,22 @@ def load_binary_data(filename):
     grid = dill.load(input_data)
     input_data.close()
 
+    # for track in grid.tracks:
+    #     for model in track.models:
+    #         # print model.glb
+    #         # sys.exit()
+    #         # print(model.glb[1]/constants.solar_mass)
+    #         if (model.glb[1] == 2.5253600000000000E+033) & (model.glb[3] == 0.01) & (model.glb[0] == 4098.5500000000002):
+    #             print model.glb[1]/constants.solar_mass
+    #             print model.glb
+    #             print model.get_freq()
+    #             model.write_file_simple('test')
+    #             print model.find_large_separation()
+    #             print model.numax
+    #             print model.FeH
+    #             model.print_me()
+    # sys.exit()
+
     if (grid.user_params != config.user_params):
         print "Mismatch between the user_params in the binary grid file and AIMS_configure.py"
         print "  Binary grid file:  ",grid.user_params
@@ -1837,7 +1853,7 @@ def find_best_model_in_track(ntrack):
     best_model_local  = None
     rejected_parameters_local = []
     accepted_parameters_local = []
-    nmodels = len(grid.tracks[ntrack].models) 
+    nmodels = len(grid.tracks[ntrack].models)
     for i in range(nmodels):
         model = grid.tracks[ntrack].models[i]
         result = prob.evaluate(model)
@@ -1954,6 +1970,7 @@ def run_emcee():
     """
 
     print "Number of walkers:    ", config.nwalkers
+    print "Length of burn-in:    ", config.nsteps0
     print "Number of steps:      ", config.nsteps
 
     if (config.PT):
@@ -1990,21 +2007,29 @@ def run_emcee():
         sampler = ptemcee.Sampler(config.nwalkers, ndims, prob.likelihood, prob.priors, ntemps=config.ntemps, threads=config.nprocesses)
         # initial burn-in:
 
-        for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
+        # for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
 	# Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
     # or breaks if insufficient convergence to solution after burn in.
         max_conv = 5
-        conv_accept = 0.02
+        rhat_accept = 1.05
         steps = config.nsteps0
         for i in range(max_conv):
             for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=steps),total=steps): pass
+            ''' Calculation of Rhat parameter (Gelman-Rubin diagnostic) to test walker convergence. '''
             med = np.median(sampler.chain[0,:,-steps:-1,:],axis=0)
-            conv = np.std(med, axis=0) / np.median(med, axis=0)
-            if np.all(conv < conv_accept):
-                print "Sufficient convergence after burn-in (", steps,"): ", conv," < ", conv_accept
+            W = np.sum(np.var(sampler.chain[0,:,-steps:-1,:],axis=0))/len(med) # within chain variance
+            mean_med = np.sum(med, axis=0)/len(med)
+            B = (steps/(len(med)-1)) * np.sum((med - mean_med)**2)
+            Var = (1 - 1.0/steps)*W + (B/steps)
+            rhat = np.sqrt(Var/W)
+            print "Rhat = ", rhat
+            # conv = np.std(med, axis=0) / np.median(med, axis=0)
+            # sys.exit()
+            if np.all(rhat < rhat_accept):
+                print "Sufficient convergence after burn-in (", steps,"): ", rhat," < ", rhat_accept
                 break
             else:
-                print "Insufficient convergence(", steps,"): ", conv," > ", conv_accept
+                print "Insufficient convergence(", steps,"): ", rhat," > ", rhat_accept
                 steps += config.add_steps
 
         # production run:
@@ -2013,24 +2038,33 @@ def run_emcee():
 
     else:
         sampler = emcee.EnsembleSampler(config.nwalkers, ndims, prob, pool=pool)
-
-        # initial burn-in:
-        p, new_prob, state = sampler.run_mcmc(p0,config.nsteps0)
-
-        # Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
-        # or breaks if insufficient convergence to solution after burn in.
-        conv_accept = 0.02
-        med = np.median(sampler.chain[0,:,-config.nsteps0:-1,:],axis=0)
-        conv = np.std(med, axis=0) / np.median(med, axis=0)
-        if np.all(conv < conv_accept):
-            print "Sufficient convergence after burn-in"
-        else:
-            print "Insufficient convergence"
+        max_conv = 5
+        rhat_accept = 1.05
+        steps = config.nsteps0
+        for i in range(max_conv):
+            # initial burn-in:
+            p, new_prob, state = sampler.run_mcmc(p0,config.nsteps0)
+            ''' Calculation of Rhat parameter (Gelman-Rubin diagnostic) to test walker convergence. '''
+            med = np.median(sampler.chain[0,:,-steps:-1,:],axis=0)
+            W = np.sum(np.var(sampler.chain[0,:,-steps:-1,:],axis=0))/len(med) # within chain variance
+            mean_med = np.sum(med, axis=0)/len(med)
+            B = (steps/(len(med)-1)) * np.sum((med - mean_med)**2)
+            Var = (1 - 1.0/steps)*W + (B/steps)
+            rhat = np.sqrt(Var/W)
+            print "Rhat = ", rhat
+            # conv = np.std(med, axis=0) / np.median(med, axis=0)
+            # sys.exit()
+            if np.all(rhat < rhat_accept):
+                print "Sufficient convergence after burn-in (", steps,"): ", rhat," < ", rhat_accept
+                break
+            else:
+                print "Insufficient convergence(", steps,"): ", rhat," > ", rhat_accept
+                steps += config.add_steps
 
         # production run:
         sampler.reset()
         p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
-        
+
     # Print acceptance fraction
     print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
     # Estimate the integrated autocorrelation time for the time series in each parameter.
@@ -2938,7 +2972,7 @@ def plot_walkers(samples, labels, filename, nw=3):
 def plot_distrib_iter(samples, labels, folder):
     """
     Plot individual distribution of walkers as a function of iterations.
-    
+
     :param samples: samples from the emcee run
     :param labels: labels for the different dimensions in parameters space
     :param folder: specify name of file in which to save plots of walkers.
@@ -2947,12 +2981,12 @@ def plot_distrib_iter(samples, labels, folder):
     :type labels: list of strings
     :type folder: string
 
-    .. warning::    
+    .. warning::
       This method must be applied before the samples are reshaped,
       and information on individual walkers lost.
     """
 
-    
+
     mid_values  = np.empty((config.nsteps,),dtype=np.float64)
     yfill       = np.empty((2*config.nsteps,),dtype=np.float64)
     xfill       = np.array(list(range(config.nsteps))+list(range(config.nsteps-1,-1,-1)))
@@ -3101,7 +3135,7 @@ if __name__ == "__main__":
                 priors.add_prior(Distribution("Uninformative",[]))
             else:
                 priors.add_prior(Distribution("Uniform",grid.range(param_name)))
-            
+
     for param_name in model.get_surface_parameter_names(config.surface_option):
         if (config.tight_ball):
             priors.add_prior(Distribution("Uninformative", []))
