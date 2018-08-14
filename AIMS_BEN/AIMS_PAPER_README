@@ -17,7 +17,7 @@ Artificial - MS:
 - Grid: grid_MS_v3.5.8 - grid containing all tracks -> list: v3.2
 - MS_test_v* - input files used (/home/bmr135/bison/Sim2/AIMS_Gael/Perturbation_Test_Obs_Files)
 - Uncertainties generated using /home/bmr135/git_AIMS/AIMS/AIMS_BEN/artificial_uncertainties.py
-- Results: /media/bmr135/SAMSUNG/AIMS_MS/XXX
+- Results: /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3
 
 Artificial - RGB:
 - Grid: grid_RGB_v3.7.1 - grid with track missing -> list: v3.3.1
@@ -31,14 +31,14 @@ FIGURES
 3 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/MS_ninr_2.png
 4 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_ninr_1.png
 5 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_ninr_2.png
-6 - /home/bmr135/Dropbox/AIMS_part_1/MS_track_int.png
+6 - /home/bmr135/SAMSUNG/AIMS-interp-testing2/MS_track_int.png
 7 - /home/bmr135/Dropbox/AIMS_part_1/M1_07_evo.png
-8 - /home/bmr135/Dropbox/AIMS_part_1/histogram_Mass.png
-9 - /home/bmr135/Dropbox/AIMS_part_1/histogram_Radius.png
-10 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_2/Comp_Hists/MS_Nsig.png
+8 - /home/bmr135/Dropbox/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Mass_gt120.png
+9 - /home/bmr135/Dropbox/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Radius_gt120.png
+10 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/MS_Nsig.png
 11 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/RGB_Nsig.png
-12 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/histogram_Mass_RGB.png
-13 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/histogram_Radius_RGB.png
+12 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/histogram_Mass_RGB_NG.png
+13 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/histogram_Radius_RGB_NG.png
 14 - /home/bmr135/Dropbox/AIMS_part_1/MS_nu_vs_dnu.png
 15 - /home/bmr135/Dropbox/AIMS_part_1/RGB_nu_vs_dnu.png
 16 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_Nsig_BiSON_as_Kepler.png
@@ -50,6 +50,6 @@ FIGURES
 22 - /home/bmr135/Dropbox/AIMS_part_1/PARAM.png
 A1 - /home/bmr135/Dropbox/AIMS_part_1/M1_206_Z0_0090.png
 A2 - /home/bmr135/Dropbox/AIMS_part_1/M1_206_Z0_0090_G.png
-A3 - /home/bmr135/Dropbox/AIMS_part_1/RGB_track_int.png
+A3 - /home/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_track_int.png
 A4 - /home/bmr135/Dropbox/AIMS_part_1/Interpolations/MS/rad_1.png
 A5 - /home/bmr135/Dropbox/AIMS_part_1/Interpolations/MS/lum_1.png

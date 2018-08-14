@@ -25,15 +25,15 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 matplotlib.rcParams.update({'font.size': 20})
 
 ''' Track Parameters '''
-m = 1.27
+m = 1.19
 x = 0.731
 z = 0.0100
 
 ''' Delaunay tessellation models formatting to save files (formatting
 is time consuming therefore save out and read in later on). '''
 
-dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
-df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_MS_Mod_vals_mHe.txt',\
+dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Models_mHe.txt',names=['model'],delimiter=r'\s+')
+df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Mod_vals_mHe.txt',\
                     names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
 
 
@@ -159,7 +159,7 @@ axSc = plt.subplot(gs01[0,0])
 axCol = plt.subplot(gs01[0,1])
 
 
-filename = '/home/bmr135/bison/Sim2/AIMS_Gael/interp_MS_test'
+filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_RGB_v3.7'
 input_data = open(filename,"r")
 [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     results_age2, results_track] = dill.load(input_data)
@@ -236,8 +236,8 @@ axSc.text(0.97, 0.075, '(B)', horizontalalignment='center',\
 ''' Echelle Diagram '''
 
 # theo = pd.read_csv('') # Theoretical Frequencies
-filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M127_MS_386' # Original Frequencies
-filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_MS/M1.27.X0.731.Z0.0100-atm-0386' # Interpolated Frequencies
+filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M119_RGB_612' # Original Frequencies
+filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_RGB/M1.19.X0.731.Z0.0100-atm-0612' # Interpolated Frequencies
 freqfile = open(filename)
 freqfile.readline() # skip head
 mode_temp = []
@@ -267,61 +267,61 @@ for line in freqfile1:
 
 axE = plt.subplot(gs[0,0])
 
-l0, l1, l2 = [], [], []
-for i in mode_temp:
-    if i[1] == 0: l0.append(i)
-    if i[1] == 1: l1.append(i)
-    if i[1] == 2: l2.append(i)
-l01, l11, l21 = [], [], []
-for i in mode_temp1:
-    if i[1] == 0: l01.append(i)
-    if i[1] == 1: l11.append(i)
-    if i[1] == 2: l21.append(i)
-n = 0
-m = 20
-shift = 20
-# axE.scatter((mode_temp[n][2]+0.5)%dnu,mode_temp[n][2],label='Original: $l=0$')
-# axE.scatter((mode_temp1[n][2]+0.5)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
-
-axE.scatter((l0[n][2]+shift)%dnu,l0[n][2],label='Original: $l=0$')
-axE.scatter((l01[n][2]+shift)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
-axE.scatter((l1[n][2]+shift)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
-axE.scatter((l11[n][2]+shift)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
-axE.scatter((l2[n][2]+shift)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
-axE.scatter((l21[n][2]+shift)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
-
-# k=0
+# l0, l1, l2 = [], [], []
 # for i in mode_temp:
-#     if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2])
-#     k+=1
+#     if i[1] == 0: l0.append(i)
+#     if i[1] == 1: l1.append(i)
+#     if i[1] == 2: l2.append(i)
+# l01, l11, l21 = [], [], []
+# for i in mode_temp1:
+#     if i[1] == 0: l01.append(i)
+#     if i[1] == 1: l11.append(i)
+#     if i[1] == 2: l21.append(i)
+n = 8
+m = 20
+shift = 5
+axE.scatter((mode_temp[n][2]+shift)%dnu,mode_temp[n][2],label='Original: $l=0$')
+axE.scatter((mode_temp1[n][2]+shift)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+
+# axE.scatter((l0[n][2]+shift)%dnu,l0[n][2],label='Original: $l=0$')
+# axE.scatter((l01[n][2]+shift)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+# axE.scatter((l1[n][2]+shift)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
+# axE.scatter((l11[n][2]+shift)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
+# axE.scatter((l2[n][2]+shift)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
+# axE.scatter((l21[n][2]+shift)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
+
 k=0
-for i in l0:
-    if k>n: axE.scatter((i[2]+shift)%dnu,i[2])
-    k+=1
-k=0
-for i in l1:
-    if k>n-3: axE.scatter((i[2]+shift)%dnu,i[2],marker='D')
-    k+=1
-k=0
-for i in l2:
-    if k>n-2: axE.scatter((i[2]+shift)%dnu,i[2],marker='^')
+for i in mode_temp:
+    if (k>n) & (k<m): axE.scatter((i[2]+shift)%dnu,i[2])
     k+=1
 # k=0
-# for i in mode_temp1:
-#     if (k>n) & (k<m): axE.scatter((i[2]+0.5)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+# for i in l0:
+#     if (k>n)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2])
+#     k+=1
+# k=0
+# for i in l1:
+#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],marker='D')
+#     k+=1
+# k=0
+# for i in l2:
+#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],marker='^')
 #     k+=1
 k=0
-for i in l01:
-    if k>n: axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+for i in mode_temp1:
+    if (k>n) & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
     k+=1
-k=0
-for i in l11:
-    if k>n-4: axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
-    k+=1
-k=0
-for i in l21:
-    if k>n-2: axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
-    k+=1
+# k=0
+# for i in l01:
+#     if (k>n)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+#     k+=1
+# k=0
+# for i in l11:
+#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
+#     k+=1
+# k=0
+# for i in l21:
+#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
+#     k+=1
 
 # axE.legend()
 axE.text(0.96, 0.075, '(A)', horizontalalignment='center',\
