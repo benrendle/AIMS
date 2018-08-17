@@ -1,4 +1,4 @@
-AIMS input files and grids used (01/08/2018, Ben Rendle)
+AIMS input files and grids used (16/08/2018, Ben Rendle)
 
 Solar:
 - BaK_short_wd - results with diffusion (Results: /media/bmr135/SAMSUNG/AIMS_MS/Solar/BaK_short_wd)
@@ -22,7 +22,7 @@ Artificial - MS:
 Artificial - RGB:
 - Grid: grid_RGB_v3.7.1 - grid with track missing -> list: v3.3.1
 - Grid: grid_RGB_v3.7 - grid containing all tracks -> list: v3.3
-- RGB_test_v* - input files used (/home/bmr135/bison/Sim2/AIMS_Gael/Perturbation_Test_Obs_Files)
+- RGB_test_v* - input files used (/home/bmr135/bison/Sim2/AIMS_Gael/Perturbation_Test_Obs_Files <- Will require regenerating from README files to use again.)
 - Results: /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG
 
 FIGURES
@@ -32,9 +32,9 @@ FIGURES
 4 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_ninr_1.png
 5 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_ninr_2.png
 6 - /home/bmr135/SAMSUNG/AIMS-interp-testing2/MS_track_int.png
-7 - /home/bmr135/Dropbox/AIMS_part_1/M1_07_evo.png
-8 - /home/bmr135/Dropbox/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Mass_gt120.png
-9 - /home/bmr135/Dropbox/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Radius_gt120.png
+7 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M1_27_Z0_01_Evo.png
+8 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Mass_gt120.png
+9 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Radius_gt120.png
 10 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/MS_Nsig.png
 11 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/RGB_Nsig.png
 12 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NG/Comp_Hists/histogram_Mass_RGB_NG.png
@@ -44,12 +44,12 @@ FIGURES
 16 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_Nsig_BiSON_as_Kepler.png
 17 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_w_diff_BiSON.png
 18 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_wo_diff_BiSON.png
-19 - /home/bmr135/Dropbox/AIMS_part_1/Mass.png
-20 - /home/bmr135/Dropbox/AIMS_part_1/Radius.png
-21 - /home/bmr135/Dropbox/AIMS_part_1/Age.png
+19 - /media/bmr135/SAMSUNG/AIMS_MS/Mass.png
+20 - /media/bmr135/SAMSUNG/AIMS_MS/Radius.png
+21 - /media/bmr135/SAMSUNG/AIMS_MS/Age.png
 22 - /home/bmr135/Dropbox/AIMS_part_1/PARAM.png
-A1 - /home/bmr135/Dropbox/AIMS_part_1/M1_206_Z0_0090.png
-A2 - /home/bmr135/Dropbox/AIMS_part_1/M1_206_Z0_0090_G.png
-A3 - /home/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_track_int.png
-A4 - /home/bmr135/Dropbox/AIMS_part_1/Interpolations/MS/rad_1.png
-A5 - /home/bmr135/Dropbox/AIMS_part_1/Interpolations/MS/lum_1.png
+A1 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M1_27_Z0_01_MS.png
+A2 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M0_91_Z0_03_RGB.png
+A3 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_track_int.png
+A4 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/rad_1.png
+A5 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/lum_1.png

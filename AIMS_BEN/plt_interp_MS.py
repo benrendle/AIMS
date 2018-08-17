@@ -215,7 +215,7 @@ def plot_grid(grid):
     ymax *= dy**0.05
 
     fig = plt.figure()
-    #plt.semilogy(grid[:,0],grid[:,1],'bo', picker=5)
+    # plt.semilogy(grid[:,0],10**grid[:,1],'bo', picker=5)
     plt.plot(grid[:,0],grid[:,1],'bo', picker=5)
     plt.xlim((xmin,xmax))
     plt.ylim((ymin,ymax))
@@ -235,6 +235,9 @@ def onpick_age(event):
     :param event: event caught by the grid plot.
     """
     for pos in event.ind:
+        print pos
+        print results_age[0][0]
+        print results_age[1][0]
         plot_slice_age(pos)
 
 def plot_slice_age(pos):
@@ -261,10 +264,10 @@ def plot_slice_age(pos):
 
     xmin = np.nanmin(results_age[0][pos][:,ndim-1])
     xmax = np.nanmax(results_age[1][pos][:,ndim-1])
-    xlim = (xmin,xmax+0.5*(xmax-xmin))
+    xlim = (xmin,xmax+0.1*(xmax-xmin))
 
     plt.figure()
-    plt.subplot(2,1,1)
+    ax = plt.subplot(2,1,1)
     if (all_nan(results_age[0][pos][:,ndim:ndim+3]) and \
         all_nan(results_age[1][pos][:,ndim:ndim+3])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
@@ -276,11 +279,12 @@ def plot_slice_age(pos):
         plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_age[0][pos][0,0],results_age[0][pos][0,1]),fontsize=20)
         plt.ylabel(r"Error(radial)",fontsize=20)
         plt.yscale('log')
+        plt.setp(ax.get_xticklabels(), visible=False)
         plt.xlim(xlim)
         plt.tick_params(labelsize=15)
-        plt.legend(fontsize=15)
+        plt.legend(fontsize=15,loc=8,ncol=3)
 
-    plt.subplot(2,1,2)
+    plt.subplot(2,1,2,sharex=ax)
     if (all_nan(results_age[0][pos][:,ndim+3:ndim+6]) and \
         all_nan(results_age[1][pos][:,ndim+3:ndim+6])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
@@ -294,8 +298,80 @@ def plot_slice_age(pos):
         plt.xlabel(titles[ndim-1],fontsize=20)
         plt.xlim(xlim)
         plt.tick_params(labelsize=15)
-        plt.legend(fontsize=15)	##################################################################################################################
     plt.show()
+
+def plot_hrd():
+    """
+    Make an HRD showing the distribution of uncertainties as a function of evolution.
+    """
+    a = [np.log10(0.03),np.log10(0.0175),np.log10(0.01),np.log10(0.0057),np.log10(0.0032)]
+    for k in a:
+        idx = []
+        fig = plt.figure()
+        for i in xrange(len(results_age[0])):
+            for j in xrange(len(results_age[0][i][:,0])):
+                if results_age[0][i][j,ndim-2] == k:
+                    idx = np.append(idx,results_age[0][i][j,:])
+        # print idx[::ndim+nglb+6+4]
+        plt.scatter(idx[20::ndim+nglb+6+4],np.log10(idx[21::ndim+nglb+6+4]/3.828e33),c=np.log10(idx[ndim::ndim+nglb+6+4]),label=r'Z = %s '%(10**idx[1]))
+        cb = plt.colorbar()
+        cax = cb.ax
+        cax.text(3.5,0.7,r"$\log_{10}$(Max. error)",rotation=270,fontsize=20)
+        cax.tick_params(labelsize=15)
+        plt.gca().invert_xaxis()
+        plt.legend(loc=3)
+        plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'_v3.9.png')
+        # plt.show()
+
+def plot_MXc():
+    """
+    Make an HRD showing the distribution of uncertainties as a function of evolution.
+    """
+    a = [np.log10(0.03),np.log10(0.0175),np.log10(0.01),np.log10(0.0057),np.log10(0.0032)]
+    for k in a:
+        idx = []
+        fig = plt.figure()
+        for i in xrange(len(results_age[0])):
+            for j in xrange(len(results_age[0][i][:,0])):
+                if results_age[0][i][j,ndim-2] == k:
+                    idx = np.append(idx,results_age[0][i][j,:])
+        # print idx[::ndim+nglb+6+4]
+        plt.scatter(idx[22::ndim+nglb+6+4],idx[0::ndim+nglb+6+4],c=np.log10(idx[ndim::ndim+nglb+6+4]),label=r'Z = %s '%(10**idx[1]))
+        cb = plt.colorbar()
+        cax = cb.ax
+        cax.text(3.5,0.7,r"$\log_{10}$(Max. error)",rotation=270,fontsize=20)
+        cax.tick_params(labelsize=15)
+        plt.legend(loc=1)
+        plt.xlabel(r'X$_{\rm{c}}$ - Inverted')
+        plt.ylabel(r'Mass')
+        plt.gca().invert_xaxis()
+        # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/MXc_MS_Z'+str(10**idx[1])+'_v3.9.png')
+        # plt.show()
+
+def plot_MmHe():
+    """
+    Make an HRD showing the distribution of uncertainties as a function of evolution.
+    """
+    a = [np.log10(0.03),np.log10(0.0175),np.log10(0.01),np.log10(0.0057),np.log10(0.0032)]
+    for k in a:
+        idx = []
+        fig = plt.figure()
+        for i in xrange(len(results_age[0])):
+            for j in xrange(len(results_age[0][i][:,0])):
+                if results_age[0][i][j,ndim-2] == k:
+                    idx = np.append(idx,results_age[0][i][j,:])
+        # print idx[::ndim+nglb+6+4]
+        plt.scatter(idx[23::ndim+nglb+6+4],idx[0::ndim+nglb+6+4],c=np.log10(idx[ndim::ndim+nglb+6+4]),label=r'Z = %s '%(10**idx[1]))
+        cb = plt.colorbar()
+        cax = cb.ax
+        cax.text(3.5,0.7,r"$\log_{10}$(Max. error)",rotation=270,fontsize=20)
+        cax.tick_params(labelsize=15)
+        plt.legend(loc=1)
+        plt.xlabel(r'Mass He-core')
+        plt.ylabel(r'Mass')
+        # plt.gca().invert_xaxis()
+        plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/MmHe_RGB_Z'+str(10**idx[1])+'_v3.9.png')
+        # plt.show()
 
 def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
     """
@@ -379,7 +455,7 @@ def plot_slice_track(pos):
     xlim = (xmin,xmax+0.3*(xmax-xmin))
 
     plt.figure()
-    plt.subplot(2,1,1)
+    ax = plt.subplot(2,1,1)
     if (all_nan(results_track[pos][:,ndim:ndim+3])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
     else:
@@ -433,6 +509,25 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     :type tpe: string
     :type title: string
     :type truncate: int
+
+    error_ndx:
+    [0] = maximum error on the radial modes
+    [1] = RMS error on the radial modes
+    [2] = RMS error on the radial modes near :math:`\\nu_{\mathrm{max}}`
+    [3] = maximum error on the non radial modes
+    [4] = RMS error on the non radial modes
+    [5] = RMS error on the non radial modes near :math:`\\nu_{\mathrm{max}}`
+    [6] = Age
+    [7] = Mass
+    [8] = Teff
+    [9] = Z0
+    [10] = X0
+    [11] = -
+    [12] = Xc
+    [13] = Period Spacing
+    [14] = Reference Frequency
+    [15] = Radius
+    [16] = Luminosity
 
     .. note::
       See above introductory description for a more detailled description
@@ -488,9 +583,9 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     print kk
 
-    # print kk[-33], kk[-37]
-    # cont.collections[-33].set_color('m')
-    # cont.collections[-37].set_color('k')
+    # print kk[-25], kk[-29]
+    # cont.collections[-25].set_color('m')
+    # cont.collections[-29].set_color('k')
     # circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
     # plt.gcf().gca().add_artist(circle1)
     plt.scatter(x, y, c=z2)
@@ -503,14 +598,14 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     b = max(z2)
     d = a-b
     # print a, b, d
-    f1 = a--1.097
+    f1 = a--1.7447
     g1 = f1/d
-    f2 = a--1.398
+    f2 = a--1.8538
     g2 = f2/d
 
     cax = cb.ax
-    cax.hlines(g1,0,1,colors='m',linewidth=2)
-    cax.hlines(g2,0,1,colors='k',linewidth=2)
+    # cax.hlines(g1,0,1,colors='m',linewidth=2)
+    # cax.hlines(g2,0,1,colors='k',linewidth=2)
     #cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
     cax.text(3.5,0.7,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=20)
     cax.tick_params(labelsize=15)
@@ -522,7 +617,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     m = n = 0
     for i in z2:
-    	if i <= -1.8539:
+    	if i <= -1.398:
     	    m += 1
     	else:
     	    n += 1
@@ -539,6 +634,33 @@ if __name__ == "__main__":
       The user may want to edit this.
     """
 
+
+    # input_data = open('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_MS_v3.5.8',"r")
+    # [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
+    #     results_age2, results_track] = dill.load(input_data)
+    # results_age_MS = [results_age1, results_age2]
+    # input_data.close()
+    # input_data = open('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_RGB_v3.7',"r")
+    # [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
+    #     results_age2, results_track] = dill.load(input_data)
+    # results_age_RGB = [results_age1, results_age2]
+    # input_data.close()
+    #
+    # a = np.log10(0.01)
+    # fig = plt.figure()
+    # plt.scatter(results_age_MS[0][132][:,20],np.log10( results_age_MS[0][132][:,21]/3.828e33))
+    # plt.scatter(results_age_RGB[0][132][:,20],np.log10( results_age_RGB[0][132][:,21]/3.828e33))
+    # plt.gca().invert_xaxis()
+    # plt.legend(loc=3)
+    # # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'.png')
+    # plt.show()
+    #
+    #
+    #
+    #
+    #
+    # sys.exit()
+
     assert (len(sys.argv) > 1), "Usage: plot_interpolation_test.py data_file"
 
     filename = sys.argv[1]
@@ -548,6 +670,10 @@ if __name__ == "__main__":
         results_age2, results_track] = dill.load(input_data)
     results_age = [results_age1, results_age2]
     input_data.close()
+
+    # plot_hrd()
+    # plot_MXc()
+    # plot_MmHe()
 
     # print grid # mass/met
     # print results_age1[0][0]
@@ -581,7 +707,7 @@ if __name__ == "__main__":
     #plot3D(results_age2,2,tpe="avg",title="numax radial error (nincr = 2)")
     #plot3D(results_track,2,tpe="avg",title="numax radial error (struct)")
 
-    #plot_grid(grid)
+    # plot_grid(grid)
     #plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
 
     plt.show()

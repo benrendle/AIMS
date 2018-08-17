@@ -1103,7 +1103,8 @@ class Track:
         # initialisation
         nmodels = len(self.models)
         ndim = len(self.params)+1
-        result = np.zeros((nmodels-2*nincr,ndim+nglb+6),dtype=gtype)
+        print nmodels, nincr, ndim, self.models[0].glb[imass]/constants.solar_mass, self.models[0].glb[3], self.models[0].glb[imHe]
+        result = np.zeros((nmodels-2*nincr,ndim+nglb+6+4),dtype=gtype)
 
         # loop through all models:
         for i in xrange(nincr,nmodels-nincr):
@@ -1116,6 +1117,10 @@ class Track:
             result[i-nincr,ndim-1] = self.models[i].glb[iage]
             # print self.models[i].glb[0]
             result[i-nincr,ndim:ndim+nglb+6] = compare_models(aModel,self.models[i])
+            result[i-nincr,ndim+nglb+6] = self.models[i].glb[itemperature]
+            result[i-nincr,ndim+nglb+7] = self.models[i].glb[iluminosity]
+            result[i-nincr,ndim+nglb+8] = self.models[i].glb[6]
+            result[i-nincr,ndim+nglb+9] = self.models[i].glb[imHe]
 
         return result
 
