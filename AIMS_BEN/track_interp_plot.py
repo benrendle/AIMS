@@ -25,15 +25,15 @@ matplotlib.rcParams['ytick.direction'] = 'out'
 matplotlib.rcParams.update({'font.size': 20})
 
 ''' Track Parameters '''
-m = 1.19
-x = 0.731
-z = 0.0100
+m = 1.47
+x = 0.740
+z = 0.0057
 
 ''' Delaunay tessellation models formatting to save files (formatting
 is time consuming therefore save out and read in later on). '''
 
-dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Models_mHe.txt',names=['model'],delimiter=r'\s+')
-df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_RGB_Mod_vals_mHe.txt',\
+dy = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_MS_Models_mHe.txt',names=['model'],delimiter=r'\s+')
+df = pd.read_csv('/media/bmr135/SAMSUNG/AIMS-interp-testing2/Delaunay_MS_Mod_vals_mHe.txt',\
                     names=['n','mass','rad','lumo','z','x','age','teff'],delimiter=r'\s+')
 
 
@@ -74,9 +74,9 @@ a = orig[(orig['mass'] == m) & (orig['x'] == x) & (orig['z'] == z)].index.get_va
 
 ''' Plotting Function with GridSpec '''
 
-gs = gridspec.GridSpec(2,2, height_ratios=[1.,1.25], width_ratios=[.5,.5])
+gs = gridspec.GridSpec(3,1)
 
-# gs.update(left=0.05, right=0.95, bottom=0.08, top=0.93, wspace=0.02, hspace=0.03)
+# gs.update(wspace=0.02, hspace=0.03)
 
 
 ''' HRD with Residuals '''
@@ -99,8 +99,7 @@ if len(df1) > 0:
     dL['res_L'] = np.zeros(len(df1))
     dL['res_L'] = (df1['lumo'] - df4['lumo'])/df1['lumo']
 
-    gs00 = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gs[1,:], height_ratios=[1.0,0.2], width_ratios=[0.9,0.1])
-    # gs00.update(left=0.05, right=0.95, bottom=0.08, top=0.93, wspace=0.02, hspace=0.03)
+    gs00 = gridspec.GridSpecFromSubplotSpec(2, 2, subplot_spec=gs[2], height_ratios=[1.0,0.2], width_ratios=[0.9,0.1], hspace=0.1, wspace=0.05)
 
     ax = plt.subplot(gs00[0,0])
     axT = plt.subplot(gs00[1,0])
@@ -129,10 +128,10 @@ if len(df1) > 0:
     ax.set_xlim(tmax+50,tmin-50)
     ax.set_ylim(lmin-1,lmax+1)
     # ax.set_title(r'M = %s M$_{\odot}$, Z = %s, X = %s' %(df1['mass'][0],df1['z'][0],df1['x'][0]),fontsize=20)
-    ax.legend(prop={'size':13},loc=2)
+    ax.legend(prop={'size':13},loc=4,ncol=2)
 
     axT.scatter(df1['teff'],dL['res_L'],marker='+',s=75)
-    axL.scatter(dT['res_T'],df1['lumo'],marker='+',s=75)
+    axL.scatter(dT['res_T']*100,df1['lumo'],marker='+',s=75)
 
     # no labels
     nullfmt = NullFormatter()
@@ -145,21 +144,21 @@ if len(df1) > 0:
     axT.set_ylabel(r'$\Delta$L/L')
     axL.set_xlabel(r'$\Delta$T/T')
 axL.xaxis.set_major_locator(plt.MaxNLocator(3))
-axL.set_xlim(-0.005,0.005)
+axL.set_xlim(-0.5,0.5)
 axT.yaxis.set_major_locator(plt.MaxNLocator(3))
-axT.set_ylim(-0.005,0.025)
-ax.text(0.975, 0.1, '(C)', horizontalalignment='center',\
+axT.set_ylim(-0.01,0.01)
+ax.text(0.025, 0.9, '(C)', horizontalalignment='center',\
       verticalalignment='center', transform=ax.transAxes)
 
 
 ''' Interpolation Test Result for Grid '''
 
-gs01 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[0,1], width_ratios=[2.0,0.1])
+gs01 = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=gs[1], width_ratios=[2.0,0.1], wspace=0.05)
 axSc = plt.subplot(gs01[0,0])
 axCol = plt.subplot(gs01[0,1])
 
 
-filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_RGB_v3.7'
+filename = '/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_MS_v3.9'
 input_data = open(filename,"r")
 [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     results_age2, results_track] = dill.load(input_data)
@@ -167,6 +166,7 @@ results_age = [results_age1, results_age2]
 input_data.close()
 
 
+# print results_track
 
 p = 1
 results = results_track
@@ -213,7 +213,7 @@ rbf = interpol.Rbf(x1,y1,z2,function='linear')
 zi = rbf(xi,yi)
 track = axSc.contourf(xi,yi,zi,100,cmap=colormaps.parula)
 
-elle = Ellipse(xy=[m,np.log10(z)], width=0.03, height=0.03, fill=None, linewidth=2, color='r')
+elle = Ellipse(xy=[m,np.log10(z)], width=0.015, height=0.03, fill=None, linewidth=2, color='r')
 # circle1 = plt.Circle((m, np.log10(z)), .0075, color='k', fill=False,linewidth=3)
 axSc.add_artist(elle)
 axSc.scatter(x1, y1, facecolors='none', linewidths=1.5)
@@ -229,15 +229,15 @@ axSc.set_ylabel(titles[1])#,fontsize=20)
 cbar = Colorbar(ax = axCol, mappable = track, orientation = 'vertical')#, ticklocation = 'right')
 cbar.set_label(r"$\log_{10}$(Max. error)", labelpad=20, rotation=270)
 # if (title is not None): axSc.set_title(title,fontsize=15)
-axSc.text(0.97, 0.075, '(B)', horizontalalignment='center',\
+axSc.text(0.025, 0.9, '(B)', horizontalalignment='center',\
       verticalalignment='center', transform=axSc.transAxes)
 
 
 ''' Echelle Diagram '''
 
 # theo = pd.read_csv('') # Theoretical Frequencies
-filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M119_RGB_612' # Original Frequencies
-filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_RGB/M1.19.X0.731.Z0.0100-atm-0612' # Interpolated Frequencies
+filename = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/M147_MS_272' # Original Frequencies
+filename1 = '/media/bmr135/SAMSUNG/AIMS-interp-testing2/Interp_Freqs_MS/M1.47.X0.740.Z0.0057-atm-0272' # Interpolated Frequencies
 freqfile = open(filename)
 freqfile.readline() # skip head
 mode_temp = []
@@ -265,66 +265,66 @@ for line in freqfile1:
 
 
 
-axE = plt.subplot(gs[0,0])
+axE = plt.subplot(gs[0])
 
-# l0, l1, l2 = [], [], []
-# for i in mode_temp:
-#     if i[1] == 0: l0.append(i)
-#     if i[1] == 1: l1.append(i)
-#     if i[1] == 2: l2.append(i)
-# l01, l11, l21 = [], [], []
-# for i in mode_temp1:
-#     if i[1] == 0: l01.append(i)
-#     if i[1] == 1: l11.append(i)
-#     if i[1] == 2: l21.append(i)
+l0, l1, l2 = [], [], []
+for i in mode_temp:
+    if i[1] == 0: l0.append(i)
+    if i[1] == 1: l1.append(i)
+    if i[1] == 2: l2.append(i)
+l01, l11, l21 = [], [], []
+for i in mode_temp1:
+    if i[1] == 0: l01.append(i)
+    if i[1] == 1: l11.append(i)
+    if i[1] == 2: l21.append(i)
 n = 8
 m = 20
 shift = 5
-axE.scatter((mode_temp[n][2]+shift)%dnu,mode_temp[n][2],label='Original: $l=0$')
-axE.scatter((mode_temp1[n][2]+shift)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+# axE.scatter((mode_temp[n][2]+shift)%dnu,mode_temp[n][2],label='Original: $l=0$')
+# axE.scatter((mode_temp1[n][2]+shift)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
 
-# axE.scatter((l0[n][2]+shift)%dnu,l0[n][2],label='Original: $l=0$')
-# axE.scatter((l01[n][2]+shift)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
-# axE.scatter((l1[n][2]+shift)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
-# axE.scatter((l11[n][2]+shift)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
-# axE.scatter((l2[n][2]+shift)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
-# axE.scatter((l21[n][2]+shift)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
+axE.scatter((l0[n][2]+shift)%dnu,l0[n][2],label='Original: $l=0$')
+axE.scatter((l01[n][2]+shift)%dnu,l01[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+axE.scatter((l1[n][2]+shift)%dnu,l1[n][2],label='Original: $l=1$',marker='D')
+axE.scatter((l11[n][2]+shift)%dnu,l11[n][2],color='r',label='Interp.: $l=1$',facecolors='none',s=40,linewidths=1.5,marker='D')
+axE.scatter((l2[n][2]+shift)%dnu,l2[n][2],label='Original: $l=2$',marker='^')
+axE.scatter((l21[n][2]+shift)%dnu,l21[n][2],color='r',label='Interp.: $l=2$',facecolors='none',s=40,linewidths=1.5,marker='^')
 
+# k=0
+# for i in mode_temp:
+#     if (k>n) & (k<m): axE.scatter((i[2]+shift)%dnu,i[2])
+    # k+=1
 k=0
-for i in mode_temp:
-    if (k>n) & (k<m): axE.scatter((i[2]+shift)%dnu,i[2])
+for i in l0:
+    if (k>n)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2])
+    k+=1
+k=0
+for i in l1:
+    if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],marker='D')
+    k+=1
+k=0
+for i in l2:
+    if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],marker='^')
     k+=1
 # k=0
-# for i in l0:
-#     if (k>n)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2])
-#     k+=1
-# k=0
-# for i in l1:
-#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],marker='D')
-#     k+=1
-# k=0
-# for i in l2:
-#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],marker='^')
+# for i in mode_temp1:
+#     if (k>n) & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
 #     k+=1
 k=0
-for i in mode_temp1:
-    if (k>n) & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
+for i in l01:
+    if (k>n)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
     k+=1
-# k=0
-# for i in l01:
-#     if (k>n)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5)
-#     k+=1
-# k=0
-# for i in l11:
-#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
-#     k+=1
-# k=0
-# for i in l21:
-#     if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
-#     k+=1
+k=0
+for i in l11:
+    if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='D')
+    k+=1
+k=0
+for i in l21:
+    if (k>n-1)  & (k<m): axE.scatter((i[2]+shift)%dnu,i[2],color='r',facecolors='none',s=40,linewidths=1.5,marker='^')
+    k+=1
 
 # axE.legend()
-axE.text(0.96, 0.075, '(A)', horizontalalignment='center',\
+axE.text(0.025, 0.9, '(A)', horizontalalignment='center',\
       verticalalignment='center', transform=axE.transAxes)
 
 
@@ -333,5 +333,5 @@ axE.set_ylabel(r"Frequency, $\nu$ (in $\mu$Hz)")
 axE.set_xlim(0.0,dnu)
 axE.legend(prop={'size':13})
 print(dnu)
-# plt.tight_layout()
+
 plt.show()

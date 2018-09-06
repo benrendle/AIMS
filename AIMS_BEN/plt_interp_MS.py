@@ -72,6 +72,7 @@ from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 import scipy.interpolate as interp
 import colormaps
+import constants
 # import pandas as pd
 import sys
 # from pandas import DataFrame, read_csv
@@ -561,7 +562,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
         if (value > 0.0):
 	    # print value
             z1.append(value)	# math.log10
-            z2.append(math.log10(value))
+            z2.append(math.log10(value/constants.solar_radius))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
 
@@ -581,14 +582,14 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     kk = np.array(k)
 
-    print kk
+    # print kk
 
-    # print kk[-25], kk[-29]
-    # cont.collections[-25].set_color('m')
-    # cont.collections[-29].set_color('k')
+    # print kk[-18], kk[-22]
+    # cont.collections[-18].set_color('m')
+    # cont.collections[-22].set_color('k')
     # circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
     # plt.gcf().gca().add_artist(circle1)
-    plt.scatter(x, y, c=z2)
+    plt.scatter(x, y, c=z2, cmap=colormaps.parula)
     cb = plt.colorbar()
     plt.xlabel(titles[0],fontsize=20)
     plt.ylabel(titles[1],fontsize=20)
@@ -611,13 +612,13 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     cax.tick_params(labelsize=15)
     # if (title is not None): plt.title(title,fontsize=15)
 
-    plt.figure()
-    plt.hist(z2,bins=50)
-    plt.xlabel(r'$\sigma_{\nu_{\rm{i}}}$')
+    # plt.figure()
+    # plt.hist(z2,bins=50)
+    # plt.xlabel(r'$\sigma_{\nu_{\rm{i}}}$')
 
     m = n = 0
     for i in z2:
-    	if i <= -1.398:
+    	if i <= -1.7447:
     	    m += 1
     	else:
     	    n += 1
@@ -675,6 +676,8 @@ if __name__ == "__main__":
     # plot_MXc()
     # plot_MmHe()
 
+    # print results_track[]
+
     # print grid # mass/met
     # print results_age1[0][0]
     #print ndx2
@@ -687,7 +690,7 @@ if __name__ == "__main__":
     # surface2D(1,results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
 
-    surface2D(1,results_age1,1,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
+    surface2D(1,results_age1,15,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
     surface2D(1,results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
 

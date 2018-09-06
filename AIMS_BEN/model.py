@@ -1177,7 +1177,7 @@ class Track:
           This method assumes the track is sorted, since it applies
           a binary search algorithm for increased efficiency.
         """
-
+        # print mHe, self.models[0].glb[imHe], self.models[-1].glb[imHe]
         # easy exit:
         if (mHe < self.models[0].glb[imHe]): return None, None, None
         if (mHe > self.models[-1].glb[imHe]): return None, None, None
@@ -1634,9 +1634,10 @@ class Model_grid:
                     # if aModel1.glb[imHe] < 0:
                     #     print(aModel1.glb[imHe])
                     aModel2, slope = interpolate_model_mHe(self,pt,tessellation,ndx2)
+                    # print aModel2
+                    # sys.exit()
                 aResult[i,0:ndim] = pt
 
-                # print aModel1.name, 1
                 # print names, 'n1'
                 # print name2, 'n2'
                 # print aResult[0,:]
@@ -1663,8 +1664,9 @@ class Model_grid:
                     # for (coef,model_name) in res:
                     #     output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
                     # output_file.write("\n")
-
             results.append(aResult)
+            # sys.exit()
+        print results
         # output_file.close()
         # out2.close()
         # out3.close()
@@ -2166,7 +2168,7 @@ def find_mHes(coefs, tracks, mHe):
         mHe_s += coef*track.models[0].glb[imHe]
         mHe_f += coef*track.models[-1].glb[imHe]
 
-    mHe *= constants.solar_mass
+    # mHe *= constants.solar_mass
     eta = (mHe-mHe_s)/(mHe_f-mHe_s)
 
     # check to see if the mHe lies within the interpolated track:
@@ -2221,6 +2223,7 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx):
     if (coefs is None): return None, None
     # find mHes:
     mHes = find_mHes(coefs,tracks,pt[-1])
+
     if (mHes is None): return None, None
     n = len(tracks)
 
@@ -2233,6 +2236,7 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx):
 
     # treat the case where there are at least 2 models:
     aModel1, slope1, name1 = tracks[0].interpolate_model_mHe(mHes[0])
+    # print aModel1
     if (aModel1 is None): return None, None
     if (name1 is None): return None, None
     aModel2, slope2, name2 = tracks[1].interpolate_model_mHe(mHes[1])
@@ -2244,9 +2248,10 @@ def interpolate_model_mHe(grid,pt,tessellation,ndx):
         aModel2, slope2, name2 = tracks[i].interpolate_model_mHe(mHes[i])
         if (aModel2 is None): return None, None
         if (name2 is None): return None, None
+        # print aModel2
         aModel1 = combine_models(aModel1,1.0,aModel2,coefs[i])
         slope += coefs[i]*slope2
-
+    # print aModel1
     return aModel1,slope
 
 def find_combination_mHe(grid,pt):
