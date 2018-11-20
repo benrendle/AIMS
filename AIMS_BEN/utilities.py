@@ -25,6 +25,7 @@ A module which contains various utility methods for handling strings and floats.
 
 __docformat__ = 'restructuredtext'
 
+import numpy as np
 
 def to_float(s):
     """
@@ -78,3 +79,34 @@ def trim(s):
     if (ndx == -1): ndx = len(s)
     return s[:ndx]
 
+def sparse_print(filename,mat):
+    """
+    Print a sparse matrix (for debug purposes only):
+
+    :param filename: name of the file in which to print the matrix
+    :type filename: string
+
+    :param mat: the matrix to be printed
+    :type mat: numpy array
+    """
+
+    output_file = open(filename,"w")
+    it = np.nditer(mat, flags=['multi_index'])
+    while not it.finished:
+       if (it[0] != 0.0): output_file.write("%22.15e %s\n"%(it[0], it.multi_index))
+       it.iternext()
+    output_file.close()
+
+def my_map(fct,lst):
+    """
+    Systematically applies a function to a list of items.  This deals with
+    the python3 behaviour of map which returns a map object rather than a
+    list.
+
+    :param fct: the function to be applied to each element of a list
+    :type fct: function
+
+    :param lst: the list to which is applied the function
+    :type lst: list
+    """
+    return list(map(fct,lst))

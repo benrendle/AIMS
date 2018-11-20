@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+# coding: utf-8
 # $Id: AIMS_configure.py
-# Author: Daniel R. Reese <dreese@bison.ph.bham.ac.uk>
+# Author: Daniel R. Reese <daniel.reese@obspm.fr>
 # Copyright (C) Daniel R. Reese and contributors
 # Copyright license: GNU GPL v3.0
 #
@@ -25,13 +26,13 @@ import math
 #       the memory in each process.  To be more memory efficient, turn off
 #       parallelisation using the "parallel" parameter.
 nprocesses  = 3      # number of processes (if running in parallel)
-parallel    = True #$$$True   # specifies whether to run in parallel
+parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
-ntemps      = 10 #$$$5 # number of temperatures
-nwalkers    = 400 #$$$400     # number of walkers (this number should be even)
-nsteps0     = 1000 #$$$200     # number of burn-in steps
-nsteps      = 2000 #$$$4000     # number of steps
+ntemps      = 10     # number of temperatures
+nwalkers    = 250    # number of walkers (this number should be even)
+nsteps0     = 400   # number of burn-in steps
+nsteps      = 200    # number of steps
 add_steps   = 500    # number of steps to add if convergence isn't achieved
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
@@ -39,46 +40,48 @@ PT          = True   # use parallel tempering?
 
 #########################   Initialisation   ###############################
 tight_ball   = True  # initialise with a tight ball around best solution
-max_iter     = 100000 # maximum number of iterations to find walker
+max_iter     = 1000  # maximum number of iterations to find walker
 
 # Ranges used around tight ball configuration for walkers.
 # NOTES:
-#   - these ranges will be re-centred around the parameters of the
-#     best model in the grid
+#   - if ranges are not provided, AIMS will comme up with its own default
+#     ranges (typically 1/30th of the total range for the relevant parameter,
+#     centred around the value from the best grid model)
+#   - if ranges are provided, they will be re-centred around the parameters
+#     of the best model in the grid
 #   - the ranges on parameters related to surface amplitudes will be reset by AIMS
 #   - exact names should be used as keys, since AIMS accesses
 #     the relevant distributions by using the name as a key.
 #   - it doesn't matter if there are supplementary parameters
 #     which don't intervene. AIMS will simply ignore them.
 
-tight_ball_range = {}
-tight_ball_range["Mass"]     = ("Gaussian", [0.0, 0.01])	# (29/06/16) edited these to 0.005, 0.002, 0.05, 100, 0.1, 0.1, 0.02, 10
-tight_ball_range["Z"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
-tight_ball_range["log_Z"]    = ("Gaussian", [0.0, 0.05])
-tight_ball_range["X"]        = ("Gaussian", [0.0, 0.01])	# 0.01 0.002 0.05 100 0.5 0.5 0.02 10
-# tight_ball_range["log_X"]    = ("Gaussian", [0.0, 0.05])
-tight_ball_range["Age"]      = ("Gaussian", [0.0, 100.0])
-tight_ball_range["mHe"]      = ("Gaussian", [0.0, 0.05])
-tight_ball_range["numax"]    = ("Gaussian", [0.0, 0.5])
-tight_ball_range["Dnu"]      = ("Gaussian", [0.0, 0.5])
-tight_ball_range["Radius"]   = ("Gaussian", [0.0, 0.01])
-tight_ball_range["Teff"]     = ("Gaussian", [0.0, 10.0])
-tight_ball_range["A_surf"]   = ("Gaussian", [0.0, 1.0])  # will be reset by AIMS
-tight_ball_range["A3_surf"]  = ("Gaussian", [0.0, 1.0])  # will be reset by AIMS
-tight_ball_range["Am1_surf"] = ("Gaussian", [0.0, 1.0])  # will be reset by AIMS
+tight_ball_range = {}  # do NOT erase this line
+#tight_ball_range["Mass"]     = ("Gaussian", [0.0, 0.10])
 #########################   Radial orders   ################################
 use_n       = True  # use radial orders when comparing observations with models?
-read_n      = True # read radial orders from input file?
-assign_n    = False  # use best model to reassign the radial order?
+read_n      = True  # read radial orders from input file?
+assign_n    = False # use best model to reassign the radial order?
                     # NOTE: this supersedes "read_n"
 #########################   Constraints   ##################################
 # Determines the type of surface correction to include.  Options include:
 #   - None: don't use any surface corrections
 #   - "Kjeldsen2008": use surface corrections based on Kjeldsen et al. (2008)
+#   - "Kjeldsen2008_scaling": use surface corrections based on Kjeldsen et al. (2008);
+#                     The b exponent is determined based on the scaling relation
+#                     from Sonoi et al. (2015)
+#   - "Kjeldsen2008_2": use surface corrections based on Kjeldsen et al. (2008);
+#                     The b exponent is a free parameter
 #   - "Ball2014": use one-term surface corrections based on Ball & Gizon (2014)
 #   - "Ball2014_2": use two-term surface corrections based on Ball & Gizon (2014)
+#   - "Sonoi2015": use the surface corrections based on Sonoi et al. (2015)
+#   - "Sonoi2015_scaling": use the surface corrections based on Sonoi et al. (2015);
+#                     The beta exponent is determined based on the scaling relation
+#                     from Sonoi et al. (2015)
+#   - "Sonoi2015_2": use the surface corrections based on Sonoi et al. (2015);
+#                     The beta exponent is a free parameter
 surface_option = None #"Ball2014_2"
 b_Kjeldsen2008 = 4.9  # exponent used in the Kjeldsen et al. surface corrections
+beta_Sonoi2015 = 4.0  # exponent used in the Sonoi et al. surface corrections
 
 # Set of seismic constraints to be used. Options include:
 #   - "nu": individual frequencies
@@ -86,11 +89,10 @@ b_Kjeldsen2008 = 4.9  # exponent used in the Kjeldsen et al. surface corrections
 #   - "dnu0": individual large frequency separation using l=0
 #   - "avg_dnu": average large frequency separation using all l
 #   - "avg_dnu0": average large frequency separation using l=0
-#   - "input_dnu": if using with only dnu and no freqs, use this constraint
 # NOTE: combining "nu" with the other constraints leads to a (nearly)
 #       singular covariance matrix and is not expected to give good
 #       results.
-#seismic_constraints = ["r02","r01","r10","avg_dnu0","nu_min0",	"input_dnu","alt_input_dnu"]
+#seismic_constraints = ["r02","r01","r10","avg_dnu0","nu_min0"]
 seismic_constraints = ["nu"]
 
 #########################   Weighting   ########################################
@@ -102,36 +104,51 @@ seismic_constraints = ["nu"]
 #                  constraints to have the same weight.
 # NOTE: even with the relative weighting, classic_weight is kept as absolute.
 weight_option = "Absolute"
-seismic_weight = 1.0
+seismic_weight = 0.1
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = False            # set this to True if you want to write a
+write_data    = True            # set this to True if you want to write a
                                  # binary grid file
+retessellate  = False            # retessellate grid (this can be useful
+                                 # if the binary grid has been produced by
+                                 # an outdated version of numpy ...)
+distort_grid  = False            # This distorts the grid by multiplying it by
+                                 # a distortion matrix in order to break its
+                                 # cartesian character and accelerate
+                                 # finding simplices.  This will cause the
+                                 # grid to be retessellated.
+                                 # NOTE: this option is still experimental
+                                 #       and may need some further fine-tuning.
 mode_format   = "simple"         # specifies the format of the files with
                                  # the mode frequencies.  Options include:
                                  #   - "simple": the original AIMS format
+                                 #   - "CLES": the CLES format (almost the same as "simple")
+                                 #   - "MESA": the GYRE format
                                  #   - "agsm": the agsm format from ADIPLS
-npositive     = True             # only save modes with n >= 0 in binary file
+npositive     = True             # if True, only save modes with n >= 0 in
+                                 # binary grid file
 cutoff        = 5.0              # remove frequencies above this value times
                                  # the acoustic cutoff-frequency
 agsm_cutoff   = False            # if True, only keep frequencies with icase=10010
                                  # (i.e. below the cutoff frequency as determined
                                  # by ADIPLS) in agsm files.  This test is in
                                  # addition to the above user-defined cutoff.
-grid_type = 'CLES'               # Define grid type for correct frequency file format
-
-list_grid     = "MS_CLES_mHe_list2"   # file with list of models and characteristics.
+list_grid      = "CLES_MS_DIFF"  # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
-grid_params = ("Mass", "log_Z")#"X","Z")   # primary grid parameters (excluding age)	<--------- Can only be the values used in the file name - the set global parameters of each track.
+grid_params = ('Mass', 'log_Z')
+#grid_params = ('Mass', 'Y', 'M_H0', 'alpha_MLT', 'alpha_OV')  # primary grid parameters (excluding age)
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = "grid_RGB_v3.10" #NGC6819" # binary file with model grid
+binary_grid = 'grid_Sun_DIFF2.1' #"data_MESA_ms_log"
+#binary_grid = "data_tsonoi_l"    # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
+track_threshold = 10             # minimal number of models for a stellar evolutionary
+                                 # track.  Tracks with fewer models are removed
 #########################   User-defined parameters   ######################
 # This variable allows the user to introduce supplementary parameters in
 # addition to the parameters hard-coded in to AIMS.  These parameters
@@ -146,11 +163,16 @@ binary_grid = "grid_RGB_v3.10" #NGC6819" # binary file with model grid
 # be replaced by appropriate strings if, for instance, one asks for the
 # log of this parameter.
 
-#user_params = ()
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)
-#user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'), \
-#               ("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
-#               ("alpha_semi_conv", r'Semiconvection parameter, $%s\alpha_{\mathrm{semi. conv.}}%s$'))
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+               #  ('alpha_MLT', 'Mixing length parameter, $%s\\alpha_{\\mathrm{MLT}}%s$'), \
+               # ('Zs', 'Surface metallicity, $%sZ_c%s$'), \
+               # ('Xs', 'Surface hydrogen, $%sX_c%s$'),    \
+               # ('Zc', 'Central metallicity, $%sZ_c%s$'), \
+               # ('Xc', 'Central hydrogen, $%sX_c%s$'),    \
+               # ('r_BCZ', 'Radius at BCZ, $%sr_{\\mathrm{BCZ}}%s$'), \
+               # ('tau_BCZ', 'Acoustic depth of BCZ, $%s\\tau_{\\mathrm{BCZ}}%s$'), \
+               # ('tau', 'Acoustic radius, $%s\\tau%s$'), \
+               # ('alpha_OV', 'Overshoot parameter, $%s\\alpha_{\\mathrm{OV}}%s$'))
 #########################   Priors    ######################################
 # The priors are given in a similar format as the tight-ball ranges above.
 # An important difference is that the relevant probability distributions
@@ -158,57 +180,64 @@ user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing,
 # amplitudes).
 #
 # NOTES:
+#   - if a prior on a given parameter is not provided, AIMS will comme
+#     up with its own default prior, namely an uniformative prior if
+#     the tight_ball option is set to True, and a uniform prior on a
+#     relevant range in the opposite case (except for parameters
+#     related to surface corrections, in which case AIMS explicitely asks
+#     the user to provide a prior).
 #   - exact names should be used as keys, since AIMS accesses
 #     the relevant distributions by using the name as a key
 #   - it doesn't matter if there are supplementary parameters
 #     which don't intervene. AIMS will simply ignore them.
 
 priors = {}                      # The priors will be defined thanks to this
-priors["Mass"]     = ("Uniform", [0.75, 2.25])
-priors["Z"]        = ("Uniform", [0.0032, 0.03])
-priors["log_Z"]    = ("Uniform", [math.log10(0.0032), math.log10(0.03)])
-priors["X"]        = ("Uniform", [0.691, 0.745])
-priors["log_X"]    = ("Uniform", [math.log10(0.691), math.log10(0.745)])
-priors["mHe"]      = ("Uniform", [0.0, 0.2])
-priors["Age"]      = ("Uniform", [0.0, 2e4])
-priors["numax"]    = ("Uniform", [0.0, 5.0e3])
-priors["A_surf"]   = ("Uniform", [-1.0, 1.0])  # this is too broad and will be sent by AIMS
-priors["A3_surf"]  = ("Uniform", [-1e-9, 1e-9])  # this too broad and should be set experimentally
-priors["Am1_surf"] = ("Uniform", [-1e-6, 1e-6])  # this too broad and should be set experimentally
+priors["Age"]     = ("Uniform", [0.0, 1.38e4])
 #########################   Interpolation    ###############################
-scale_age = True                 # use a scaled interpolation parameter
-interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
+scale_age = True                 # use a scaled age when interpolating
+interp_type = "Age"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
-test_interpolation = True       # decide whether to test the interpolation.
+test_interpolation = False       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interp_RGB_v3.10" #"interp_MS_He_v2.2"  # Name of the file to which to
+interpolation_file = "interpolation_test"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.
 #########################   Output   #######################################
-# choice of parameters: "Mass", "Radius", "Luminosity", "Z", "X", "Fe_H",
-#                       "M_H", "Age", "Teff", "Dnu", "Rho", "g"
+# choice of parameters: "Mass", "Radius", "Luminosity", "X", "Y", "Z", "zsx_0",
+#                       "Fe_H", "M_H", "Age", "Teff", "Dnu", "numax", "Rho", "g",
+#                       "b_Kjeldsen2008", "beta_Sonoi2015"
+# Also all quantities provided in the user_params variable are available.
+# If the quantities "Zs" and "Xs" are defined via user_params, then "Ys" and
+#                       "zsx_s" are also available.
 # possible prefixes: "log_", "ln_", "exp_"
 # example: "log_g" corresponds to log_{10}(g), where $g$ is the surface gravity
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","X","numax","Dnu","Luminosity","Fe_H","M_H","DNl1")
-output_dir    = "/home/bmr135/" #"results"      # name of the root folder with the MSresults
+# NOTE: the quantities "b_Kjeldsen2008" and "beta_Sonoi2015" will be the ones
+#       based on the scaling relation in Sonoi et al. (2015).  This will differ
+#       from the values obtained when using the options surface_option="Kjeldsen2008_2"
+#       or "Sonoi2015_2"
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","Xc","Luminosity")
+output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
-with_osm       = False         # decide whether to write output files for
-                               # OSM (=Optimal Stellar Model by R. Samadi)
+extended_model  = False        # if True, print all models frequencies
+                               # (not just those with observed counterparts)
+with_osm        = False        # decide whether to write output files for OSM
+                               # (=Optimal Stellar Model by R. Samadi)
 with_combinations = True       # decide whether to write file with model combinations
 with_walkers    = True         # decide whether to plot walkers
-with_distrib_iter = True         # decide whether to plot distrib_iter
+with_distrib_iter=True         # decide whether to plot distrib_iter
 with_echelle    = True         # decide whether to plot echelle diagrams
 with_histograms = True         # decide whether to plot histograms
 with_triangles  = True         # decide whether to make triangle plots
 with_rejected   = True         # decide whether to make triangle plots with accepted/rejected models
 plot_extensions = ['png']      # extensions (and formats) for all simple plots
 tri_extensions  = ['png']      # extensions (and formats) for triangle plots
-# supported formats: eps, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff
+                               # supported formats (may depend on backend): eps, jpeg,
+                               #   jpg, pdf, png, ps, raw, rgba, svg, svgz, tif, tiff
 backend         = 'agg'        # matplotlib backend with which to produce plots.
                                # Options (may differ according to installation):
                                #   'pdf', 'pgf', 'Qt4Agg', 'GTK', 'GTKAgg',

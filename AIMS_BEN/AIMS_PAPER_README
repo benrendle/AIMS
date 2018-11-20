@@ -5,7 +5,7 @@ Solar:
 - BaK_short_r01/10/02 - results using frequency ratios and diffusive grid (/home/bmr135/bison/Sim3/AIMS_New/results/BiSON.tar.gz)
 - Bison_as_Kepler_wod - results without diffusion included -> to be re-run with new grid (01/08/2018) (Results: /media/bmr135/SAMSUNG/AIMS_MS/Solar/BiSON_as_Kepler_wod)
 - grid_MS_v2 - nominal grid used for non-diffusive tests
-- grid_Sun_DIFF2 - grid used with diffusion included
+- grid_Sun_DIFF2 - grid used with diffusion included (list: CLES_MS_DIFF)
 
 PARAM:
 - AaP_test_* - input files with various constraints to be used in the PARAM tests (/home/bmr135/bison/Sim2/AIMS_Gael/Aims_as_PARAM)

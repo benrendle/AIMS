@@ -43,7 +43,7 @@ of seismic an classic constraints.
 """
 
 __docformat__ = 'restructuredtext'
-__version__ = "1.0.0"
+__version__ = "1.3.0"
 
 # AIMS configuration option
 import AIMS_configure as config # user-defined configuration parameters
@@ -61,11 +61,11 @@ import matplotlib.lines   as mlines
 import numpy as np
 from scipy.stats import truncnorm
 import emcee
+import ptemcee
 import corner
 from lxml import etree
 from operator import attrgetter
 from multiprocessing import Pool
-import ptemcee
 from tqdm import tqdm
 
 # import modules from the AIMS package
@@ -73,7 +73,7 @@ import model
 import constants
 import utilities
 import aims_fortran
-
+plt.rcParams["font.family"] = "serif"
 # parameters associated with the grid
 grid             = None
 """ grid of models """
@@ -117,7 +117,7 @@ best_grid_result  = log0
 """ ln(probability) result for the model :py:data:`best_grid_model`"""
 
 best_age_range    = 0.0
-""" Age or mHe range on track with :py:data:`best_model_model`"""
+""" Age or evolutionary parameter range on track with :py:data:`best_model_model`"""
 
 # variables associated with the best model from the MCMC run:
 best_MCMC_model   = None
@@ -154,6 +154,15 @@ accepted_parameters = []
 
 rejected_parameters = []
 """ list of parameters associated with rejected models """
+
+nreject_classic = 0
+""" Number of models rejected because of classic constraints """
+
+nreject_seismic = 0
+""" Number of models rejected because of seismic constraints """
+
+nreject_prior   = 0
+""" Number of models rejected based on priors """
 
 class Distribution:
 
@@ -464,7 +473,6 @@ class Prior_list:
         """
 
         self.priors.append(aPrior)
-        # print self.priors
 
     def realisation(self,size=None):
         """
@@ -507,7 +515,6 @@ class Prior_list:
         lnprior = 0.0
         for aPrior, param in zip(self.priors, params):
             lnprior += aPrior(param)
-            # print aPrior(param), lnprior
         return lnprior
 
 class Mode:
@@ -627,15 +634,15 @@ class Combination:
     def print_me(self):
         """ Print frequency combination. """
 
-        print "value = ",self.value
-        print "*******************"
-        print "num = ",  self.num
+        print("value = "+str(self.value))
+        print("*******************")
+        print("num = "+str(self.num))
         for i, coeff in zip(self.num_index,self.num_coeff):
-            print "  ",i,"  ",coeff
-        print "*******************"
-        print "den = ",  self.den
+            print("  "+str(i)+"  "+str(coeff))
+        print("*******************")
+        print("den = "+str(self.den))
         for i, coeff in zip(self.den_index,self.den_coeff):
-            print "  ",i,"  ",coeff
+            print("  "+str(i)+"  "+str(coeff))
 
 class Likelihood:
     """
@@ -709,6 +716,17 @@ class Likelihood:
           3. The index of the frequency combination
         """
 
+    def find_weights_new(self):
+        """
+        Find absolute weights for seismic and classic constraints based on options
+        in ``AIMS_configure.py``.
+        """
+        nclassic = len(self.constraints)
+        nseismic = len(self.combinations)
+        config.find_weights(nclassic,nseismic)
+        self.seismic_weight = config.seismic_weight
+        self.classic_weight = config.classic_weight
+
     def find_weights(self):
         """
         Find absolute weights for seismic and classic constraints based on options
@@ -729,6 +747,20 @@ class Likelihood:
             nclassic = len(self.constraints)
             self.seismic_weight = config.seismic_weight*float(nclassic)/float(nseismic)
             self.classic_weight = config.classic_weight
+            return
+
+        if (config.weight_option == "Reduced"):
+            nseismic = len(self.combinations)
+            nclassic = len(self.constraints)
+            self.seismic_weight = 1.0/float(nclassic + nseismic - 1)
+            self.classic_weight = 1.0/float(nclassic + nseismic - 1)
+            return
+
+        if (config.weight_option == "Reduced_bis"):
+            nseismic = len(self.combinations)
+            nclassic = len(self.constraints)
+            self.seismic_weight = 1.0/float(nseismic - 1)
+            self.classic_weight = 1.0/float(nclassic - 1)
             return
 
         sys.exit("Unknown weight_option: "+config.weight_option)
@@ -757,7 +789,7 @@ class Likelihood:
         self.fvalues = np.empty((size_obs,),dtype=model.ftype)
         self.dfvalues = np.empty((size_obs,),dtype=model.ftype)
 
-        for i in xrange(size_obs):
+        for i in range(size_obs):
             self.lvalues[i] = self.modes[i].l
             self.nvalues[i] = self.modes[i].n
             self.fvalues[i] = self.modes[i].freq
@@ -804,17 +836,17 @@ class Likelihood:
                 if (utilities.is_number(columns[1])):
                     like.add_constraint((columns[0],           \
                         Distribution("Gaussian",               \
-                        map(utilities.to_float,columns[1:]))))
+                        utilities.my_map(utilities.to_float,columns[1:]))))
                 else:
                     like.add_constraint((columns[0],           \
                         Distribution(columns[1],               \
-                        map(utilities.to_float,columns[2:]))))
+                        utilities.my_map(utilities.to_float,columns[2:]))))
 
         # don't forget to do this:
         obsfile.close()
 
         # print number of modes:
-        print "I found %d modes in %s."%(len(self.modes),filename)
+        print("I found %d modes in %s."%(len(self.modes),filename))
 
         # if the n values have not been provided, then they need to be guessed:
         if (not config.read_n): self.guess_n()
@@ -823,13 +855,15 @@ class Likelihood:
         self.sort_modes()
         self.create_mode_arrays()
 
-    def add_constraint(self,(name,distribution)):
+    def add_constraint(self,constraint):
         """
         Add a supplementary constraint to the list of constraints.
 
         :param constraint: supplementary constraint
         :type constraint: (string, :py:class:`Distribution`)
         """
+
+        (name,distribution) = constraint
 
         # look for single letter constraints and "translate" them to their full name:
         if (name == "T"): name = "Teff"
@@ -865,7 +899,7 @@ class Likelihood:
             # find minimun frequency difference between radial modes as
             # a first estimate of the large frequency separation:
             min_diff = np.nan
-            for i in xrange(1,nmodes):
+            for i in range(1,nmodes):
                 if (self.modes[ind[i]].l != 0): break
                 diff = self.modes[ind[i]].freq - self.modes[ind[i-1]].freq
                 # the following condition is "nan-resistant":
@@ -873,7 +907,7 @@ class Likelihood:
 
             # easy exit:
             if (min_diff != min_diff):
-                print "WARNING: cannot find large frequency separation"
+                print("WARNING: cannot find large frequency separation")
                 return np.nan
 
         # refine large frequency separation using a least squares approach
@@ -881,7 +915,7 @@ class Likelihood:
         # previous estimate of the large frequency separation.
         ntemp = 0
         one = n = nn = nu = nnu = 0.0
-        for i in xrange(nmodes):
+        for i in range(nmodes):
             if (self.modes[ind[i]].l != 0): break
             if ((i > 0) and (not with_n)):
                 ntemp += max(1,int(round((self.modes[ind[i]].freq-self.modes[ind[i-1]].freq)/min_diff)))
@@ -923,9 +957,9 @@ class Likelihood:
         # avoid having two modes with the same n value:
         ind = np.lexsort(([mode.freq for mode in self.modes], \
                              [mode.l for mode in self.modes]))  # sorts by l, then freq
-        for i in xrange(len(self.modes)-2,0,-1):
+        for i in range(len(self.modes)-2,0,-1):
             if ((self.modes[ind[i]].l == self.modes[ind[i+1]].l) and (self.modes[ind[i]].n == self.modes[ind[i+1]].n)):
-                for j in xrange(i,0,-1):
+                for j in range(i,0,-1):
                     if (self.modes[ind[j]].l != self.modes[ind[i]].l): break
                     self.modes[ind[j]].n -= 1
 
@@ -942,11 +976,11 @@ class Likelihood:
 
         # easy exit:
         if (nmissing > 0):
-            print "WARNING: unable to assign radial orders due to unmatched modes"
+            print("WARNING: unable to assign radial orders due to unmatched modes")
             return
 
         # assign radial orders
-        for i in xrange(len(self.modes)):
+        for i in range(len(self.modes)):
             self.modes[i].n = my_model.modes['n'][mode_map[i]]
 
     def clear_seismic_constraints(self):
@@ -975,6 +1009,7 @@ class Likelihood:
           - ``r10``: :math:`r_{10}` frequency ratios
           - ``dnu``: individual large frequency separations (using all modes)
           - ``dnu0``: individual large frequency separations (using radial modes only)
+          - ``d2nu``: second differences (using all modes)
           - ``avg_dnu``: average large frequency separation (using all modes)
           - ``avg_dnu0``: average large frequency separation (using radial modes only)
 
@@ -1015,6 +1050,10 @@ class Likelihood:
             self.add_combinations(num_list=((0,0,1.0),(-1,0,-1.0)),target_ell=0)
             return
 
+        if (string == "d2nu"):
+            self.add_combinations(num_list=((1,0,1.0),(0,0,-2.0),(-1,0,1.0)))
+            return
+
         if (string == "avg_dnu"):
             self.add_dnu_constraint(l_targets=None)
             return
@@ -1023,8 +1062,8 @@ class Likelihood:
             self.add_dnu_constraint(l_targets=[0])
             return
 
-        print "Unknown type of seismic constraint: ",string
-        print "Skipping ..."
+        print("Unknown type of seismic constraint: "+string)
+        print("Skipping ...")
         return
 
     def find_l_list(self, l_targets):
@@ -1057,14 +1096,14 @@ class Likelihood:
                 if (l not in l_list): l_list.append(l)
 
         # count the number of modes with different l values
-        l_num = np.zeros(len(l_list),dtype=np.int16)
+        l_num = [0.0,]*len(l_list)
         for mode in self.modes:
             if (mode.l in l_list): l_num[l_list.index(mode.l)] += 1
 
         # remove l values from list if there are less than 2 modes with
         # that value (iterate backwards to avoid problems with shifting
         # indices).
-        for i in xrange(len(l_list)-1,-1,-1):
+        for i in range(len(l_list)-1,-1,-1):
             if (l_num[i] < 2): del l_num[i], l_list[i]
         return l_list
 
@@ -1093,9 +1132,9 @@ class Likelihood:
 
         # easy exit:
         if (len(l_list) == 0):
-            print "WARNING: unable to find large frequency separation for given l targets."
-            print "Try including other l values in l_targets, or expanding your set of"
-            print "observations."
+            print("WARNING: unable to find large frequency separation for given l targets.")
+            print("Try including other l values in l_targets, or expanding your set of")
+            print("observations.")
             return
 
         # set up linear system and invert it:
@@ -1116,7 +1155,7 @@ class Likelihood:
 
         # create associated mode combination
         a_combination = Combination()
-        for j in xrange(len(self.modes)):
+        for j in range(len(self.modes)):
             if (self.modes[j].l not in l_list): continue
             ndx = l_list.index(self.modes[j].l) + 1
             a_combination.add_num(j,(invmat[0,0]*self.modes[j].n + invmat[0,ndx])/self.modes[j].dfreq**2)
@@ -1127,7 +1166,7 @@ class Likelihood:
         a_combination.num   = value
         a_combination.den   = 1.0
 
-        print "Number of added seismic constraints:  1"
+        print("Number of added seismic constraints:  1")
         self.combinations.append(a_combination)
 
     def add_dnu_constraint(self, l_targets=[0]):
@@ -1155,9 +1194,9 @@ class Likelihood:
 
         # easy exit:
         if (len(l_list) == 0):
-            print "WARNING: unable to find large frequency separation for given l targets."
-            print "Try including other l values in l_targets, or expanding your set of"
-            print "observations."
+            print("WARNING: unable to find large frequency separation for given l targets.")
+            print("Try including other l values in l_targets, or expanding your set of")
+            print("observations.")
             return
 
         # find various summed quantities:
@@ -1173,12 +1212,12 @@ class Likelihood:
             nn += cnst*mode.n*mode.n
 
         det = nn
-        for i in xrange(n): det -= m[i,1]*m[i,1]/m[i,0]
+        for i in range(n): det -= m[i,1]*m[i,1]/m[i,0]
 
         # create associated mode combination
         a_combination = Combination()
         value = 0.0
-        for j in xrange(len(self.modes)):
+        for j in range(len(self.modes)):
             if (self.modes[j].l not in l_list): continue
             ndx = l_list.index(self.modes[j].l)
             coeff = (self.modes[j].n - m[ndx,1]/m[ndx,0])/(det*self.modes[j].dfreq**2)
@@ -1190,8 +1229,7 @@ class Likelihood:
         a_combination.num   = value
         a_combination.den   = 1.0
 
-        print "Number of added seismic constraints:  1"
-
+        print("Number of added seismic constraints:  1")
         self.combinations.append(a_combination)
 
     def add_nu_min_constraint(self, target_ell=0, min_n=False):
@@ -1210,7 +1248,7 @@ class Likelihood:
 
         ndx = -1
         min_val = np.nan
-        for j in xrange(len(self.modes)):
+        for j in range(len(self.modes)):
             if (self.modes[j].l != target_ell): continue
             if (min_n):
                 value = self.modes[j].n
@@ -1229,7 +1267,7 @@ class Likelihood:
             a_combination.num   = self.modes[ndx].freq
             a_combination.den   = 1.0
             self.combinations.append(a_combination)
-            print "Number of added seismic constraints:  1"
+            print("Number of added seismic constraints:  1")
 
     def add_combinations(self,num_list,den_list=[],target_ell=None):
         """
@@ -1255,7 +1293,7 @@ class Likelihood:
 
         # find indices of modes which follow the specified pattern
         n = 0
-        for i in xrange(len(self.modes)):
+        for i in range(len(self.modes)):
             if ((target_ell is not None) and (self.modes[i].l != target_ell)): continue
 
             a_combination = Combination()
@@ -1264,7 +1302,7 @@ class Likelihood:
             num = 0.0
             for (n_diff, l_diff, coeff) in num_list:
                 target_mode = Mode(self.modes[i].n+n_diff,self.modes[i].l+l_diff,0.0,0.0)
-                for j in xrange(len(self.modes)):
+                for j in range(len(self.modes)):
                     if (target_mode.match(self.modes[j])):
                         a_combination.add_num(j,coeff)
                         num += coeff*self.modes[j].freq
@@ -1278,7 +1316,7 @@ class Likelihood:
             den = 0.0
             for (n_diff, l_diff, coeff) in den_list:
                 target_mode = Mode(self.modes[i].n+n_diff,self.modes[i].l+l_diff,0.0,0.0)
-                for j in xrange(len(self.modes)):
+                for j in range(len(self.modes)):
                     if (target_mode.match(self.modes[j])):
                         a_combination.add_den(j,coeff)
                         den += coeff*self.modes[j].freq
@@ -1300,7 +1338,7 @@ class Likelihood:
 
             self.combinations.append(a_combination)
             n += 1
-        print "Number of added seismic constraints: ", n
+        print("Number of added seismic constraints: "+str(n))
 
     def find_covariance(self):
         """
@@ -1315,11 +1353,11 @@ class Likelihood:
         n = len(self.combinations)
         self.cov = np.zeros((n,n),dtype=np.float64)
 
-        for i in xrange(n):
+        for i in range(n):
             vec1 = self.find_vec(self.combinations[i])
-            for j in xrange(n):
+            for j in range(n):
                 vec2 = self.find_vec(self.combinations[j])
-                for k in xrange(len(self.modes)):
+                for k in range(len(self.modes)):
                     self.cov[i][j] += vec1[k]*vec2[k]*self.modes[k].dfreq*self.modes[k].dfreq
 
         self.invcov = np.linalg.inv(self.cov)
@@ -1370,7 +1408,7 @@ class Likelihood:
         self.coeff  = np.empty((nmax,2,ncomb),dtype=model.ftype)
         self.indices= np.empty((nmax,2,ncomb),dtype=np.int)
 
-        for i in xrange(ncomb):
+        for i in range(ncomb):
             self.values[i] = self.combinations[i].value
 
             self.ncoeff[0,i] = len(self.combinations[i].num_index)
@@ -1508,7 +1546,7 @@ class Likelihood:
         X = np.zeros((nsurf_free,n),dtype=np.float64)
         Y = np.zeros((n,),dtype=np.float64)
 
-        for i in xrange(nsurf_free):
+        for i in range(nsurf_free):
             a = np.zeros(nsurf,dtype=np.float64)
             a[i] = 1.0
 
@@ -1516,17 +1554,17 @@ class Likelihood:
             if (config.surface_option == "Sonoi2015_2"):    a[-1] = my_model.beta_Sonoi2015
 
             dsurf = my_model.get_surface_correction(config.surface_option,a)
-            for j in xrange(n): X[i,j] = dsurf[mode_map[j]]/self.modes[j].dfreq
+            for j in range(n): X[i,j] = dsurf[mode_map[j]]/self.modes[j].dfreq
 
-        for i in xrange(n):
+        for i in range(n):
             Y[i] = (self.modes[i].freq/my_model.glb[model.ifreq_ref] \
                  - my_model.modes['freq'][mode_map[i]]) / self.modes[i].dfreq
 
         mat = np.zeros((nsurf_free,nsurf_free),dtype=np.float64)
         b   = np.zeros((nsurf_free,),dtype=np.float64)
-        for i in xrange(nsurf_free):
+        for i in range(nsurf_free):
             b[i] = np.dot(X[i,:],Y)
-            for j in xrange(i,nsurf_free):
+            for j in range(i,nsurf_free):
                 mat[i,j] = np.dot(X[i,:],X[j,:])
                 mat[j,i] = mat[i,j]
 
@@ -1550,25 +1588,29 @@ class Likelihood:
         :param my_model: model for which the :math:`\chi^2` value is being calculated
         :type my_model: :py:class:`model.Model`
 
-        :return: the :math:`\chi^2` value, and optionally the optimal surface amplitudes
-           (depending on the value of :py:data:`AIMS_configure.surface_option`)
-        :rtype: float, np.array (optional)
+        :return: the :math:`\chi^2` value, optionally the optimal surface amplitudes
+           (depending on the value of :py:data:`AIMS_configure.surface_option`),
+           integers to indicate whether the model was rejected due to classic
+           or seismic contraints
+        :rtype: float, np.array (optional), int, int
 
         .. note::
           This avoids model interpolation and can be used to gain time.
         """
 
         chi2 =  self.classic_weight*self.apply_constraints(my_model)
+        reject_classic = 0
+        if (chi2 < threshold): reject_classic = 1
         mode_map, nmissing = self.find_map(my_model, config.use_n and config.read_n)
         if (config.surface_option is None):
-            if (nmissing > 0): return log0
+            if (nmissing > 0): return log0, reject_classic, 1
             chi2 += self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map)
-            return chi2
+            return chi2, reject_classic, 0
         else:
-            if (nmissing > 0): return log0, [0.0]*nsurf
+            if (nmissing > 0): return log0, [0.0]*nsurf, reject_classic, 1
             optimal_amplitudes = self.get_optimal_surface_amplitudes(my_model, mode_map)
             chi2 += self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map,a=optimal_amplitudes)
-            return chi2, optimal_amplitudes
+            return chi2, optimal_amplitudes, reject_classic, 0
 
     def __call__(self, params):
         """
@@ -1599,19 +1641,17 @@ class Likelihood:
         else:
             sys.exit("An unexpected error occurred.  Please contact the authors of AIMS.")
 
-        # print 'checking tuple'  (Ask Ben why this was introduced)
-        # if isinstance(my_model,tuple) == True:
-        #    return log0
         mode_map, nmissing = self.find_map(my_model, config.use_n)
         if (nmissing > 0): return log0
         chi2 = self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map,a=params[ndims-nsurf:ndims])
         chi2 += self.classic_weight*self.apply_constraints(my_model)
-        return chi2 + log_slope
+
+        return chi2
 
     def is_outside(self, params):
         """
         Test to see if the given set of parameters lies outside the grid of
-        models.  This is done by evaluating the probability and seeing if
+        models.  This is done by evaluate the probability and seeing if
         the result indicates this.
 
         :param params: input set of parameters
@@ -1655,24 +1695,24 @@ class Probability:
         :param my_model: input model
         :type my_model: :py:class:`model.Model`
 
-        :return: the ln of the probability
-        :rtype: float
+        :return: the ln of the probability, integers indicating if the model has bee
+                 rejected based on classic constraints, seismic constraints, and/or priors
+        :rtype: float, int, int, int
 
         .. note::
           This avoids model interpolation and can be used to gain time.
         """
-        # output_folder = '/home/buldgen/AIMS-master_New/AIMS_BEN/'
-        # filename = os.path.join(output_folder,"lnp_mass.txt")
-        # out = open(filename,"a")
 
         if (config.surface_option is None):
-            result1 = self.likelihood.evaluate(my_model)
-            result2 = self.priors(map(my_model.string_to_param,grid_params_MCMC))
+            result1, reject_classic, reject_seismic = self.likelihood.evaluate(my_model)
+            result2 = self.priors(utilities.my_map(my_model.string_to_param,grid_params_MCMC))
         else:
-            result1, surf_amplitudes = self.likelihood.evaluate(my_model)
-            result2 = self.priors(map(my_model.string_to_param,grid_params_MCMC)+list(surf_amplitudes))
+            result1, surf_amplitudes, reject_classic, reject_seismic = self.likelihood.evaluate(my_model)
+            result2 = self.priors(utilities.my_map(my_model.string_to_param,grid_params_MCMC)+list(surf_amplitudes))
 
-        return result1 + result2
+        reject_prior = 0
+        if (result2 < threshold): reject_prior = 1
+        return result1 + result2, reject_classic, reject_seismic, reject_prior
 
     def __call__(self, params):
         """
@@ -1716,14 +1756,15 @@ def write_binary_data(infile,outfile):
     grid = model.Model_grid()
     grid.read_model_list(infile)
     grid.tessellate()
-    output = open(outfile,"w")
+    output = open(outfile,"wb")
     dill.dump(grid,output)
     output.close()
     grid.plot_tessellation()
 
 def load_binary_data(filename):
     """
-    Read a binary file with a grid of models.
+    Read a binary file with a grid of models. Option to find model in grid and
+    output parameters (uncomment for use).
 
     :param filename: name of file with grid in binary format
     :type filename: string
@@ -1732,9 +1773,15 @@ def load_binary_data(filename):
     :rtype: :py:class:`model.Model_grid`
     """
 
-    input_data = open(filename,"r")
+    input_data = open(filename,"rb")
     grid = dill.load(input_data)
     input_data.close()
+    retessellate = grid.remove_tracks(config.track_threshold)  # filter out incomplete tracks
+    if (config.distort_grid):
+        grid.distort_grid()
+        retessellate = True
+    if (retessellate or config.retessellate):
+        grid.tessellate()
 
     # for track in grid.tracks:
     #     for model in track.models:
@@ -1753,10 +1800,19 @@ def load_binary_data(filename):
     # sys.exit()
 
     if (grid.user_params != config.user_params):
-        print "Mismatch between the user_params in the binary grid file and AIMS_configure.py"
-        print "  Binary grid file:  ",grid.user_params
-        print "  AIMS_configure.py: ",config.user_params
-        sys.exit(1)
+        print("WARNING: mismatch between the user_params in the binary grid file")
+        print("         and in AIMS_configure.py.  Will overwrite user_params.")
+        print("  Binary grid file:  ",grid.user_params)
+        print("  AIMS_configure.py: ",config.user_params)
+
+        # manually correct relevant variables:
+        config.user_params = grid.user_params
+        model.nglb = 8 + len(config.user_params)
+        model.nlin = 5 + len(config.user_params)
+        model.ifreq_ref = 5 + len(config.user_params)
+        model.iradius = 6 + len(config.user_params)
+        model.iluminosity = 7 + len(config.user_params)
+        model.init_user_param_dict()
 
     return grid
 
@@ -1775,7 +1831,7 @@ def write_list_file(filename):
     for track in grid.tracks:
         #if (int(round(track.params[0]*100.0))%4 != 0): continue # impose step of 0.04 Msun
         if (int(round(track.params[1]*100.0))%10 != 0): continue # impose step of 0.1 on alpha_MLT
-        for i in xrange(0,len(track.models)):
+        for i in range(0,len(track.models)):
             amodel = track.models[i]  # skip every other model along evolutionary track
             output.write("%20s "%(amodel.name))                       # le nom du fichier
             output.write("%22.15e "%(amodel.glb[model.imass]))        # la masse (en g)
@@ -1805,37 +1861,50 @@ def find_best_model():
 
     global best_grid_model, best_grid_params, best_grid_result, best_age_range
     global accepted_parameters, rejected_parameters
+    global nreject_classic, nreject_seismic, nreject_prior
 
     best_grid_result = log0
     best_grid_model  = None
     accepted_parameters = []
     rejected_parameters = []
-    for (result,model,accepted,rejected,age_range) in results:
+    nreject_classic = 0
+    nreject_seismic = 0
+    nreject_prior   = 0
+    for (result,model,accepted,rejected,age_range,rc,rs,rp) in results:
         accepted_parameters += accepted
         rejected_parameters += rejected
+        nreject_classic += rc
+        nreject_seismic += rs
+        nreject_prior   += rp
         if (result > best_grid_result):
             best_grid_result = result
             best_grid_model  = model
             best_age_range   = age_range
 
+    print("Number of accepted models: %d"%(len(accepted_parameters)))
+    print("Number of rejected models: %d"%(len(rejected_parameters)))
+    print("  Rejections from classic constraints: %d"%(nreject_classic))
+    print("  Rejections from seismic constraints: %d"%(nreject_seismic))
+    print("  Rejections based on priors:          %d"%(nreject_prior))
+
     if (best_grid_model is None):
-        print "ERROR:  Unable to find a model in the grid which matches your"
-        print "        constraints.  Try extending the frequency spectra of"
-        print "        your models before running AIMS.   Aborting."
+        print("ERROR:  Unable to find a model in the grid which matches your")
+        print("        constraints.  Try extending the frequency spectra of")
+        print("        your models before running AIMS.   Aborting.")
         sys.exit(1)
 
-    best_grid_params  = map(best_grid_model.string_to_param,grid_params_MCMC)
+    best_grid_params  = utilities.my_map(best_grid_model.string_to_param,grid_params_MCMC)
 
     if (config.surface_option is not None):
         mode_map, nmissing = prob.likelihood.find_map(best_grid_model, config.use_n and config.read_n)
         if (nmissing > 0):
-            print "An unexpected error occured.  Please contact the authors of AIMS."
+            print("An unexpected error occured.  Please contact the authors of AIMS.")
         optimal_amplitudes  = prob.likelihood.get_optimal_surface_amplitudes(best_grid_model, mode_map)
         best_grid_params = best_grid_params + list(optimal_amplitudes)
 
-    best_grid_params = best_grid_params + map(best_grid_model.string_to_param,config.output_params)
+    best_grid_params = best_grid_params + utilities.my_map(best_grid_model.string_to_param,config.output_params)
 
-    print "Best model:  ", best_grid_result, best_grid_params
+    print("Best model:  "+str(best_grid_result)+" "+str(best_grid_params))
 
 def find_best_model_in_track(ntrack):
     """
@@ -1845,18 +1914,24 @@ def find_best_model_in_track(ntrack):
     :param ntrack: number of the evolutionary track
     :type ntrack: int
 
-    :return: the ln(probability) value, and the "best" model
-    :rtype: (float, :py:class:`model.Model`)
+    :return: the ln(probability) value, the "best" model, the parameters of accepted models,
+             the parameters of rejected models, the age range of the track, and the numbers
+             of models rejected due to classic constraints, seismic contraints, and priors
+    :rtype: (float, :py:class:`model.Model`, 2D float list, 2D float list, float, int, int, int)
     """
 
     best_result_local = log0
     best_model_local  = None
     rejected_parameters_local = []
     accepted_parameters_local = []
-    nmodels = len(grid.tracks[ntrack].models)
-    for i in range(nmodels):
-        model = grid.tracks[ntrack].models[i]
-        result = prob.evaluate(model)
+    reject_classic = 0
+    reject_seismic = 0
+    reject_prior   = 0
+    for model in grid.tracks[ntrack].models:
+        result, rc, rs, rp = prob.evaluate(model)
+        reject_classic += rc
+        reject_seismic += rs
+        reject_prior   += rp
         if (config.interp_type == "mHe"):
             istart = max(i-1,0)
             istop  = min(i+1,nmodels-1)
@@ -1871,11 +1946,13 @@ def find_best_model_in_track(ntrack):
             best_result_local = result
             best_model_local  = model
         if (result >= threshold):
-            accepted_parameters_local.append(map(model.string_to_param,grid_params_MCMC))
+            accepted_parameters_local.append(utilities.my_map(model.string_to_param,grid_params_MCMC))
         else:
-            rejected_parameters_local.append(map(model.string_to_param,grid_params_MCMC))
+            rejected_parameters_local.append(utilities.my_map(model.string_to_param,grid_params_MCMC))
 
-    return (best_result_local, best_model_local, accepted_parameters_local, rejected_parameters_local, grid.tracks[ntrack].age_range)
+    return (best_result_local, best_model_local, accepted_parameters_local, \
+            rejected_parameters_local, grid.tracks[ntrack].age_range, reject_classic, \
+            reject_seismic, reject_prior)
 
 def init_walkers():
     """
@@ -1888,7 +1965,6 @@ def init_walkers():
     # set up initial distributions according to the value of config.tight_ball:
 
     global tight_ball_distributions
-
     if (config.tight_ball):
 
         # find the best model:
@@ -1898,7 +1974,7 @@ def init_walkers():
         tight_ball_distributions = Prior_list() # just reuse the same class as for the priors
 
         #for param_name in grid_params_MCMC:
-        for i in xrange(ndims):
+        for i in range(ndims):
             param_name = grid_params_MCMC_with_surf[i]
             # the star notation unpacks the tuple:
             if (param_name in config.tight_ball_range):
@@ -1922,14 +1998,11 @@ def init_walkers():
        # set the initial distributions to the priors
        tight_ball_distributions = prob.priors
 
-    for i in range(ndims):
-        print("Tight ball distrib. %s: %s"%(grid_params_MCMC_with_surf[i],tight_ball_distributions.priors[i].to_string()))
-
     if (config.PT):
         p0 = np.zeros([config.ntemps, config.nwalkers, ndims])
 
-        for k in xrange(config.ntemps):
-            for j in xrange(config.nwalkers):
+        for k in range(config.ntemps):
+            for j in range(config.nwalkers):
                 params = None
                 counter = 0
                 while (prob.likelihood.is_outside(params)):
@@ -1941,12 +2014,12 @@ def init_walkers():
 
         # include the parameters of the best model as the first walker:
         if (config.tight_ball):
-            for i in xrange(ndims): p0[0,0,i] = best_grid_params[i]
+            for i in range(ndims): p0[0,0,i] = best_grid_params[i]
 
     else:
         p0 = np.zeros([config.nwalkers, ndims])
 
-        for j in xrange(config.nwalkers):
+        for j in range(config.nwalkers):
             params = None
             counter = 0
             while (prob.likelihood.is_outside(params)):
@@ -1958,7 +2031,7 @@ def init_walkers():
 
         # include the parameters of the best model as the first walker:
         if (config.tight_ball):
-            for i in xrange(ndims): p0[0,i] = best_grid_params[i]
+            for i in range(ndims): p0[0,i] = best_grid_params[i]
 
     return p0
 
@@ -1969,47 +2042,48 @@ def run_emcee():
     :return: the ``emcee`` sampler for the MCMC run
     """
 
-    print "Number of walkers:    ", config.nwalkers
-    print "Length of burn-in:    ", config.nsteps0
-    print "Number of steps:      ", config.nsteps
+    print("Number of walkers:    "+str(config.nwalkers))
+    print("Number of steps:      "+str(config.nsteps))
 
     if (config.PT):
         ''' v1 of emcee sampler '''
-   #      print "Number of temp.:      ", config.ntemps
-   #      sampler = emcee.PTSampler(config.ntemps, config.nwalkers, ndims, prob.likelihood, prob.priors, pool=pool)
-   #      # print prob.likelihood
-   #      # print prob.priors
-   #      # initial burn-in:
-   #      for p, lnprob, lnlike in sampler.sample(p0, iterations = config.nsteps0): pass
-   #
-   #      # production run:
-   #      sampler.reset()
-   #      for p, lnprob, lnlike in sampler.sample(p, lnprob0 = lnprob, lnlike0 = lnlike, iterations = config.nsteps):
-   #          pass
-   #
-   #  else:
-   #      sampler = emcee.EnsembleSampler(config.nwalkers, ndims, prob, pool=pool)
-   #
-   #      # initial burn-in:
-   #      p, new_prob, state = sampler.run_mcmc(p0,config.nsteps0)
-   #
-   #      # production run:
-   #      sampler.reset()
-   #      p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
-   #
-   #  # Print acceptance fraction
-   #  print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
-   #  # Estimate the integrated autocorrelation time for the time series in each parameter.
-   # #  print "Autocorrelation time: ", sampler.get_autocorr_time()
-
+    #     print("Number of temp.:      "+str(config.ntemps))
+    #     sampler = emcee.PTSampler(config.ntemps, config.nwalkers, ndims, prob.likelihood, prob.priors, pool=pool)
+    #
+    #     # initial burn-in:
+    #     for p, lnprob, lnlike in tqdm(sampler.sample(p0, iterations = config.nsteps0),total=config.nsteps0): pass
+    #
+    #     # production run:
+    #     sampler.reset()
+    #     for p, lnprob, lnlike in tqdm(sampler.sample(p, lnprob0 = lnprob, lnlike0 = lnlike, iterations = config.nsteps),total=config.nsteps):
+    #         pass
+    #
+    # else:
+    #     sampler = emcee.EnsembleSampler(config.nwalkers, ndims, prob, pool=pool)
+    #
+    #     # initial burn-in:
+    #     p, new_prob, state = sampler.run_mcmc(p0,config.nsteps0)
+    #
+    #     # production run:
+    #     sampler.reset()
+    #     p, new_prob, state = sampler.run_mcmc(p,config.nsteps)
+    #
+    # # Print acceptance fraction
+    # print("Mean acceptance fraction: {0:.5f}".format(np.mean(sampler.acceptance_fraction)))
+    # # Estimate the integrated autocorrelation time for the time series in each parameter.
+    # try:
+    #     autocorr_time =  sampler.get_autocorr_time(c=1.0)
+    #     print("Autocorrelation time: "+str(autocorr_time))
+    # except emcee.autocorr.AutocorrError:
+    #     print("Autocorrelation time not available")
         ''' v2 of emcee sampler '''
         print "Number of temp.:      ", config.ntemps
         sampler = ptemcee.Sampler(config.nwalkers, ndims, prob.likelihood, prob.priors, ntemps=config.ntemps, threads=config.nprocesses)
         # initial burn-in:
 
         # for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
-	# Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
-    # or breaks if insufficient convergence to solution after burn in.
+	    # Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
+        # or breaks if insufficient convergence to solution after burn in.
         max_conv = 5
         rhat_accept = 1.05
         steps = config.nsteps0
@@ -2023,8 +2097,6 @@ def run_emcee():
             Var = (1 - 1.0/steps)*W + (B/steps)
             rhat = np.sqrt(Var/W)
             print "Rhat = ", rhat
-            # conv = np.std(med, axis=0) / np.median(med, axis=0)
-            # sys.exit()
             if np.all(rhat < rhat_accept):
                 print "Sufficient convergence after burn-in (", steps,"): ", rhat," < ", rhat_accept
                 break
@@ -2070,7 +2142,6 @@ def run_emcee():
     # Estimate the integrated autocorrelation time for the time series in each parameter.
     print "Autocorrelation time: ", sampler.get_autocorr_time()
 
-
     return sampler
 
 def find_blobs(samples):
@@ -2084,7 +2155,7 @@ def find_blobs(samples):
     :return: set of supplementary output parameters
     :rtype: np.array
     """
-    print samples[:][:][:][2]
+
     blobs = my_map(find_a_blob,samples)
     return np.asarray(blobs)
 
@@ -2099,11 +2170,12 @@ def find_a_blob(params):
     :return: list of supplementary output parameters
     :rtype: list of floats
     """
+
     if config.interp_type == "Age":
         my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     elif config.interp_type == "mHe":
         my_model, slope = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-    return map(my_model.string_to_param,config.output_params)
+    return utilities.my_map(my_model.string_to_param,config.output_params)
 
 def write_samples(filename, labels, samples):
     """
@@ -2124,8 +2196,8 @@ def write_samples(filename, labels, samples):
     output_file.write("#")
     for label in labels: output_file.write(' {0:22}'.format(label))
     output_file.write("\n ")
-    for i in xrange(m):
-        for j in xrange(n):
+    for i in range(m):
+        for j in range(n):
             output_file.write(' {0:22.15e}'.format(samples[i,j]))
         output_file.write("\n ")
     output_file.close()
@@ -2154,30 +2226,84 @@ def write_statistics(filename, labels, samples):
     covariance = np.zeros((n,n), dtype=np.float64)
 
     # find covariance matrix:
-    for i in xrange(n):
-        for j in xrange(i+1):
+    for i in range(n):
+        for j in range(i+1):
             covariance[i,j] = np.dot(samples[:,i]-average[i],samples[:,j]-average[j])/(1.0*m)
             covariance[j,i] = covariance[i,j]
 
     # write results to file
     output_file = open(filename,"w")
     output_file.write("Summary\n=======\n");
-    for i in xrange(n):
+    for i in range(n):
         output_file.write('{0:25} {1:25.15e} {2:25.15e}\n'.format(labels[i], \
                           average[i],math.sqrt(covariance[i,i])))
     output_file.write("\nCorrelation matrix\n==================\n");
 
     output_file.write('{0:25} '.format(" "))
-    for i in xrange(n):
+    for i in range(n):
         output_file.write('{0:25} '.format(labels[i]))
     output_file.write("\n")
 
-    for i in xrange(n):
+    for i in range(n):
         output_file.write('{0:25} '.format(labels[i]))
-        for j in xrange(n):
+        for j in range(n):
             output_file.write('{0:25.15e} '.format(covariance[i,j] \
                         /math.sqrt(covariance[i,i]*covariance[j,j])))
         output_file.write("\n")
+    output_file.close()
+
+def write_percentiles(filename, labels, samples):
+    """
+    Write percentiles based on a sequence of realisations to a file.
+    The results include:
+
+      +/- 2 sigma error bars (using the 2.5th and 97.5th percentiles)
+      +/- 1 sigma error bars (using the 16th and 84th percentiles)
+      the median value (i.e. the 50th percentile)
+
+    :param filename: name of file in which to write the percentiles
+    :param labels:   names of relevant variables
+    :param samples:  samples for which statistical properties are calculated
+
+    :type filename: string
+    :type labels:   list of strings
+    :type samples:  np.array
+    """
+
+    # n sigma values (from https://en.wikipedia.org/wiki/Normal_distribution)
+    one_sigma = 0.682689492137
+    two_sigma = 0.954499736104
+    #three_sigma = 0.997300203937
+
+    # initialisation
+    (m,n) = np.shape(samples)
+    percentiles = np.empty((n,7), dtype=np.float64)
+    for i in range(n):
+        percentiles[i,0] = np.percentile(samples[:,i],100.0*(0.5-two_sigma/2.0))
+        percentiles[i,4] = np.percentile(samples[:,i],100.0*(0.5+two_sigma/2.0))
+        percentiles[i,1] = np.percentile(samples[:,i],100.0*(0.5-one_sigma/2.0))
+        percentiles[i,3] = np.percentile(samples[:,i],100.0*(0.5+one_sigma/2.0))
+        percentiles[i,2] = np.percentile(samples[:,i],50.0)
+        percentiles[i,5] = abs((percentiles[i,1]-percentiles[i,3])/2.)
+        percentiles[i,6] = abs((percentiles[i,0]-percentiles[i,4])/2.)
+
+    # write results to file
+    output_file = open(filename,"w")
+    output_file.write("Percentiles\n===========\n\n");
+    output_file.write('{0:25} '.format("Quantity"))
+    output_file.write('{0:25} '.format("-2sigma"))
+    output_file.write('{0:25} '.format("-1sigma"))
+    output_file.write('{0:25} '.format("Median"))
+    output_file.write('{0:25} '.format("+1sigma"))
+    output_file.write('{0:25}'.format("+2sigma"))
+    output_file.write('{0:25} '.format("1sig"))
+    output_file.write('{0:25}\n'.format("2sig"))
+
+    for i in range(n):
+        output_file.write('{0:25} '.format(labels[i]))
+        for j in range(7):
+            output_file.write('{0:25.15e} '.format(percentiles[i,j]))
+        output_file.write('\n')
     output_file.close()
 
 def write_LEGACY_summary(filename, KIC, labels, samples):
@@ -2208,16 +2334,16 @@ def write_LEGACY_summary(filename, KIC, labels, samples):
     uncertainties = np.zeros((n,), dtype=np.float64)
 
     # find covariance matrix:
-    for i in xrange(n):
+    for i in range(n):
         uncertainties[i] = math.sqrt(np.dot(samples[:,i]-average[i],samples[:,i]-average[i])/(1.0*m))
 
     # write results to file
     output_file = open(filename,"w")
     output_file.write(KIC)
 
-    print n
-    print labels
-    print average
+    print(n)
+    print(labels)
+    print(average)
     i = labels.index("Radius")
     output_file.write(" %f %f %f"%(average[i],uncertainties[i],-uncertainties[i]))
     i = labels.index("Mass")
@@ -2283,12 +2409,13 @@ def write_readme(filename, elapsed_time):
                            mode.l, mode.n, mode.freq, mode.dfreq))
     for (param,distrib) in prob.likelihood.constraints:
         output_file.write(str_string.format(param,distrib.to_string()))
-    output_file.write(str_string.format("Seismic constraints",config.seismic_constraints))
+    output_file.write(str_string.format("Seismic constraints",str(config.seismic_constraints)))
     output_file.write(str_string.format("Surface option",config.surface_option))
     if (config.surface_option == "Kjeldsen2008"):
         output_file.write(str_float.format("Surface exponent, b",config.b_Kjeldsen2008))
     if (config.surface_option == "Sonoi2015"):
         output_file.write(str_float.format("Surface parameter, beta",config.beta_Sonoi2015))
+
 
     output_file.write(string_to_title("Priors"))
     for name,distribution in zip(grid_params_MCMC_with_surf, prob.priors.priors):
@@ -2300,7 +2427,10 @@ def write_readme(filename, elapsed_time):
     output_file.write(str_string.format("Weight option",config.weight_option))
     output_file.write(str_float.format("Absolute seismic weight",prob.likelihood.seismic_weight))
     output_file.write(str_float.format("Absolute classic weight",prob.likelihood.classic_weight))
-    output_file.write(str_float.format("Relative seismic weight",prob.likelihood.seismic_weight*float(nseismic)/float(nclassic)))
+    if (nclassic != 0):
+        output_file.write(str_float.format("Relative seismic weight",prob.likelihood.seismic_weight*float(nseismic)/float(nclassic)))
+    else:
+        output_file.write(str_float.format("Relative seismic weight",np.nan))
     output_file.write(str_float.format("Relative classic weight",prob.likelihood.classic_weight))
 
     output_file.write(string_to_title("Radial orders"))
@@ -2310,8 +2440,12 @@ def write_readme(filename, elapsed_time):
 
     output_file.write(string_to_title("The grid and interpolation"))
     output_file.write(str_string.format("Binary grid",config.binary_grid))
-    output_file.write(str_string.format("User defined parameters",[x[0] for x in config.user_params]))
+    output_file.write(str_string.format("User defined parameters",str([x[0] for x in config.user_params])))
     output_file.write(str_string.format("Scaled age interpolation",boolean2str[config.scale_age]))
+    output_file.write(str_string.format("Distort grid prior to tessellation",boolean2str[config.distort_grid]))
+    if (config.distort_grid):
+        output_file.write("Distortion matrix:")
+        output_file.write(str(grid.distort_mat))
 
     output_file.write(string_to_title("EMCEE parameters"))
     output_file.write(str_string.format("With parallel tempering",boolean2str[config.PT]))
@@ -2331,15 +2465,14 @@ def write_readme(filename, elapsed_time):
                 tight_ball_distributions.priors[i].to_string()))
 
     output_file.write(string_to_title("Output"))
-    output_file.write(str_string.format("List of output parameters",config.output_params))
+    output_file.write(str_string.format("List of output parameters",str(config.output_params)))
     output_file.write(str_string.format("Write OSM files",boolean2str[config.with_osm]))
     output_file.write(str_string.format("Plot walkers",boolean2str[config.with_walkers]))
-    output_file.write(str_string.format("Plot iterated distributions",boolean2str[config.with_distrib_iter]))
     output_file.write(str_string.format("Plot echelle diagrams",boolean2str[config.with_echelle]))
     output_file.write(str_string.format("Plot histograms",boolean2str[config.with_histograms]))
     output_file.write(str_string.format("Plot triangle plots",boolean2str[config.with_triangles]))
-    output_file.write(str_string.format("List of plot extensions",config.plot_extensions))
-    output_file.write(str_string.format("List of triangle plot extensions",config.tri_extensions))
+    output_file.write(str_string.format("List of plot extensions",str(config.plot_extensions)))
+    output_file.write(str_string.format("List of triangle plot extensions",str(config.tri_extensions)))
 
     output_file.write(string_to_title("Miscellaneous"))
     output_file.write(str_string.format("With parallelisation",boolean2str[config.parallel]))
@@ -2348,6 +2481,9 @@ def write_readme(filename, elapsed_time):
     output_file.write(str_float.format("Execution time (s)",elapsed_time))
     output_file.write(str_decimal.format("Number of accepted models",len(accepted_parameters)))
     output_file.write(str_decimal.format("Number of rejected models",len(rejected_parameters)))
+    output_file.write(str_decimal.format("  Classic rejections",nreject_classic))
+    output_file.write(str_decimal.format("  Seismic rejections",nreject_seismic))
+    output_file.write(str_decimal.format("  Prior-based rejections",nreject_prior))
 
     output_file.close()
 
@@ -2373,21 +2509,20 @@ def write_combinations(filename,samples):
             my_model = model.interpolate_model(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
         if config.interp_type == "mHe":
             my_model, slope = model.interpolate_model_mHe(grid,params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-        if isinstance(my_model,tuple) == True: pass
-        else:
-            if (results is None): continue  # filter out combinations outside the grid
-            output_file.write("{0:d} {1:.15e} {2:.15e} {3:.15e} {4:.5f} {5:.5f} {6:.15e} {7:.5f}\n".format( \
-                              len(results), my_model.glb[model.imass], my_model.glb[model.iradius], \
-                              my_model.glb[model.iluminosity],my_model.glb[model.iz0], \
-                              my_model.glb[model.ix0],my_model.glb[model.iage], \
-                              my_model.glb[model.itemperature]))
-            for (coef,model_name) in results:
-               output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
-            output_file.write("\n")
+
+        if (results is None): continue  # filter out combinations outside the grid
+        output_file.write("{0:d} {1:.15e} {2:.15e} {3:.15e} {4:.5f} {5:.5f} {6:.15e} {7:.5f}\n".format(
+                          len(results), my_model.glb[model.imass], my_model.glb[model.iradius],
+                          my_model.glb[model.iluminosity],my_model.glb[model.iz0],
+                          my_model.glb[model.ix0],my_model.glb[model.iage],
+                          my_model.glb[model.itemperature]))
+        for (coef,model_name) in results:
+           output_file.write("{0:.15f} {1:s}\n".format(coef, model_name))
+        output_file.write("\n")
 
     output_file.close()
 
-def write_model(my_model,my_params,my_result,model_name):
+def write_model(my_model,my_params,my_result,model_name,extended=False):
     """
     Write text file with caracteristics of input model.
 
@@ -2396,6 +2531,9 @@ def write_model(my_model,my_params,my_result,model_name):
     :param my_result: ln(P) value obtained for the model
     :param model_name: name used to describe this model.  This is also used
       when naming the text file.
+    :param extended: if set to True, all of the theoretical modes are
+                     saved in the text file, including those not matched
+                     to observations
 
     :type my_model: :py:class:`model.Model`
     :type my_params: array-like
@@ -2410,6 +2548,7 @@ def write_model(my_model,my_params,my_result,model_name):
     str_float   = "{0:40}{1:22.15e}\n"
     param_names = grid_params_MCMC_with_surf + config.output_params
     mode_map, nmissing = prob.likelihood.find_map(my_model, config.use_n)
+    mode_map = list(mode_map)
 
     output_file = open(os.path.join(output_folder,model_name+"_model.txt"),"w")
     output_file.write(string_to_title("Model: "+model_name))
@@ -2421,24 +2560,37 @@ def write_model(my_model,my_params,my_result,model_name):
     if (config.surface_option is None):
         output_file.write("{0:4} {1:4} {2:17} {3:17} {4:17}\n".format("l","n","freq_theo", \
                           "freq_obs", "dfreq_obs"))
-        for i in xrange(len(mode_map)):
-            j = mode_map[i]
-            output_file.write("{0:4d} {1:4d} {2:17.10e} {3:17.10e} {4:17.10e}\n".format( \
-                           my_model.modes['l'][j], my_model.modes['n'][j], \
-                           my_model.modes['freq'][j]*my_model.glb[model.ifreq_ref], \
-                           prob.likelihood.modes[i].freq, prob.likelihood.modes[i].dfreq))
+        for i in range(my_model.modes.size):
+            if (i in mode_map):
+                j = mode_map.index(i)
+                output_file.write("{0:4d} {1:4d} {2:17.10e} {3:17.10e} {4:17.10e}\n".format( \
+                           my_model.modes['l'][i], my_model.modes['n'][i], \
+                           my_model.modes['freq'][i]*my_model.glb[model.ifreq_ref], \
+                           prob.likelihood.modes[j].freq, prob.likelihood.modes[j].dfreq))
+            else:
+                if (extended):
+                    output_file.write("{0:4d} {1:4d} {2:17.10e}\n".format( \
+                               my_model.modes['l'][i], my_model.modes['n'][i], \
+                               my_model.modes['freq'][i]*my_model.glb[model.ifreq_ref]))
 
     else:
         freq = my_model.get_freq(surface_option=config.surface_option, a=my_params[ndims-nsurf:ndims])
         output_file.write("{0:4} {1:4} {2:17} {3:17} {4:17} {5:17}\n".format("l","n", \
                           "freq_theo", "freq+surf. corr.", "freq_obs", "dfreq_obs"))
-        for i in xrange(len(mode_map)):
-            j = mode_map[i]
-            output_file.write("{0:4d} {1:4d} {2:17.10e} {3:17.10e} {4:17.10e} {5:17.10e}\n".format( \
-                           my_model.modes['l'][j], my_model.modes['n'][j], \
-                           my_model.modes['freq'][j]*my_model.glb[model.ifreq_ref], \
-                           freq[j]*my_model.glb[model.ifreq_ref], prob.likelihood.modes[i].freq, \
-                           prob.likelihood.modes[i].dfreq))
+        for i in range(my_model.modes.size):
+            if (i in mode_map):
+                j = mode_map.index(i)
+                output_file.write("{0:4d} {1:4d} {2:17.10e} {3:17.10e} {4:17.10e} {5:17.10e}\n".format( \
+                           my_model.modes['l'][i], my_model.modes['n'][i], \
+                           my_model.modes['freq'][i]*my_model.glb[model.ifreq_ref], \
+                           freq[i]*my_model.glb[model.ifreq_ref], prob.likelihood.modes[j].freq, \
+                           prob.likelihood.modes[j].dfreq))
+            else:
+                if (extended):
+                    output_file.write("{0:4d} {1:4d} {2:17.10e} {3:17.10e}\n".format( \
+                               my_model.modes['l'][i], my_model.modes['n'][i], \
+                               my_model.modes['freq'][i]*my_model.glb[model.ifreq_ref], \
+                               freq[i]*my_model.glb[model.ifreq_ref]))
 
     output_file.close()
 
@@ -2455,7 +2607,7 @@ def string_to_title(string):
 
     n = len(string)
     ntitle = 80
-    nhalf  = (ntitle - n - 6)/2
+    nhalf  = (ntitle - n - 6)//2
     result = "\n"+"#"*ntitle + "\n"
     result += "#"*(ntitle - nhalf - n - 6)
     result += "   "+string+"   "+"#"*nhalf+"\n"
@@ -2483,7 +2635,7 @@ def write_osm_frequencies(filename, my_model):
     output_file = open(os.path.join(config.output_osm,filename+"_freq.dat"),"w")
     output_file.write("# {0:4} {1:4} {2:17} {3:17} \n".format("n", "l",\
                           "nu[muHz]", "sigma [muHz]"))
-    for i in xrange(len(mode_map)):
+    for i in range(len(mode_map)):
         j = mode_map[i]
         output_file.write("{0:4d} {1:4d} {2:17.10e} {3:17.10e}\n".format( \
                            my_model.modes['n'][j], my_model.modes['l'][j], \
@@ -2512,8 +2664,8 @@ def write_osm_don(filename, my_model):
     if "alpha_MLT" in model.user_params_index:
         alpha = my_model.string_to_param("alpha_MLT")
     else:
-        print "WARNING: no 'alpha_MLT' parameter in grid.  Using"
-        print "         solar-calibrated value in OSM files."
+        print("WARNING: no 'alpha_MLT' parameter in grid.  Using")
+        print("         solar-calibrated value in OSM files.")
         alpha = 1.6 # approximate solar calibrated value
 
     # initialisation:
@@ -2687,7 +2839,7 @@ def write_osm_xml(filename,my_params, my_model):
                 sigma_osm.text = "%22.15e"%(distrib.error_bar)
                 config_osm.append(target_osm)
             else:
-                print "WARNING: unused constraint in OSM file: %s"%(param)
+                print("WARNING: unused constraint in OSM file: %s"%(param))
 
     seismic_constraints_osm = etree.Element("seismic_constraints")
     fich_osm = etree.SubElement(seismic_constraints_osm, "file")
@@ -2875,13 +3027,13 @@ def echelle_diagram(my_model,my_params,model_name):
     # obtain frequency sets (and limits)
     nu_min = 1e300
     nu_max =-1e300
-    for l in xrange(lmax+1):
+    for l in range(lmax+1):
         nu_obs[l] = np.array([mode.freq for mode in prob.likelihood.modes if mode.l == l])
         error_obs[l] = np.array([mode.dfreq for mode in prob.likelihood.modes if mode.l == l])
-        nu_theo[l] = np.array([freq[mode_map[j]] for j in xrange(len(mode_map)) \
+        nu_theo[l] = np.array([freq[mode_map[j]] for j in range(len(mode_map)) \
                       if (mode_map[j] != -1) and (my_model.modes['l'][mode_map[j]] == l)])
         if (config.surface_option is not None):
-            nu_theo_surf[l] = np.array([freq_surf[mode_map[j]] for j in xrange(len(mode_map)) \
+            nu_theo_surf[l] = np.array([freq_surf[mode_map[j]] for j in range(len(mode_map)) \
                                if (mode_map[j] != -1) and (my_model.modes['l'][mode_map[j]] == l)])
 
         if (nu_obs[l].shape[0] > 0):
@@ -2901,14 +3053,14 @@ def echelle_diagram(my_model,my_params,model_name):
 
     plt.figure()
     plt.plot((dnu,dnu),(nu_min,nu_max),"k:")
-    for l in xrange(lmax+1):
+    for l in range(lmax+1):
         plt.errorbar(nu_obs[l]%dnu, nu_obs[l], xerr=error_obs[l], fmt="r"+style[l], markersize=msize)
 
     if (config.surface_option is not None):
-        for l in xrange(lmax+1):
+        for l in range(lmax+1):
             plt.plot(nu_theo_surf[l]%dnu, nu_theo_surf[l], "c"+style[l], markersize=msize)
 
-    for l in xrange(lmax+1):
+    for l in range(lmax+1):
         plt.plot(nu_theo[l]%dnu, nu_theo[l], "b"+style[l], markersize=msize)
 
     plt.title("Model: "+model_name)
@@ -2925,7 +3077,7 @@ def echelle_diagram(my_model,my_params,model_name):
     if (config.surface_option is not None):
         handles.append(mpatches.Patch(color='cyan'))
         labels.append(r'$\nu_{\mathrm{theo}}^{\mathrm{surf}}$')
-    for l in xrange(lmax+1):
+    for l in range(lmax+1):
         handles.append(mlines.Line2D([],[], color='white', marker=style[l], markersize=msize, \
                                      linestyle='None',drawstyle='steps-mid'))
         labels.append(r'$\ell='+"{0:d}".format(l)+r'$')
@@ -2958,8 +3110,8 @@ def plot_walkers(samples, labels, filename, nw=3):
 
     plt.figure()
     itr = np.arange(config.nsteps)
-    for i in xrange(nw):
-        for j in xrange(ndims):
+    for i in range(nw):
+        for j in range(ndims):
             #plt.subplot(ndims*100+nw*10+1+i+j*nw)
             plt.subplot(ndims,nw,1+i+j*nw)
             plt.title(labels[j])
@@ -3023,15 +3175,14 @@ def plot_histograms(samples, names, fancy_names, truths=None):
     :type truths: list of floats
     """
 
-    for i in xrange(len(names)):
+    for i in range(len(names)):
         plt.figure()
-        n, bins, patches = plt.hist(samples[:,i],50,normed=1,histtype='bar')
+        n, bins, patches = plt.hist(samples[:,i],50,density=True,histtype='bar')
         if (truths is not None):
             ylim = plt.ylim()
             plt.plot([truths[i],truths[i]],ylim,'g-')
             plt.ylim(ylim) # restore limits, just in case
         plt.xlabel(fancy_names[i])
-	plt.ticklabel_format(useOffset=False)	# Should turn off the scientific label formatting (+n*10^x notations)
         for ext in config.plot_extensions:
             plt.savefig(os.path.join(output_folder,"histogram_"+names[i]+"."+ext))
 
@@ -3051,14 +3202,83 @@ def interpolation_tests(filename):
     """
 
     grid = load_binary_data(config.binary_grid)
-    titles = map(model.string_to_latex,grid.grid_params+("Age",))
+    titles = utilities.my_map(model.string_to_latex,grid.grid_params+("Age",))
     results_age1 = [track.test_interpolation(1) for track in grid.tracks]
     results_age2 = [track.test_interpolation(2) for track in grid.tracks]
-    results_track, ndx1, ndx2, tessellation = grid.test_interpolation(grid)
-    output = open(filename,"w")
+    results_track, ndx1, ndx2, tessellation = grid.test_interpolation()
+    output = open(filename,"wb")
     dill.dump([grid.ndim+1, model.nglb, titles, grid.grid, ndx1, ndx2, tessellation, \
                results_age1, results_age2, results_track],output)
     output.close()
+
+def plot_frequencies(grid):
+    """
+    Plot frequencies along an evolutionary track
+    """
+
+    # arbitrarily choose one of the tracks:
+    ntrack = 0
+    track = grid.tracks[ntrack]
+
+    #nmin, nmax, lmin, lmax = track.find_mode_range()
+    nmin = 15
+    nmax = 25
+
+    title = r"$M = %.2f M_{\odot}$, $\log(Z) = %.3f$"%(track.params[0],track.params[1])
+
+    nages = 1000
+    ages, freqs = track.find_modes(nmax,0)
+    ages_ext = np.linspace(min(ages),max(ages),nages)
+    freqs_ext = np.empty((nages,nmax-nmin+1,2),dtype=float)
+    freqs_ext_dim = np.empty((nages,nmax-nmin+1,2),dtype=float)
+    for i in range(nages):
+        aModel = track.interpolate_model(ages_ext[i])
+        for n in range(nmin,nmax+1):
+            for l in range(2):
+                freqs_ext[i,n-nmin,l] = aModel.find_mode(n,l)
+                freqs_ext_dim[i,n-nmin,l] = aModel.find_mode(n,l)*aModel.glb[model.ifreq_ref]
+
+    for n in range(nmin,nmax+1):
+        if n == nmin:
+            label0 = "radial"
+            label1 = r"$\ell = 1$"
+        else:
+            label0 = label1 = None
+        ages, freqs = track.find_modes(n,0)
+        plt.plot(ages,freqs,"b.")
+        plt.plot(ages_ext,freqs_ext[:,n-nmin,0],"b-",label=label0)
+        ages, freqs = track.find_modes(n,1)
+        plt.plot(ages,freqs,"r.")
+        plt.plot(ages_ext,freqs_ext[:,n-nmin,1],"r-",label=label1)
+    plt.legend(fontsize=12,loc=2)
+    plt.xlabel(r"Stellar age (in Myrs)",fontsize=12)
+    plt.ylabel(r"Frequency, $\omega/\sqrt{GM/R^3}$",fontsize=12)
+    plt.title(title,fontsize=15)
+    plt.ylim(21.5,40)
+    plt.savefig("freq_non_dim.pdf")
+    plt.clf()
+    plt.close()
+
+    for n in range(nmin,nmax+1):
+        if n == nmin:
+            label0 = "radial"
+            label1 = r"$\ell = 1$"
+        else:
+            label0 = label1 = None
+        ages, freqs = track.find_modes_dim(n,0)
+        plt.plot(ages,freqs,"b.")
+        plt.plot(ages_ext,freqs_ext_dim[:,n-nmin,0],"b-",label=label0)
+        ages, freqs = track.find_modes_dim(n,1)
+        plt.plot(ages,freqs,"r.")
+        plt.plot(ages_ext,freqs_ext_dim[:,n-nmin,1],"r-",label=label1)
+    plt.legend(fontsize=10)
+    plt.xlabel(r"Stellar age (in Myrs)",fontsize=15)
+    plt.ylabel(r"Frequency, $\nu$ (in $\mu$Hz)",fontsize=15)
+    plt.title(title,fontsize=15)
+    plt.savefig("freq_dim.pdf")
+
+    # sys.exit(0)
+
 
 if __name__ == "__main__":
     """
@@ -3110,14 +3330,15 @@ if __name__ == "__main__":
     # define likelihood function:
     like = Likelihood()
     like.read_constraints(sys.argv[1],factor=1.0)
-    print "Estimated large frequency separation (in microHz): ",like.guess_dnu(with_n=True)
-    map(like.add_seismic_constraint,config.seismic_constraints)
+    print("Estimated large frequency separation (in microHz): "+str(like.guess_dnu(with_n=True)))
+    utilities.my_map(like.add_seismic_constraint,config.seismic_constraints)
     like.find_covariance()
     like.create_combination_arrays()
     like.find_weights()
 
     # load grid and associated quantities
     grid = load_binary_data(config.binary_grid)
+    plot_frequencies(grid) # this will stop the program
     grid_params_MCMC = grid.grid_params + (config.interp_type,)
     grid_params_MCMC_with_surf = grid_params_MCMC \
                                + model.get_surface_parameter_names(config.surface_option)
@@ -3126,7 +3347,7 @@ if __name__ == "__main__":
 
     # define priors:
     priors = Prior_list()
-    for param_name in grid_params_MCMC:
+    for param_name in grid_params_MCMC_with_surf:
         # the star notation unpacks the tuple:
         if (param_name in config.priors):
             priors.add_prior(Distribution(*config.priors[param_name]))
@@ -3134,20 +3355,17 @@ if __name__ == "__main__":
             if (config.tight_ball):
                 priors.add_prior(Distribution("Uninformative",[]))
             else:
-                priors.add_prior(Distribution("Uniform",grid.range(param_name)))
-
-    for param_name in model.get_surface_parameter_names(config.surface_option):
-        if (config.tight_ball):
-            priors.add_prior(Distribution("Uninformative", []))
-        else:
-            sys.exit("Please define prior for surface effects in configuration file.")
+                if (param_name in model.get_surface_parameter_names(config.surface_option)):
+                    sys.exit("Please define prior for surface effects in configuration file.")
+                else:
+                    priors.add_prior(Distribution("Uniform",grid.range(param_name)))
 
     # combine the above:
     prob = Probability(priors,like)
 
     # titles, labels, etc.
-    labels     = ["ln(P)"]+map(model.string_to_latex,grid_params_MCMC_with_surf)
-    labels_big = labels + map(model.string_to_latex,config.output_params)
+    labels     = ["ln(P)"]+utilities.my_map(model.string_to_latex,grid_params_MCMC_with_surf)
+    labels_big = labels + utilities.my_map(model.string_to_latex,config.output_params)
     names_big  = ("lnP",)+grid_params_MCMC_with_surf + config.output_params
 
     # start pool of parallel processes
@@ -3159,7 +3377,8 @@ if __name__ == "__main__":
         my_map = pool.map
     else:
         pool = None
-        my_map = map
+        my_map = utilities.my_map
+
     # initialised walkers:
     p0 = init_walkers()
 
@@ -3169,7 +3388,7 @@ if __name__ == "__main__":
         like.assign_n(best_grid_model)
         like.sort_modes()
         like.create_mode_arrays()
-        map(like.add_seismic_constraint,config.seismic_constraints)
+        utilities.my_map(like.add_seismic_constraint,config.seismic_constraints)
         like.find_covariance()
         like.create_combination_arrays()
         like.find_weights()
@@ -3180,9 +3399,11 @@ if __name__ == "__main__":
     # Collect results:
     if (config.PT):
         samples = sampler.chain[0,...]
+        # lnprob  = sampler.lnprobability[0,...]
         lnprob  = sampler.logprobability[0,...]
     else:
         samples = sampler.chain
+        # lnprob  = sampler.lnprobability
         lnprob  = sampler.logprobability
 
     # Write file with parameters used in this run
@@ -3220,12 +3441,17 @@ if __name__ == "__main__":
     write_samples   (os.path.join(output_folder,"samples_big.txt"), labels_big,    samples_big)
     write_statistics(os.path.join(output_folder,"results.txt"),     names_big[1:], samples[:,1:])
     write_statistics(os.path.join(output_folder,"results_big.txt"), names_big[1:], samples_big[:,1:])
+    write_percentiles(os.path.join(output_folder,"percentiles.txt"),     \
+                      names_big[1:], samples[:,1:])
+    write_percentiles(os.path.join(output_folder,"percentiles_big.txt"), \
+                      names_big[1:], samples_big[:,1:])
     if (config.with_combinations):
         write_combinations(os.path.join(output_folder,"combinations.txt"),samples[0::config.thin_comb,1:])
 
     # write best grid model
     if (best_grid_model is not None):
-        write_model(best_grid_model,best_grid_params,best_grid_result,"best_grid")
+        write_model(best_grid_model,best_grid_params,best_grid_result, \
+                   "best_grid",extended=config.extended_model)
         write_combinations(os.path.join(output_folder,"combinations_best_grid.txt"),[best_grid_params])
         if (config.with_echelle):
             echelle_diagram(best_grid_model,best_grid_params,"Best grid")
@@ -3239,8 +3465,9 @@ if __name__ == "__main__":
         best_MCMC_model  = model.interpolate_model(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     elif config.interp_type == "mHe":
         best_MCMC_model, slope  = model.interpolate_model_mHe(grid,best_MCMC_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
-    best_MCMC_params = list(best_MCMC_params) + map(best_MCMC_model.string_to_param,config.output_params)
-    write_model(best_MCMC_model,best_MCMC_params,best_MCMC_result,"best_MCMC")
+    best_MCMC_params = list(best_MCMC_params) + utilities.my_map(best_MCMC_model.string_to_param,config.output_params)
+    write_model(best_MCMC_model,best_MCMC_params,best_MCMC_result, \
+               "best_MCMC",extended=config.extended_model)
     write_combinations(os.path.join(output_folder,"combinations_best_MCMC.txt"),[best_MCMC_params])
     if (config.with_echelle):
         echelle_diagram(best_MCMC_model,best_MCMC_params,"Best MCMC")
@@ -3254,8 +3481,9 @@ if __name__ == "__main__":
     elif config.interp_type == "mHe":
         statistical_model, slope  = model.interpolate_model_mHe(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     if (statistical_model is not None):
-        statistical_params = list(statistical_params) + map(statistical_model.string_to_param,config.output_params)
-        write_model(statistical_model,statistical_params,statistical_result,"statistical")
+        statistical_params = list(statistical_params) + utilities.my_map(statistical_model.string_to_param,config.output_params)
+        write_model(statistical_model,statistical_params,statistical_result, \
+                   "statistical",extended=config.extended_model)
         write_combinations(os.path.join(output_folder,"combinations_statistical.txt"),[statistical_params])
         if (config.with_echelle):
             echelle_diagram(statistical_model,statistical_params,"statistical")
@@ -3292,15 +3520,11 @@ if __name__ == "__main__":
                 plt.close('all')
 
     if (config.with_triangles):
-        try :
-            fig = corner.corner(samples[:,1:], truths=best_grid_params, labels=labels[1:])
-        except ValueError: pass
+        fig = corner.corner(samples[:,1:], truths=best_grid_params, labels=labels[1:])
         for ext in config.tri_extensions:
             fig.savefig(os.path.join(output_folder,"triangle."+ext))
             plt.close('all')
-        try:
-            fig = corner.corner(samples_big[:,1:], truths=best_grid_params, labels=labels_big[1:])
-        except ValueError: pass
+        fig = corner.corner(samples_big[:,1:], truths=best_grid_params, labels=labels_big[1:])
         for ext in config.tri_extensions:
             fig.savefig(os.path.join(output_folder,"triangle_big."+ext))
             plt.close('all')

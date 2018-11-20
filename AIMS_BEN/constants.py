@@ -56,23 +56,17 @@ A module which contains the following physical constants:
 
 __docformat__ = 'restructuredtext'
 
-#solar_radius     = 6.9599e10    # Allen (1973)
-#solar_radius     = 6.95508e10    # CLES
-solar_radius     = 6.957e10  # CLES with Diffusion 
+solar_radius     = 6.9599e10    # Allen (1973)
 """ the solar radius in :math:`\mathrm{cm}` """
 
-#solar_mass       = 1.98919e33   # Same as in Model S
-solar_mass       = 1.9884e33   # CLES
+solar_mass       = 1.98919e33   # Same as in Model S
 """ the solar mass in :math:`\mathrm{g}` """
 
-#solar_luminosity = 3.846e33 # Cestam 94
-#solar_luminosity = 3.8422e33 # CLES
-solar_luminosity = 3.828e33 # CLES with diffusion
+solar_luminosity = 3.846e33 # Cestam 94
 #solar_luminosity = 3.844e33
 """ the solar luminosity in :math:`\mathrm{g.cm^2.s^{-3}}` """
 
-#solar_temperature= 5777.0
-solar_temperature= 5772.0 # CLES with diffusion
+solar_temperature= 5777.0
 """ the solar temperature in :math:`\mathrm{K}` """
 
 solar_dnu        = 138.8        # solar delta nu value (in \mu Hz), Mosser et al 2013 (A&A, 550, A126)
@@ -87,8 +81,7 @@ solar_cutoff     = 5100.0 # Jimenez 2006
 #solar_cutoff     = 5300.0       # Jimenez et al. (2011) (see Balmforth & Gough 1990, Fossat et al. 1992)
 """ the solar cut-off frequency separation in :math:`\mathrm{\mu Hz}` """
 
-#G                =  6.67168e-8  # Cestam 1994
-G                =  6.6742e-8  # CLES
+G                =  6.67168e-8  # Cestam 1994
 #G                = 6.67408e-8   # CODATA 2014
 #G                = 6.67428e-8   # CODATA 2006
 #G                = 6.6716823e-8 # the gravitational constant in cm^3.g^-1.s^-2 (CoRoT/ESTA value)
@@ -100,16 +93,16 @@ multiplicative constant which intervenes in the
 conversion from metal content to iron content
 """
 
-solar_x          = 0.7336  # Grevesse & Noels (1993)
+#solar_x          = 0.7336  # Grevesse & Noels (1993)
 #solar_x          = 0.7345  # Grevesse & Sauval (1998)
 #solar_x          = 0.7392  # Asplund et al. (2005)
 #solar_x          = 0.7381  # Asplund et al. (2009)
-#solar_x          = 0.7355 # Asplund et al. (2009)_Yveline
+solar_x          = 0.7355 # Asplund et al. (2009)_Yveline
 """ the solar hydrogen content """
 
-solar_z          = 0.0179  # Grevesse & Noels (1993)
+#solar_z          = 0.0179  # Grevesse & Noels (1993)
 #solar_z          = 0.0169  # Grevesse & Sauval (1998)
 #solar_z          = 0.0122  # Asplund et al. (2005)
 #solar_z          = 0.0134  # Asplund et al. (2009)
-#solar_z          = 0.0131  # Asplund et al. (2009)_Yveline
+solar_z          = 0.0131  # Asplund et al. (2009)_Yveline
 """ the solar metallicity content """

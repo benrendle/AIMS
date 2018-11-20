@@ -79,6 +79,7 @@ import sys
 
 matplotlib.rcParams['xtick.direction'] = 'out'
 matplotlib.rcParams['ytick.direction'] = 'out'
+plt.rcParams["font.family"] = "serif"
 
 # global variables
 ndim = 0
@@ -562,7 +563,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
         if (value > 0.0):
 	    # print value
             z1.append(value)	# math.log10
-            z2.append(math.log10(value/constants.solar_radius))
+            z2.append(math.log10(value/constants.solar_luminosity))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
 
@@ -576,9 +577,14 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     zi = rbf(xi,yi)
     j = 0
     kkk = 0
-    fig = plt.figure()
-    cont = plt.contourf(xi,yi,zi,100,cmap=colormaps.parula)
+    plt.figure()
+    cont = plt.contourf(xi,yi,zi,100)
+    plt.close()
     k = cont.levels
+    # print k
+
+    fig = plt.figure(figsize=(6,2))
+    plt.subplots_adjust(left=0.15, right=0.94, top=0.95, bottom=0.25)
 
     kk = np.array(k)
 
@@ -589,12 +595,14 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     # cont.collections[-22].set_color('k')
     # circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
     # plt.gcf().gca().add_artist(circle1)
-    plt.scatter(x, y, c=z2, cmap=colormaps.parula)
+    plt.scatter(x, y, c=z2, cmap=colormaps.parula, s=75)
     cb = plt.colorbar()
-    plt.xlabel(titles[0],fontsize=20)
-    plt.ylabel(titles[1],fontsize=20)
-    plt.xticks(fontsize=15)
-    plt.yticks(fontsize=15)
+    plt.xlabel(titles[0],fontsize=10)
+    plt.ylabel(titles[1],fontsize=10)
+    plt.xticks(fontsize=8)
+    plt.yticks(fontsize=8)
+    plt.xlim(0.75,2.25)
+    plt.ylim(-2.54,-1.46)
     a = min(z2)
     b = max(z2)
     d = a-b
@@ -608,10 +616,10 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     # cax.hlines(g1,0,1,colors='m',linewidth=2)
     # cax.hlines(g2,0,1,colors='k',linewidth=2)
     #cax.text(3.5,0.7,r"Percentage Error",rotation=270,fontsize=20)	# %s %(tpe)
-    cax.text(3.5,0.7,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=20)
-    cax.tick_params(labelsize=15)
+    cax.text(6.5,0.85,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=10)
+    cax.tick_params(labelsize=8)
     # if (title is not None): plt.title(title,fontsize=15)
-
+    fig.savefig('lum_interp.pdf', bbox_inches='tight')
     # plt.figure()
     # plt.hist(z2,bins=50)
     # plt.xlabel(r'$\sigma_{\nu_{\rm{i}}}$')
@@ -623,7 +631,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     	else:
     	    n += 1
     pp = float(m)/len(z2)
-    print 'Pass percentage',p,': ',pp*100,'%'
+    # print 'Pass percentage',p,': ',pp*100,'%'
 
 
 
@@ -690,8 +698,8 @@ if __name__ == "__main__":
     # surface2D(1,results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
 
-    surface2D(1,results_age1,15,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
-    surface2D(1,results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
+    surface2D(1,results_age1,16,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
+    # surface2D(1,results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
 
     #surface2D(1,results_age1,2,tpe="max",title="numax radial error (nincr = 1)",truncate=1)

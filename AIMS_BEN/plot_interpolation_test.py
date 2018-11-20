@@ -136,14 +136,14 @@ def plot3D(results,error_ndx,tpe="max",title=None,truncate=0):
     x = []
     y = []
     z = []
-    for i in xrange(n):
+    for i in range(n):
         start = truncate
         stop  = results[i].shape[0] - truncate
         if (tpe == "max"):
             value = np.nanmax(results[i][start:stop,ndim+error_ndx])
         elif (tpe == "avg"):
             num = den = 0.0
-            for j in xrange(start,stop):
+            for j in range(start,stop):
                 if (not math.isnan(results[i][j,ndim+error_ndx])):
                     num += results[i][j,ndim+error_ndx]**2
                     den += 1.0
@@ -152,7 +152,7 @@ def plot3D(results,error_ndx,tpe="max",title=None,truncate=0):
             else:
                 value = np.nan
         else:
-            print "ERROR: unrecognised type: ",tpe
+            print("ERROR: unrecognised type: "+str(tpe))
             sys.exit(1)
         if (value > 0.0):
             z.append(math.log10(value))
@@ -187,7 +187,7 @@ def plot_grid(grid):
 
     # remember ndim includes the age dimension.
     if (ndim != 3):
-        print "Only able to plot the tessellation in two dimensions."
+        print("Only able to plot the tessellation in two dimensions.")
         return
 
     # find bounds:
@@ -239,7 +239,7 @@ def plot_slice_age(pos):
 
     if (all_nan(results_age[0][pos][:,ndim:ndim+6]) and \
         all_nan(results_age[1][pos][:,ndim:ndim+6])):
-        print "Cowardly refusing to plot nan's"
+        print("Cowardly refusing to plot nan's")
         return
 
     style = ["b:","b-","bv","r:","r-","rv"]
@@ -256,8 +256,8 @@ def plot_slice_age(pos):
         all_nan(results_age[1][pos][:,ndim:ndim+3])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
     else:
-        for j in xrange(2):
-            for i in xrange(3):
+        for j in range(2):
+            for i in range(3):
                 plt.plot(results_age[j][pos][:,ndim-1],results_age[j][pos][:,ndim+i],
                      style[i+3*j],label=labels[i+3*j])
         plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_age[0][pos][0,0],results_age[0][pos][0,1]))
@@ -271,8 +271,8 @@ def plot_slice_age(pos):
         all_nan(results_age[1][pos][:,ndim+3:ndim+6])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
     else:
-        for j in xrange(2):
-            for i in xrange(3):
+        for j in range(2):
+            for i in range(3):
                 plt.plot(results_age[j][pos][:,ndim-1],results_age[j][pos][:,ndim+3+i],
                      style[i+3*j],label=labels[i+3*j])
         plt.ylabel(r"Error(non radial)")
@@ -304,7 +304,7 @@ def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
     # remember ndim includes the age dimension which is not included
     # in the tessellation:
     if (ndim != 3):
-        print "Only able to plot the tessellation in two dimensions."
+        print("Only able to plot the tessellation in two dimensions.")
         return
 
     # find bounds:
@@ -355,7 +355,7 @@ def plot_slice_track(pos):
     """
 
     if (all_nan(results_track[pos][:,ndim:ndim+6])):
-        print "Cowardly refusing to plot nan's"
+        print("Cowardly refusing to plot nan's")
         return
 
     style = ["b:","b-","bv"]
@@ -369,7 +369,7 @@ def plot_slice_track(pos):
     if (all_nan(results_track[pos][:,ndim:ndim+3])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
     else:
-        for i in xrange(3):
+        for i in range(3):
             plt.plot(results_track[pos][:,ndim-1],results_track[pos][:,ndim+i],
                      style[i],label=labels[i])
         plt.title(r"Error at $(M,Z)=(%f,%f)$"%(results_track[pos][0,0],results_track[pos][0,1]))
@@ -382,7 +382,7 @@ def plot_slice_track(pos):
     if (all_nan(results_track[pos][:,ndim+3:ndim+6])):
         plt.plot([0,1,1,0],[0,1,0,1],"k-")
     else:
-        for i in xrange(3):
+        for i in range(3):
             plt.plot(results_track[pos][:,ndim-1],results_track[pos][:,ndim+3+i],
                      style[i],label=labels[i])
         plt.ylabel(r"Error(non radial)")
@@ -401,17 +401,17 @@ if __name__ == "__main__":
     """
 
     if (len(sys.argv) < 2):
-        print "Usage: plot_interpolation_test.py data_file"
+        print("Usage: plot_interpolation_test.py data_file")
         sys.exit(1)
 
     filename = sys.argv[1]
 
-    input_data = open(filename,"r")
+    input_data = open(filename,"rb")
     [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
         results_age2, results_track] = dill.load(input_data)
 
     if (ndim != 3):
-        print "I'm sorry, but I can only plot handle 3D grids." 
+        print("I'm sorry, but I can only plot handle 3D grids.")
         sys.exit(1)
 
     results_age = [results_age1, results_age2]
