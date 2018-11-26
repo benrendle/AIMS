@@ -30,9 +30,9 @@ parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10     # number of temperatures
-nwalkers    = 250    # number of walkers (this number should be even)
-nsteps0     = 400   # number of burn-in steps
-nsteps      = 200    # number of steps
+nwalkers    = 400    # number of walkers (this number should be even)
+nsteps0     = 2000   # number of burn-in steps
+nsteps      = 400    # number of steps
 add_steps   = 500    # number of steps to add if convergence isn't achieved
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
@@ -108,7 +108,7 @@ seismic_weight = 0.1
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = True            # set this to True if you want to write a
+write_data    = False            # set this to True if you want to write a
                                  # binary grid file
 retessellate  = False            # retessellate grid (this can be useful
                                  # if the binary grid has been produced by
@@ -134,7 +134,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # (i.e. below the cutoff frequency as determined
                                  # by ADIPLS) in agsm files.  This test is in
                                  # addition to the above user-defined cutoff.
-list_grid      = "CLES_MS_DIFF"  # file with list of models and characteristics.
+list_grid      = "AIMS_in"  # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ('Mass', 'log_Z')
@@ -143,7 +143,7 @@ grid_params = ('Mass', 'log_Z')
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = 'grid_Sun_DIFF2.1' #"data_MESA_ms_log"
+binary_grid = 'grid_MS_v3.9' #"data_MESA_ms_log"
 #binary_grid = "data_tsonoi_l"    # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
@@ -163,7 +163,7 @@ track_threshold = 10             # minimal number of models for a stellar evolut
 # be replaced by appropriate strings if, for instance, one asks for the
 # log of this parameter.
 
-user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)
                #  ('alpha_MLT', 'Mixing length parameter, $%s\\alpha_{\\mathrm{MLT}}%s$'), \
                # ('Zs', 'Surface metallicity, $%sZ_c%s$'), \
                # ('Xs', 'Surface hydrogen, $%sX_c%s$'),    \
@@ -194,11 +194,11 @@ user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),)#("DNl1", r'Period Spacin
 priors = {}                      # The priors will be defined thanks to this
 priors["Age"]     = ("Uniform", [0.0, 1.38e4])
 #########################   Interpolation    ###############################
-scale_age = True                 # use a scaled age when interpolating
+scale_age = False                 # use a scaled age when interpolating
 interp_type = "Age"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
-test_interpolation = False       # decide whether to test the interpolation.
+test_interpolation = True       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
@@ -220,7 +220,7 @@ interpolation_file = "interpolation_test"  # Name of the file to which to
 #       based on the scaling relation in Sonoi et al. (2015).  This will differ
 #       from the values obtained when using the options surface_option="Kjeldsen2008_2"
 #       or "Sonoi2015_2"
-output_params = ("Radius","Mass","log_g","Rho","Age","Teff","Xc","Luminosity")
+output_params = ("Radius","Mass","log_g","Rho","Age","Teff","Xc","Luminosity","Dnu","numax","Fe_H")
 output_dir    = "results"      # name of the root folder with the results
 output_osm    = "osm"          # name of the root folder with the OSM files
 extended_model  = False        # if True, print all models frequencies

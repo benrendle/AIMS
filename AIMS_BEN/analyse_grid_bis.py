@@ -78,7 +78,7 @@ if __name__ == "__main__":
          find_range_bis(grid,i)
 
     #for i in range(len(grid.grid_params)):
-    #    find_range(grid,i)
+     #   find_range(grid,i)
 
     plot_number_of_modes(grid)
     #print_number_of_models_in_tracks(grid)

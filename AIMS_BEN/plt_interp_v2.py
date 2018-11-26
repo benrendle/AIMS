@@ -47,6 +47,7 @@ def interp_scatter(p,results,error_ndx,truncate=0,tpe="max"):#,a,tpe="max",title
     y = []
     z1 = []
     z2 = []
+    mu = []
     for i in xrange(n):
         start = truncate
         stop  = results[i].shape[0] - truncate
@@ -63,7 +64,7 @@ def interp_scatter(p,results,error_ndx,truncate=0,tpe="max"):#,a,tpe="max",title
             else:
                 value = np.nan
         else:
-            print "ERROR: unrecognised type: ",tpe
+            print("ERROR: unrecognised type: ",tpe)
             sys.exit(1)
         if (value > 0.0):
 	    # print value
@@ -71,7 +72,8 @@ def interp_scatter(p,results,error_ndx,truncate=0,tpe="max"):#,a,tpe="max",title
             z2.append(math.log10(value))#/constants.solar_radius))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
-
+            mu.append(results[i][0,24])
+            
     x = np.array(x,dtype = np.float64)
     y = np.array(y,dtype = np.float64)
     z1 = np.array(z1,dtype = np.float64)
@@ -80,6 +82,7 @@ def interp_scatter(p,results,error_ndx,truncate=0,tpe="max"):#,a,tpe="max",title
     df['y'] = y
     df['z1'] = z1
     df['z2'] = z2
+    df['mu'] = mu
 
     return df
 
@@ -93,7 +96,8 @@ if __name__ == "__main__":
     # assert (len(sys.argv) > 1), "Usage: plot_interpolation_test.py data_file"
 
     # filename = sys.argv[1]
-    filename_ms = 'interp_MS_v3.9'
+    # filename_ms = 'interp_MS_v3.9'
+    filename_ms = '/home/bmr135/bison/Sim2/AIMS_Gael/interp_MS_v3.9.1'
     filename_rgb = 'interp_RGB_v3.10'
 
     input_data = open(filename_ms,"r")
@@ -110,8 +114,14 @@ if __name__ == "__main__":
 
     a = interp_scatter(1,results_age1_ms,2,truncate=1,tpe="max")
     b = interp_scatter(1,results_age2_ms,2,truncate=1,tpe="max")
-    c = interp_scatter(1,results_age1_rgb,2,truncate=1,tpe="max")
-    d = interp_scatter(1,results_age2_rgb,2,truncate=1,tpe="max")
+    # c = interp_scatter(1,results_age1_rgb,2,truncate=1,tpe="max")
+    # d = interp_scatter(1,results_age2_rgb,2,truncate=1,tpe="max")
+
+    print(np.median(a['z2']/b['z2']))
+    print(np.median(a['mu']/b['mu']))
+    # print(np.median(c['z2']/d['z2']))
+    # print(np.sqrt(2))
+    sys.exit()
 
     max = np.max([np.max(a['z2']),np.max(b['z2']),np.max(c['z2']),np.max(d['z2'])])
     min = np.min([np.min(a['z2']),np.min(b['z2']),np.min(c['z2']),np.min(d['z2'])])

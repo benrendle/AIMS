@@ -91,10 +91,10 @@ user_params_latex = {}
 """ dictionary which will supply the appropriate latex name for the user-defined parameters"""
 
 # integer indices for various global quantities which will be stored in a np array:
-nglb         = 9 + len(config.user_params) - 1
+nglb         = 9 + len(config.user_params) #- 1
 """ total number of global quantities in a model (see :py:data:`Model.glb`)."""
 
-nlin         = 5 + len(config.user_params)
+nlin         = 6 + len(config.user_params) #- 1
 """
 total number of global quantities which are interpolated in a linear way (see
 :py:func:`combine_models`).  These quantities are numbered 0:nlin-1
@@ -121,20 +121,20 @@ index of the parameter corresponding to the initial hydrogen content
 in the :py:data:`Model.glb` array
 """
 
-# imHe         = 5
+imHe         = 5
 """ index of the parameter corresponding to He core mass in the :py:data:`Model.glb` array """
 
-ifreq_ref    = 6 + len(config.user_params) - 1
+ifreq_ref    = 6 + len(config.user_params) #- 1
 """
 index of the parameter corresponding to the reference frequency
 (used to non-dimensionalise the pulsation frequencies of the model)
 in the :py:data:`Model.glb` array
 """
 
-iradius      = 7 + len(config.user_params) - 1
+iradius      = 7 + len(config.user_params) #- 1
 """ index of the parameter corresponding to radius in the :py:data:`Model.glb` array """
 
-iluminosity  = 8 + len(config.user_params) - 1
+iluminosity  = 8 + len(config.user_params) #- 1
 """ index of the parameter corresponding to luminosity in the :py:data:`Model.glb` array """
 
 def string_to_latex(string,prefix="",postfix=""):
@@ -894,7 +894,7 @@ class Model:
         print("Age (in Myrs):                %.2f" % self.glb[iage])
         print("Z:                            %.4f" % self.glb[iz0])
         print("X:                            %.4f" % self.glb[ix0])
-        # print "Mass He core (in M_Sun):      %.4f" % self.glb[imHe]
+        print "Mass He core (in M_Sun):      %.4f" % self.glb[imHe]
         for (name, latex_name) in config.user_params:
             print("{0:29} {1:.5e}".format(name,self.glb[user_params_index[name]]))
         print("Modes (in muHz):")
@@ -1200,14 +1200,9 @@ class Track:
             mu = (self.models[i].glb[iage]   - self.models[i-nincr].glb[iage]) \
                / (self.models[i+nincr].glb[iage] - self.models[i-nincr].glb[iage])
             aModel = combine_models(self.models[i-nincr],1.0-mu,self.models[i+nincr],mu)
-
             result[i-nincr,0:ndim-1] = self.params
             result[i-nincr,ndim-1] = self.models[i].glb[iage]
             result[i-nincr,ndim:ndim+nglb+6] = compare_models(aModel,self.models[i])
-            result[i-nincr,ndim+nglb+6] = self.models[i].glb[itemperature]
-            result[i-nincr,ndim+nglb+7] = self.models[i].glb[iluminosity]
-            result[i-nincr,ndim+nglb+8] = self.models[i].glb[6]
-            # result[i-nincr,ndim+nglb+9] = self.models[i].glb[imHe]
 
         return result
 
@@ -1491,9 +1486,9 @@ class Model_grid:
             glb[ix0]          = utilities.to_float(columns[5])
             glb[iage]         = utilities.to_float(columns[6])
             glb[itemperature] = utilities.to_float(columns[7])
-            # glb[imHe]         = utilities.to_float(columns[8])
+            glb[imHe]         = utilities.to_float(columns[8])
 
-            i = 9 - 1
+            i = 9 #- 1
             for (name, name_latex) in config.user_params:
                 glb[user_params_index[name]] = utilities.to_float(columns[i])
                 i += 1
@@ -1714,9 +1709,9 @@ class Model_grid:
                 else:
                     aResult[i,ndim:ndim+nglb+6] = compare_models(aModel1,aModel2)
                     if config.interp_type == "Age":
-                        res = find_combination(grid,pt)
+                        res = find_combination(self.grid,pt)
                     elif config.interp_type == "mHe":
-                        res = find_combination_mHe(grid,pt)
+                        res = find_combination_mHe(self.grid,pt)
                     if (res is None): continue  # filter out combinations outside the grid
                     # output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
                     #                     len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \
@@ -1999,7 +1994,7 @@ def compare_models(model1,model2):
                 n_non_radial_numax += 1
         i1+=1
         i2+=1
-
+    # print(n_radial_numax)
     # avoid divisions by zero:
     if (n_radial > 0):
         result[1] = math.sqrt(result[1]/float(n_radial))

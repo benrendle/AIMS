@@ -7,7 +7,8 @@ A simple utility for correcting binary AIMS grids
 import sys
 import dill
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib
+#import matplotlib.pyplot as plt
 
 def write_binary_data(grid,outfile):
     """
@@ -43,17 +44,18 @@ def load_binary_data(filename):
 if __name__ == "__main__":
 
     # check number of arguments
-    assert (len(sys.argv) > 2), "Usage: test_grid.py input_grid output_grid"
+    assert (len(sys.argv) > 2), "Usage: test_grid.py input_grid output_grid, input_grid is a binary file"
 
     grid = load_binary_data(sys.argv[1])
-    grid.user_params = (("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
-               ("Zs", r'Surface metallicity, $%sZ_c%s$'), \
-               ("Xs", r'Surface hydrogen, $%sX_c%s$'), \
-               ("Zc", r'Central metallicity, $%sZ_c%s$'), \
-               ("Xc", r'Central hydrogen, $%sX_c%s$'), \
-               ("r_BCZ",r'Radius at BCZ, $%sr_{\mathrm{BCZ}}%s$'), \
-               ("tau_BCZ",r'Acoustic depth of BCZ, $%s\tau_{\mathrm{BCZ}}%s$'), \
-               ("tau",r'Acoustic radius, $%s\tau%s$'), \
-               ("alpha_OV", r'Overshoot parameter, $%s\alpha_{\mathrm{OV}}%s$'))
+    grid.user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing, $%sDNl1%s$'),)
+		#("alpha_MLT", r'Mixing length parameter, $%s\alpha_{\mathrm{MLT}}%s$'), \
+               #("Zs", r'Surface metallicity, $%sZ_c%s$'), \
+               #("Xs", r'Surface hydrogen, $%sX_c%s$'), \
+               #("Zc", r'Central metallicity, $%sZ_c%s$'), \
+               #("Xc", r'Central hydrogen, $%sX_c%s$'), \
+               #("r_BCZ",r'Radius at BCZ, $%sr_{\mathrm{BCZ}}%s$'), \
+               #("tau_BCZ",r'Acoustic depth of BCZ, $%s\tau_{\mathrm{BCZ}}%s$'), \
+               #("tau",r'Acoustic radius, $%s\tau%s$'), \
+               #("alpha_OV", r'Overshoot parameter, $%s\alpha_{\mathrm{OV}}%s$'))
     write_binary_data(grid,sys.argv[2])
 
