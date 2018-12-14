@@ -73,7 +73,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import scipy.interpolate as interp
 import colormaps
 import constants
-# import pandas as pd
+import pandas as pd
 import sys
 # from pandas import DataFrame, read_csv
 
@@ -414,14 +414,14 @@ def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
 
     fig = plt.figure()
     plt.plot(grid[ndx1,0],grid[ndx1,1],'bo', picker=5)
-    plt.plot(grid[ndx2,0],grid[ndx2,1],'yo')
+    # plt.plot(grid[ndx2,0],grid[ndx2,1],'yo')
     plt.triplot(grid[ndx2,0],grid[ndx2,1],tessellation.simplices.copy())
     plt.xlim((xmin,xmax))
     plt.ylim((ymin,ymax))
     plt.xlabel(titles[0],fontsize=20)
     plt.ylabel(titles[1],fontsize=20)
     plt.tick_params(labelsize=15)
-    fig.canvas.mpl_connect('pick_event', onpick_track)
+    # fig.canvas.mpl_connect('pick_event', onpick_track)
 
 def onpick_track(event):
     """
@@ -563,7 +563,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
         if (value > 0.0):
 	    # print value
             z1.append(value)	# math.log10
-            z2.append(math.log10(value/constants.solar_luminosity))
+            z2.append(math.log10(value/constants.solar_radius))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
 
@@ -585,8 +585,12 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
 
     fig = plt.figure(figsize=(6,2))
     plt.subplots_adjust(left=0.15, right=0.94, top=0.95, bottom=0.25)
-
-    kk = np.array(k)
+    df = pd.DataFrame()
+    df['x'] = x
+    df['y'] = y
+    df['z2'] = z2
+    df = df.sort_values(['z2'])
+    # kk = np.array(k)
 
     # print kk
 
@@ -595,10 +599,10 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     # cont.collections[-22].set_color('k')
     # circle1 = plt.Circle((1.46, np.log10(0.0046)), .0075, color='k', fill=False,linewidth=3)
     # plt.gcf().gca().add_artist(circle1)
-    plt.scatter(x, y, c=z2, cmap=colormaps.parula, s=75)
+    plt.scatter(df['x'], df['y'], c=df['z2'], cmap=colormaps.parula, s=75)
     cb = plt.colorbar()
     # plt.xlabel(titles[0],fontsize=10)
-    plt.xlabel(r'Luminosity $L/L_{\odot}$',fontsize=10)
+    plt.xlabel(r'Radius $R/R_{\odot}$',fontsize=10)
     plt.ylabel(titles[1],fontsize=10)
     plt.xticks(fontsize=8)
     plt.yticks(fontsize=8)
@@ -620,7 +624,9 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     cax.text(6.5,0.85,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=10)
     cax.tick_params(labelsize=8)
     # if (title is not None): plt.title(title,fontsize=15)
-    fig.savefig('lum_interp.pdf', bbox_inches='tight')
+    fig.savefig('rad_interp.pdf', bbox_inches='tight')
+    # plt.show()
+    # sys.exit()
     # plt.figure()
     # plt.hist(z2,bins=50)
     # plt.xlabel(r'$\sigma_{\nu_{\rm{i}}}$')
@@ -698,8 +704,8 @@ if __name__ == "__main__":
     # surface2D(1,results_age1,0,tpe="max",title="Max radial error (nincr = 1)",truncate=1)
     # surface2D(1,results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
-
-    surface2D(1,results_age1,16,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
+    ''' '''
+    # surface2D(1,results_age1,15,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
     # surface2D(1,results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
 
@@ -720,6 +726,6 @@ if __name__ == "__main__":
     #plot3D(results_track,2,tpe="avg",title="numax radial error (struct)")
 
     # plot_grid(grid)
-    #plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
+    plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
 
     plt.show()

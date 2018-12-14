@@ -72,8 +72,8 @@ def interp_scatter(p,results,error_ndx,truncate=0,tpe="max"):#,a,tpe="max",title
             z2.append(math.log10(value))#/constants.solar_radius))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
-            mu.append(results[i][0,24])
-            
+            # mu.append(results[i][0,24])
+
     x = np.array(x,dtype = np.float64)
     y = np.array(y,dtype = np.float64)
     z1 = np.array(z1,dtype = np.float64)
@@ -82,7 +82,7 @@ def interp_scatter(p,results,error_ndx,truncate=0,tpe="max"):#,a,tpe="max",title
     df['y'] = y
     df['z1'] = z1
     df['z2'] = z2
-    df['mu'] = mu
+    # df['mu'] = mu
 
     return df
 
@@ -114,14 +114,19 @@ if __name__ == "__main__":
 
     a = interp_scatter(1,results_age1_ms,2,truncate=1,tpe="max")
     b = interp_scatter(1,results_age2_ms,2,truncate=1,tpe="max")
-    # c = interp_scatter(1,results_age1_rgb,2,truncate=1,tpe="max")
-    # d = interp_scatter(1,results_age2_rgb,2,truncate=1,tpe="max")
+    c = interp_scatter(1,results_age1_rgb,2,truncate=1,tpe="max")
+    d = interp_scatter(1,results_age2_rgb,2,truncate=1,tpe="max")
 
-    print(np.median(a['z2']/b['z2']))
-    print(np.median(a['mu']/b['mu']))
-    # print(np.median(c['z2']/d['z2']))
-    # print(np.sqrt(2))
-    sys.exit()
+    a = a.sort_values(['z2'])
+    b = b.sort_values(['z2'])
+    c = c.sort_values(['z2'])
+    d = d.sort_values(['z2'])
+
+    # print(np.median(a['z2']/b['z2']))
+    # print(np.median(a['mu']/b['mu']))
+    # # print(np.median(c['z2']/d['z2']))
+    # # print(np.sqrt(2))
+    # sys.exit()
 
     max = np.max([np.max(a['z2']),np.max(b['z2']),np.max(c['z2']),np.max(d['z2'])])
     min = np.min([np.min(a['z2']),np.min(b['z2']),np.min(c['z2']),np.min(d['z2'])])
@@ -189,4 +194,4 @@ if __name__ == "__main__":
     ax2.yaxis.set_ticks([-2.5,-2.25,-2.0,-1.75,-1.5])
 
     plt.show()
-    # fig.savefig('model_interp.pdf', bbox_inches='tight')
+    fig.savefig('model_interp.pdf', bbox_inches='tight')

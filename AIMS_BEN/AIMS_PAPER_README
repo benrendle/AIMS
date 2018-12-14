@@ -27,29 +27,23 @@ Artificial - RGB:
 
 FIGURES
 1 - /home/bmr135/HRD-AIMS.png <- CLES_MS_v3.2; CLES_RGB_v3.2
-2 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/MS_ninr_1.png <- v3.9
-3 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/MS_ninr_2.png
-4 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_ninr_1.png <- v3.10
-5 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_ninr_2.png
-6 - /home/bmr135/SAMSUNG/AIMS-interp-testing2/MS_track_int.png <- n=8, m=20, shift=5, M147_MS_272
-7 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M1_27_Z0_01_Evo.png
-8 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Mass_gt120.png
-9 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Radius_gt120.png
-10 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/MS_Nsig.png
-11 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NGorig/Comp_Hists/RGB_Nsig.png
-12 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NGorig/Comp_Hists/histogram_Mass_RGB_NG.png
-13 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NGorig/Comp_Hists/histogram_Radius_RGB_NG.png
-14 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_Nsig_BiSON_as_Kepler.png
-15 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_w_diff_BiSON.png
-16 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_wo_diff_BiSON.png
-17 - /media/bmr135/SAMSUNG/AIMS_MS/Mass.png
-18 - /media/bmr135/SAMSUNG/AIMS_MS/Radius.png
-19 - /media/bmr135/SAMSUNG/AIMS_MS/Age.png
-20 - /home/bmr135/Dropbox/AIMS_part_1/PARAM.png
-21 - /media/bmr135/SAMSUNG/AIMS_MS/MS_nu_vs_dnu.png
-# 15 - /media/bmr135/SAMSUNG/AIMS_MS/RGB_nu_vs_dnu.png
-A1 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M1_27_Z0_01_MS.png
-A2 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M0_91_Z0_03_RGB.png
-A3 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/RGB_track_int.png <- n=8, m=20, shift=5, M119_RGB_612
-A4 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/rad_1.png <- MS v3.9
-A5 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/lum_1.png <- MS v3.9
+2 - age_interpolation.pdf
+3 - freq_non_dim.pdf + freq_dim.pdf (/home/bmr135/AIMS/AIMS_BEN)
+4 - model_interp.pdf (/home/bmr135/AIMS/AIMS_BEN) MS: v3.9.1; RGB: v3.10
+5 - track_interp_MS_alt.pdf (/home/bmr135/AIMS/AIMS_BEN) <- n=8, m=20, shift=5, M147_MS_272
+6 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/M1_27_Z0_01_Evo.png
+7 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Mass_gt120.png + 
+    /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/histogram_Radius_gt120.png
+8 - /media/bmr135/SAMSUNG/AIMS_MS/MS_pert_3/Comp_Hists/MS_Nsig.png
+9 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NGorig/Comp_Hists/histogram_Mass_RGB_NG.png +
+     /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NGorig/Comp_Hists/histogram_Radius_RGB_NG.png
+10 - /media/bmr135/SAMSUNG/AIMS_RGB/RGB_test_NGorig/Comp_Hists/RGB_Nsig.png
+11 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_Nsig_BiSON_as_Kepler.png
+12 - /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_w_diff_BiSON.png +
+     /media/bmr135/SAMSUNG/AIMS_MS/Solar/Sun_wo_diff_BiSON.png
+13 - MRA.pdf (/media/bmr135/SAMSUNG/AIMS_MS/)
+14 - /home/bmr135/Dropbox/AIMS_part_1/PARAM.pdf
+15 - /media/bmr135/SAMSUNG/AIMS_MS/MS_nu_vs_dnu.pdf
+A1 - RGB_track_int_alt.pdf (/home/bmr135/AIMS/AIMS_BEN) <- n=8, m=20, shift=5, M119_RGB_612
+A2 - /media/bmr135/SAMSUNG/AIMS-interp-testing2/rad_1.png <- MS v3.9 +
+     /media/bmr135/SAMSUNG/AIMS-interp-testing2/lum_1.png <- MS v3.9

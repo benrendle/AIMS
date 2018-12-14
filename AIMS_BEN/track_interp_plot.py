@@ -30,7 +30,10 @@ m = 1.47
 x = 0.740
 z = 0.0057
 ''' Echelle comes from data point 4 in original file '''
-
+'''
+MS - 1.47, 0.740, 0.0057, 272
+RGB - 1.19, 0.731, 0.0100, 612
+'''
 ''' Delaunay tessellation models formatting to save files (formatting
 is time consuming therefore save out and read in later on). '''
 
@@ -131,7 +134,7 @@ if len(df1) > 0:
     ax.set_xlim(tmax+50,tmin-50)
     ax.set_ylim(lmin-1,lmax+1)
     # ax.set_title(r'M = %s M$_{\odot}$, Z = %s, X = %s' %(df1['mass'][0],df1['z'][0],df1['x'][0]),fontsize=20)
-    ax.legend(prop={'size':9},loc=4,ncol=2)
+    ax.legend(prop={'size':9},loc=9,ncol=2)
 
     axT.scatter(df1['teff'],dL['res_L'],marker='+',s=75)
     axL.scatter(dT['res_T']*100,df1['lumo'],marker='+',s=75)
@@ -168,6 +171,57 @@ input_data = open(filename,"r")
 results_age = [results_age1, results_age2]
 input_data.close()
 
+def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
+    """
+    Make an interactive tessellation plot based on the supplied partition
+    on the grid. Clicking on the blue dots will produce a 2D slice showing
+    track interpolation errors for the associated evolutionary track.
+
+    :param grid: array containing basic grid parameters (excluding age)
+    :param ndx1: list with the indices of the first part of the partition.
+    :param ndx2: list with the indices of the second part of the partition.
+    :param tessellation: grid tessellation associated with ``ndx2``
+
+    :type grid: np.array
+    :type ndx1: list of int
+    :type ndx2: list of int
+
+    .. warning::
+      This only works for two-dimensional tessellations.
+    """
+
+    # remember ndim includes the age dimension which is not included
+    # in the tessellation:
+    if (ndim != 3):
+        print("Only able to plot the tessellation in two dimensions.")
+        return
+
+    # find bounds:
+    xmin = np.nanmin(grid[:,0])
+    xmax = np.nanmax(grid[:,0])
+    ymin = np.nanmin(grid[:,1])
+    ymax = np.nanmax(grid[:,1])
+    dx = xmax-xmin
+    dy = ymax/ymin
+    xmin -= dx*0.03
+    xmax += dx*0.03
+    ymin /= dy**0.05
+    ymax *= dy**0.05
+
+    # axSc.triplot(grid[ndx1,0],grid[ndx1,1],tessellation.simplices.copy(),alpha=0.2,color='grey')
+    axSc.triplot(grid[ndx2,0],grid[ndx2,1],tessellation.simplices.copy(),alpha=0.2,color='grey')
+    axSc.plot(grid[ndx2,0],grid[ndx2,1],'o',alpha=0.2,color='grey')
+    # axSc.plot(0.75,-2.244,'rd', alpha=0.2)
+    axSc.plot(0.75,-2.494,'rd', alpha=0.2)
+    # axSc.plot(0.77,-2.494,'rd', alpha=0.2)
+    axSc.plot(2.25,-2.494,'rd', alpha=0.2)
+    axSc.plot(2.25,-2.244,'rd', alpha=0.2)
+    axSc.plot(2.25,-1.523,'rd', alpha=0.2)
+    axSc.plot(2.23,-1.523,'rd', alpha=0.2)
+    axSc.plot(2.21,-1.523,'rd', alpha=0.2)
+    axSc.plot(2.19,-1.523,'rd', alpha=0.2)
+    axSc.plot(2.17,-1.523,'rd', alpha=0.2)
+    axSc.plot(2.15,-1.523,'rd', alpha=0.2)
 
 # print results_track
 
@@ -221,11 +275,13 @@ max = np.max(z2)
 # elle = Ellipse(xy=[m,np.log10(z)], width=0.015, height=0.03, fill=None, linewidth=2, color='r')
 # circle1 = plt.Circle((m, np.log10(z)), .0075, color='k', fill=False,linewidth=3)
 # axSc.add_artist(elle)
-col = axSc.scatter(x1, y1, c=z2, cmap=colormaps.parula,vmin=min,vmax=max)
-axSc.scatter(m, np.log10(z), facecolors='none', edgecolors='r', linewidths=3, s=150)
+plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
+col = axSc.scatter(x1, y1, c=z2, cmap=colormaps.parula,vmin=min,vmax=max,alpha=1.1)
+axSc.scatter(m, np.log10(z), facecolors='none', edgecolors='r', linewidths=3, s=160)
 axSc.set_xlabel(titles[0])#,fontsize=20)
 axSc.set_ylabel(titles[1])#,fontsize=20)
 cbar = plt.colorbar(col,cax=axCol)
+
 # axCol = plt.cb()
 # axSc.set_xticks(fontsize=15)
 # axSc.set_yticks(fontsize=15)
@@ -287,8 +343,8 @@ for i in mode_temp1:
 n = 8
 m = 20
 shift = 5
-# axE.scatter((mode_temp[n][2]+shift)%dnu,mode_temp[n][2],label='Original: $l=0$')
-# axE.scatter((mode_temp1[n][2]+shift)%dnu,mode_temp1[n][2],color='r',label='Interp.: $l=0$',facecolors='none',s=40,linewidths=1.5)
+# axE.scatter((mode_temp[n][2]+shift)%dnu,mode_temp[n][2],label='Original: $l=0$',color='blue')
+# axE.scatter((mode_temp1[n][2]+shift)%dnu,mode_temp1[n][2],color='orange',label='Interp.: $l=0$',facecolors='none',s=140,linewidths=1.5)
 
 axE.scatter((l0[n][2]+shift)%dnu,l0[n][2],label='Original: $l=0$',color='blue')
 axE.scatter((l01[n][2]+shift)%dnu,l01[n][2],color='orange',label='Interp.: $l=0$',facecolors='none',s=140,linewidths=2.)
@@ -341,5 +397,5 @@ axE.set_xlim(0.0,dnu)
 axE.legend(prop={'size':9})
 print(dnu)
 
-fig.savefig('track_interp_MS.pdf', bbox_inches='tight')
+fig.savefig('track_interp_MS_alt.pdf', bbox_inches='tight')
 plt.show()
