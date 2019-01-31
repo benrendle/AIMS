@@ -986,7 +986,7 @@ class Track:
 
     def duplicate_ages(self):
         """
-        Check to see if you track contains models with duplicate ages.
+        Check to see if your track contains models with duplicate ages.
 
         :return: ``True`` if there are duplicate age(s)
         :rtype: boolean
@@ -1476,41 +1476,43 @@ class Model_grid:
         nmodes  = 0
         models_small_spectra = []
         for line in listfile:
-            line = line.strip()
-            columns = line.split()
-            glb = np.empty((nglb,),dtype = gtype)
-            glb[imass]        = utilities.to_float(columns[1])
-            glb[iradius]      = utilities.to_float(columns[2])
-            glb[iluminosity]  = utilities.to_float(columns[3])
-            glb[iz0]          = utilities.to_float(columns[4])
-            glb[ix0]          = utilities.to_float(columns[5])
-            glb[iage]         = utilities.to_float(columns[6])
-            glb[itemperature] = utilities.to_float(columns[7])
-            glb[imHe]         = utilities.to_float(columns[8])
+            try:
+                line = line.strip()
+                columns = line.split()
+                glb = np.empty((nglb,),dtype = gtype)
+                glb[imass]        = utilities.to_float(columns[1])
+                glb[iradius]      = utilities.to_float(columns[2])
+                glb[iluminosity]  = utilities.to_float(columns[3])
+                glb[iz0]          = utilities.to_float(columns[4])
+                glb[ix0]          = utilities.to_float(columns[5])
+                glb[iage]         = utilities.to_float(columns[6])
+                glb[itemperature] = utilities.to_float(columns[7])
+                glb[imHe]         = utilities.to_float(columns[8])
 
-            i = 9 #- 1
-            for (name, name_latex) in config.user_params:
-                glb[user_params_index[name]] = utilities.to_float(columns[i])
-                i += 1
+                i = 9 #- 1
+                for (name, name_latex) in config.user_params:
+                    glb[user_params_index[name]] = utilities.to_float(columns[i])
+                    i += 1
 
-            aModel = Model(glb, _name = columns[0])
-            exceed_freqlim = aModel.read_file(self.prefix + columns[0] + self.postfix)
-            aModel.multiply_modes(1.0/aModel.glb[ifreq_ref])  # make frequencies non-dimensional
-            aModel.sort_modes()
-            aModel.remove_duplicate_modes()
-            for track in self.tracks:
-                if (track.matches(aModel)):
-                    track.append(aModel)
-                    break
-            else:
-                aTrack = Track(aModel,self.grid_params)
-                self.tracks.append(aTrack)
-            nmodels += 1
-            nmodes  += len(aModel.modes)
-            if (not exceed_freqlim):
-                models_small_spectra.append(aModel.name)
-            print("%d %d %d"%(len(self.tracks), nmodels, nmodes))
-            print('\033[2A') # backup two line - might not work in all terminals
+                aModel = Model(glb, _name = columns[0])
+                exceed_freqlim = aModel.read_file(self.prefix + columns[0] + self.postfix)
+                aModel.multiply_modes(1.0/aModel.glb[ifreq_ref])  # make frequencies non-dimensional
+                aModel.sort_modes()
+                aModel.remove_duplicate_modes()
+                for track in self.tracks:
+                    if (track.matches(aModel)):
+                        track.append(aModel)
+                        break
+                else:
+                    aTrack = Track(aModel,self.grid_params)
+                    self.tracks.append(aTrack)
+                nmodels += 1
+                nmodes  += len(aModel.modes)
+                if (not exceed_freqlim):
+                    models_small_spectra.append(aModel.name)
+                print("%d %d %d"%(len(self.tracks), nmodels, nmodes))
+                print('\033[2A') # backup two line - might not work in all terminals
+            except: continue
         listfile.close()
         print("%d %d %d"%(len(self.tracks), nmodels, nmodes))
 
@@ -1529,11 +1531,13 @@ class Model_grid:
         # sanity check:
         for track in self.tracks:
             if track.duplicate_ages():
-                print("ERROR: the track %s = %s"%(str(track.grid_params),str(track.params)))
+                print("ERROR: the track %s, %s = %s"%(columns[0],str(track.grid_params),str(track.params)))
                 print("       has models with the same age.  Please remove")
                 print("       duplicate models.")
-                #for i in range(len(track.models)):
-                #    print("Model[%d]: %e"%(i,track.models[i].glb[iage]))
+                for i in range(len(track.models)-1):
+                    if track.models[i].glb[iage] == track.models[i+1].glb[iage]:
+                        # print("Model[%d]: %e"%(i,track.models[i].glb[iage]))
+                        print(track.models[i].glb[iage],track.models[i+1].glb[iage])
                 sys.exit(1)
 
         # update list of indices:

@@ -134,7 +134,7 @@ if len(df1) > 0:
     ax.set_xlim(tmax+50,tmin-50)
     ax.set_ylim(lmin-1,lmax+1)
     # ax.set_title(r'M = %s M$_{\odot}$, Z = %s, X = %s' %(df1['mass'][0],df1['z'][0],df1['x'][0]),fontsize=20)
-    ax.legend(prop={'size':9},loc=9,ncol=2)
+    ax.legend(prop={'size':9},loc=4,ncol=2)
 
     axT.scatter(df1['teff'],dL['res_L'],marker='+',s=75)
     axL.scatter(dT['res_T']*100,df1['lumo'],marker='+',s=75)
@@ -397,5 +397,5 @@ axE.set_xlim(0.0,dnu)
 axE.legend(prop={'size':9})
 print(dnu)
 
-fig.savefig('track_interp_MS_alt.pdf', bbox_inches='tight')
+fig.savefig('track_interp_MS_alt.jpeg', bbox_inches='tight', dpi=52)
 plt.show()

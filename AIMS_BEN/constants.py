@@ -56,33 +56,37 @@ A module which contains the following physical constants:
 
 __docformat__ = 'restructuredtext'
 
-solar_radius     = 6.9599e10    # Allen (1973)
+#solar_radius     = 6.9599e10    # Allen (1973)
+solar_radius     = 6.957e10 # cles-19.2
 """ the solar radius in :math:`\mathrm{cm}` """
 
-solar_mass       = 1.98919e33   # Same as in Model S
+#solar_mass       = 1.98919e33   # Same as in Model S
+solar_mass	 = 1.988475415e33 # cles-19.2
 """ the solar mass in :math:`\mathrm{g}` """
 
-solar_luminosity = 3.846e33 # Cestam 94
+#solar_luminosity = 3.846e33 # Cestam 94
 #solar_luminosity = 3.844e33
+solar_luminosity = 3.828e33 # cles-19.2
 """ the solar luminosity in :math:`\mathrm{g.cm^2.s^{-3}}` """
 
-solar_temperature= 5777.0
+#solar_temperature= 5777.0 # classic
+solar_temperature= 5772.2 # cles-19.2
 """ the solar temperature in :math:`\mathrm{K}` """
 
-solar_dnu        = 138.8        # solar delta nu value (in \mu Hz), Mosser et al 2013 (A&A, 550, A126)
-#solar_dnu        = 135.1        # solar delta nu value (in \mu Hz), Huber et al. (2011)
+#solar_dnu        = 138.8        # solar delta nu value (in \mu Hz), Mosser et al 2013 (A&A, 550, A126)
+solar_dnu        = 135.1        # solar delta nu value (in \mu Hz), Huber et al. (2011)
 """ the solar large frequency separation in :math:`\mathrm{\mu Hz}` """
 
-solar_numax      = 3104.0          # solar nu_max value (in \mu Hz),Mosser et al 2013 (A&A, 550, A126)
-#solar_numax      = 3090.0       # solar nu_max value (in \mu Hz), Huber et al. (2011)
+#solar_numax      = 3104.0          # solar nu_max value (in \mu Hz),Mosser et al 2013 (A&A, 550, A126)
+solar_numax      = 3090.0       # solar nu_max value (in \mu Hz), Huber et al. (2011)
 """ the solar frequency at maximum power in :math:`\mathrm{\mu Hz}` """
 
 solar_cutoff     = 5100.0 # Jimenez 2006
 #solar_cutoff     = 5300.0       # Jimenez et al. (2011) (see Balmforth & Gough 1990, Fossat et al. 1992)
 """ the solar cut-off frequency separation in :math:`\mathrm{\mu Hz}` """
 
-G                =  6.67168e-8  # Cestam 1994
-#G                = 6.67408e-8   # CODATA 2014
+#G                =  6.67168e-8  # Cestam 1994
+G                = 6.67408e-8   # CODATA 2014/cles-19.2
 #G                = 6.67428e-8   # CODATA 2006
 #G                = 6.6716823e-8 # the gravitational constant in cm^3.g^-1.s^-2 (CoRoT/ESTA value)
 """ the gravitational constant in :math:`\mathrm{cm^3.g^{-1}.s^{-2}}` """
@@ -93,16 +97,16 @@ multiplicative constant which intervenes in the
 conversion from metal content to iron content
 """
 
-#solar_x          = 0.7336  # Grevesse & Noels (1993)
+solar_x          = 0.7336  # Grevesse & Noels (1993)
 #solar_x          = 0.7345  # Grevesse & Sauval (1998)
 #solar_x          = 0.7392  # Asplund et al. (2005)
 #solar_x          = 0.7381  # Asplund et al. (2009)
-solar_x          = 0.7355 # Asplund et al. (2009)_Yveline
+#solar_x          = 0.7355 # Asplund et al. (2009)_Yveline
 """ the solar hydrogen content """
 
-#solar_z          = 0.0179  # Grevesse & Noels (1993)
+solar_z          = 0.0179  # Grevesse & Noels (1993)
 #solar_z          = 0.0169  # Grevesse & Sauval (1998)
 #solar_z          = 0.0122  # Asplund et al. (2005)
 #solar_z          = 0.0134  # Asplund et al. (2009)
-solar_z          = 0.0131  # Asplund et al. (2009)_Yveline
+#solar_z          = 0.0131  # Asplund et al. (2009)_Yveline
 """ the solar metallicity content """

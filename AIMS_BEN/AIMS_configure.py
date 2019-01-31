@@ -25,7 +25,7 @@ import math
 # NOTE: this is currently implemented with multiprocessing, which duplicates
 #       the memory in each process.  To be more memory efficient, turn off
 #       parallelisation using the "parallel" parameter.
-nprocesses  = 3      # number of processes (if running in parallel)
+nprocesses  = 2      # number of processes (if running in parallel)
 parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
@@ -108,7 +108,7 @@ seismic_weight = 0.1
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = False            # set this to True if you want to write a
+write_data    = True            # set this to True if you want to write a
                                  # binary grid file
 retessellate  = False            # retessellate grid (this can be useful
                                  # if the binary grid has been produced by
@@ -134,7 +134,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # (i.e. below the cutoff frequency as determined
                                  # by ADIPLS) in agsm files.  This test is in
                                  # addition to the above user-defined cutoff.
-list_grid      = "AIMS_in"  # file with list of models and characteristics.
+list_grid      = "NGC6791_in"  # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ('Mass', 'log_Z')
@@ -143,7 +143,7 @@ grid_params = ('Mass', 'log_Z')
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = 'grid_MS_v3.9' #"data_MESA_ms_log"
+binary_grid = 'NGC6791_grid' #"data_MESA_ms_log"
 #binary_grid = "data_tsonoi_l"    # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False
@@ -198,7 +198,7 @@ scale_age = False                 # use a scaled age when interpolating
 interp_type = "Age"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
-test_interpolation = True       # decide whether to test the interpolation.
+test_interpolation = False       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
