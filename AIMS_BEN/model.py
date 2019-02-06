@@ -1493,7 +1493,6 @@ class Model_grid:
                 for (name, name_latex) in config.user_params:
                     glb[user_params_index[name]] = utilities.to_float(columns[i])
                     i += 1
-
                 aModel = Model(glb, _name = columns[0])
                 exceed_freqlim = aModel.read_file(self.prefix + columns[0] + self.postfix)
                 aModel.multiply_modes(1.0/aModel.glb[ifreq_ref])  # make frequencies non-dimensional
@@ -1520,7 +1519,6 @@ class Model_grid:
         output = open("models_small_spectra","w")
         for name in models_small_spectra: output.write(name+"\n")
         output.close()
-
         # sort tracks:
         for track in self.tracks: track.sort()
         if config.interp_type == 'Age':

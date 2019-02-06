@@ -76,7 +76,7 @@ end do
 
 
 ! Generation of the list, adapt name and criteria accordingly
-open (3, file ='/home/bmr135/AIMS/AIMS_BEN/KIC9970396_in',position='append')
+open (3, file ='/home/bmr135/AIMS/AIMS_BEN/KIC5786154_in',position='append')
 !write (3,*) '/home/ADF/bmr135/Sim3/cles-19.1-Up/scripts/	.mod'
 do i=1,nmod
 model(i) = trim(Modelname(i))

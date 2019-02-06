@@ -134,7 +134,7 @@ agsm_cutoff   = False            # if True, only keep frequencies with icase=100
                                  # (i.e. below the cutoff frequency as determined
                                  # by ADIPLS) in agsm files.  This test is in
                                  # addition to the above user-defined cutoff.
-list_grid      = "NGC6791_in"  # file with list of models and characteristics.
+list_grid      = "KIC5786154_in"  # file with list of models and characteristics.
                                  # only used when constructing binary file with
                                  # the model grid (i.e. write_data == True)
 grid_params = ('Mass', 'log_Z')
@@ -143,7 +143,7 @@ grid_params = ('Mass', 'log_Z')
                                  # the model grid (i.e. write_data == True)
                                  # These parameters are used to distinguish
                                  # evolutionary tracks
-binary_grid = 'NGC6791_grid' #"data_MESA_ms_log"
+binary_grid = 'KIC5786154_grid' #"data_MESA_ms_log"
 #binary_grid = "data_tsonoi_l"    # binary file with model grid
                                  # this file is written to if write_data == True
                                  # this file is read from if write_data = False

@@ -4,7 +4,7 @@
 #for FOLDER in $(find /home/buldgen/GridGiantsClesV0.3/models_grad_rad_under -maxdepth 1 -mindepth 1 -type d);
 #for FOLDER in $(find /home/buldgen/osc-42.2_new/TestComputeP0 -maxdepth 1 -mindepth 1 -type d);
 #for FOLDER in $(find /home/ADF/bmr135/Sim3/cles-19.1-Up/scripts -maxdepth 1 -mindepth 1 -type d);
-for FOLDER in $(find /media/bmr135/PC1/KIC9970396 -maxdepth 1 -mindepth 1 -type d);
+for FOLDER in $(find /media/bmr135/PC1/KIC5786154 -maxdepth 1 -mindepth 1 -type d);
 do
  echo $FOLDER
  FOLDERNAME=$(echo $FOLDER | cut -d "/" -f 8)

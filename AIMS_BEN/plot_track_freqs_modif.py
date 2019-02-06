@@ -137,8 +137,8 @@ if __name__ == "__main__":
 
     #Verification of the frequencies
     Dnu = [] #AvgDnu
-    f3=open('./FreqOrderCheck_NGC6791', 'w+')
-    f4=open('./FreqRegularityCheck_NGC6791', 'w+')
+    f3=open('./FreqOrderCheck_KIC5786154', 'w+')
+    f4=open('./FreqRegularityCheck_KIC5786154', 'w+')
     #Check 1: verifying that there is no double identification or missed mode in the frequency spectrum of each model
     #Check 2: Verifying that the modes behave regularly and follow a pattern of +-25% of Delta nu
     #The treshold for the regularity can be altered if necessary.
