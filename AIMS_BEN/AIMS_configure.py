@@ -104,11 +104,11 @@ seismic_constraints = ["nu"]
 #                  constraints to have the same weight.
 # NOTE: even with the relative weighting, classic_weight is kept as absolute.
 weight_option = "Absolute"
-seismic_weight = 0.1
+seismic_weight = 1.0
 classic_weight = 1.0
 
 #########################   Input   ########################################
-write_data    = True            # set this to True if you want to write a
+write_data    = False            # set this to True if you want to write a
                                  # binary grid file
 retessellate  = False            # retessellate grid (this can be useful
                                  # if the binary grid has been produced by
@@ -195,15 +195,15 @@ priors = {}                      # The priors will be defined thanks to this
 priors["Age"]     = ("Uniform", [0.0, 1.38e4])
 #########################   Interpolation    ###############################
 scale_age = False                 # use a scaled age when interpolating
-interp_type = "Age"		 # options to use either "age" or "mHe" for interpolation. Should only be
+interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
                         # changed if using a grid with mHe values > 0
 #########################   Interpolation tests    #########################
-test_interpolation = False       # decide whether to test the interpolation.
+test_interpolation = True       # decide whether to test the interpolation.
                                  # If True, interpolation tests are carried
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "interpolation_test"  # Name of the file to which to
+interpolation_file = "KIC5786154_interp"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.

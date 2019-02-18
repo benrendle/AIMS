@@ -1313,7 +1313,7 @@ class Track:
                 istop = itemp
             else:
                 istart = itemp
-        print mHe, self.models[istart].glb[imHe]
+        # print(mHe, self.models[istart].glb[imHe])
         mu = (mHe - self.models[istart].glb[imHe]) \
            / (self.models[istop].glb[imHe] - self.models[istart].glb[imHe])
         return ((coef*(1.0-mu), self.models[istart].name), (coef*mu, self.models[istop].name))
@@ -1711,9 +1711,9 @@ class Model_grid:
                 else:
                     aResult[i,ndim:ndim+nglb+6] = compare_models(aModel1,aModel2)
                     if config.interp_type == "Age":
-                        res = find_combination(self.grid,pt)
+                        res = find_combination(self,pt)
                     elif config.interp_type == "mHe":
-                        res = find_combination_mHe(self.grid,pt)
+                        res = find_combination_mHe(self,pt)
                     if (res is None): continue  # filter out combinations outside the grid
                     # output_file.write("{0:d} {1:.2f} {2:.3f} {3:.3f} {4:.4f} {5:.3f} {6:.3f} {7:.2f}\n".format( \
                     #                     len(res), aModel1.glb[imass]/constants.solar_mass, aModel1.glb[iradius]/constants.solar_radius, \

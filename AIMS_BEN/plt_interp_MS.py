@@ -322,8 +322,8 @@ def plot_hrd():
         cax.tick_params(labelsize=15)
         plt.gca().invert_xaxis()
         plt.legend(loc=3)
-        plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'_v3.9.png')
-        # plt.show()
+        # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'_v3.9.png')
+        plt.show()
 
 def plot_MXc():
     """
@@ -687,7 +687,7 @@ if __name__ == "__main__":
     results_age = [results_age1, results_age2]
     input_data.close()
 
-    # plot_hrd()
+    plot_hrd()
     # plot_MXc()
     # plot_MmHe()
 
