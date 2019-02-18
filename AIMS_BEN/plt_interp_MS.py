@@ -306,7 +306,10 @@ def plot_hrd():
     """
     Make an HRD showing the distribution of uncertainties as a function of evolution.
     """
-    a = [np.log10(0.03),np.log10(0.0175),np.log10(0.01),np.log10(0.0057),np.log10(0.0032)]
+    # a = [np.log10(0.01),np.log10(0.0125),np.log10(0.0156),np.log10(0.0194),np.log10(0.0240)] #KIC5786154
+    # a = [np.log10(0.0090),np.log10(0.0072),np.log10(0.0057),np.log10(0.0046),np.log10(0.0036)] #KIC8430105
+    a = [np.log10(0.0125),np.log10(0.0100),np.log10(0.0080),np.log10(0.0064),np.log10(0.0051)] #KIC9970396
+    # a = [np.log10(0.0267),np.log10(0.0297),np.log10(0.0329),np.log10(0.0365)]#,np.log10(0.0446),np.log10(0.0492)] #NGC6791 np.log10(0.0404),
     for k in a:
         idx = []
         fig = plt.figure()
@@ -314,8 +317,10 @@ def plot_hrd():
             for j in xrange(len(results_age[0][i][:,0])):
                 if results_age[0][i][j,ndim-2] == k:
                     idx = np.append(idx,results_age[0][i][j,:])
-        # print idx[::ndim+nglb+6+4]
-        plt.scatter(idx[20::ndim+nglb+6+4],np.log10(idx[21::ndim+nglb+6+4]/3.828e33),c=np.log10(idx[ndim::ndim+nglb+6+4]),label=r'Z = %s '%(10**idx[1]))
+        # print(results_age[0][i][j,:])
+        print(idx[21::ndim+nglb+6+5]/3.828e33)
+        # sys.exit()
+        plt.scatter(idx[20::ndim+nglb+6+5],np.log10(idx[21::ndim+nglb+6+5]/3.828e33),c=np.log10(idx[ndim::ndim+nglb+6+5]),label=r'Z = %s '%(10**idx[1]))
         cb = plt.colorbar()
         cax = cb.ax
         cax.text(3.5,0.7,r"$\log_{10}$(Max. error)",rotation=270,fontsize=20)
@@ -323,7 +328,7 @@ def plot_hrd():
         plt.gca().invert_xaxis()
         plt.legend(loc=3)
         # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'_v3.9.png')
-        plt.show()
+        # plt.show()
 
 def plot_MXc():
     """
@@ -651,12 +656,12 @@ if __name__ == "__main__":
     """
 
 
-    # input_data = open('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_MS_v3.5.8',"r")
+    # input_data = open('/home/bmr135/AIMS/AIMS_BEN/interp_MS_v3.5.8',"r")
     # [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     #     results_age2, results_track] = dill.load(input_data)
     # results_age_MS = [results_age1, results_age2]
     # input_data.close()
-    # input_data = open('/home/bmr135/git_AIMS/AIMS/AIMS_BEN/interp_RGB_v3.7',"r")
+    # input_data = open('/home/bmr135/AIMS/AIMS_BEN/interp_RGB_v3.7',"r")
     # [ndim, nglb, titles, grid, ndx1, ndx2, tessellation, results_age1, \
     #     results_age2, results_track] = dill.load(input_data)
     # results_age_RGB = [results_age1, results_age2]
@@ -670,11 +675,11 @@ if __name__ == "__main__":
     # plt.legend(loc=3)
     # # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'.png')
     # plt.show()
-    #
-    #
-    #
-    #
-    #
+    # #
+    # #
+    # #
+    # #
+    # #
     # sys.exit()
 
     assert (len(sys.argv) > 1), "Usage: plot_interpolation_test.py data_file"

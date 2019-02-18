@@ -1192,7 +1192,7 @@ class Track:
         # initialisation
         nmodels = len(self.models)
         ndim = len(self.params)+1
-        result = np.zeros((nmodels-2*nincr,ndim+nglb+6),dtype=gtype)
+        result = np.zeros((nmodels-2*nincr,ndim+nglb+6+5),dtype=gtype)
 
         # loop through all models:
         for i in range(nincr,nmodels-nincr):
@@ -1203,6 +1203,11 @@ class Track:
             result[i-nincr,0:ndim-1] = self.params
             result[i-nincr,ndim-1] = self.models[i].glb[iage]
             result[i-nincr,ndim:ndim+nglb+6] = compare_models(aModel,self.models[i])
+            result[i-nincr,ndim+nglb+6] = self.models[i].glb[itemperature]
+            result[i-nincr,ndim+nglb+7] = self.models[i].glb[iluminosity]
+            result[i-nincr,ndim+nglb+8] = self.models[i].glb[6]
+            result[i-nincr,ndim+nglb+9] = self.models[i].glb[imHe]
+            result[i-nincr,ndim+nglb+10] = mu
 
         return result
 
@@ -1367,7 +1372,7 @@ class Track:
         # initialisation
         nmodels = len(self.models)
         ndim = len(self.params)+1
-        result = np.zeros((nmodels-2*nincr,ndim+nglb+6),dtype=gtype)
+        result = np.zeros((nmodels-2*nincr,ndim+nglb+6+4+5),dtype=gtype)
 
         # loop through all models:
         for i in xrange(nincr,nmodels-nincr):
@@ -1380,6 +1385,11 @@ class Track:
             result[i-nincr,ndim-1] = self.models[i].glb[imHe]
             # print self.models[i].glb[0]
             result[i-nincr,ndim:ndim+nglb+6] = compare_models(aModel,self.models[i])
+            result[i-nincr,ndim+nglb+6] = self.models[i].glb[itemperature]
+            result[i-nincr,ndim+nglb+7] = self.models[i].glb[iluminosity]
+            result[i-nincr,ndim+nglb+8] = self.models[i].glb[6]
+            result[i-nincr,ndim+nglb+9] = self.models[i].glb[imHe]
+            result[i-nincr,ndim+nglb+10] = mu
 
         return result
 
