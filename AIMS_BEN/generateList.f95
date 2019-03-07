@@ -71,12 +71,12 @@ do i=1,nmod
   Modelname(i)=trim(nameseq)//'/AIMS/'//trim(nameseq)//'-atm-'//mnumber(i)
   !write (*,*) LEN(Modelname(i))
   !write (*,*) LEN(trim(Modelname(i)))
-  !Modelname(i)=trim(nameseq)//'/AIMSG/'//trim(nameseq)//'-atm-'//mnumber(i)//'.freq'
+  !Modelname(i)=trim(nameseq)//'/AIMS/'//trim(nameseq)//'-atm-'//mnumber(i)//'.freq'
 end do
 
 
 ! Generation of the list, adapt name and criteria accordingly
-open (3, file ='/home/bmr135/AIMS/AIMS_BEN/KIC5786154_in',position='append')
+open (3, file ='/home/bmr135/AIMS/AIMS_BEN/nu_indi_in',position='append')
 !write (3,*) '/home/ADF/bmr135/Sim3/cles-19.1-Up/scripts/	.mod'
 do i=1,nmod
 model(i) = trim(Modelname(i))
@@ -96,7 +96,7 @@ model(i) = trim(Modelname(i))
 !&,Xc(i),P0sum(i)
 !  endif
 !if((Xc(i).gt.(0.1)).and. (abs(X0(i)-Xc(i)).gt. (0.05d0))) then
-if((mHe(i).gt.(0.05))) then
+if((mHe(i).gt.0.05).and.(mHe(i).lt.0.265)) then
  !write(*,*) Numax(i), 10.0**logTeff(i)
  write(3,*) model(i),Mass(i),(R(i)*Rsun),(10.0**logL(i))*Lsun,Z0(i),X0(i),(Age(i)*1d-6),(10.0**logTeff(i))&
  &,(mHe(i)*Msun),Xc(i),P0sum(i)

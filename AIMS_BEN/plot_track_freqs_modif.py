@@ -137,8 +137,8 @@ if __name__ == "__main__":
 
     #Verification of the frequencies
     Dnu = [] #AvgDnu
-    f3=open('./FreqOrderCheck_KIC5786154', 'w+')
-    f4=open('./FreqRegularityCheck_KIC5786154', 'w+')
+    f3=open('./FreqOrderCheck_NGC6819', 'w+')
+    f4=open('./FreqRegularityCheck_NGC6819', 'w+')
     #Check 1: verifying that there is no double identification or missed mode in the frequency spectrum of each model
     #Check 2: Verifying that the modes behave regularly and follow a pattern of +-25% of Delta nu
     #The treshold for the regularity can be altered if necessary.
@@ -153,9 +153,9 @@ if __name__ == "__main__":
                 Dnu=model.find_large_separation()
             for i in range(len(mode_l)-1):
                     #Checking radial orders
-                print mode_n[i], mode_n[i+1]
+                #print mode_n[i], mode_n[i+1]
                 if (mode_l[i+1]==mode_l[i]) and (mode_n[i+1]!=(mode_n[i]+1)):
-                   print mode_n[i], mode_n[i+1]
+                   #print mode_n[i], mode_n[i+1]
                    f3.write(model.name+' '+str(mode_l[i])+' '+str(mode_n[i+1])+' '+str(mode_n[i])+'\n') #writes model name, l and n and n+1 of misidentified mode
                     #Checking regularity of frequency spectrum
                 elif (mode_l[i]==mode_l[i+1]) and (((mode_freq[i+1]-mode_freq[i])<0.75*Dnu) or ((mode_freq[i+1]-mode_freq[i])>1.25*Dnu)):

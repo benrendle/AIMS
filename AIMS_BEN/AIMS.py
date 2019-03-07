@@ -103,7 +103,7 @@ tight_ball_distributions = None
 log0      = -1e300
 """ a large negative value used to represent ln(0) """
 
-threshold = -1e290
+threshold = -1e295
 """ threshold for "accepted" models.  Needs to be greater than :py:const:`log0` """
 
 # variables associated with the best model from a scan of the entire grid:
@@ -1927,7 +1927,10 @@ def find_best_model_in_track(ntrack):
     reject_classic = 0
     reject_seismic = 0
     reject_prior   = 0
-    for model in grid.tracks[ntrack].models:
+    nmodels = len(grid.tracks[ntrack].models)
+    for i in range(nmodels):
+    # for model in grid.tracks[ntrack].models:
+        model = grid.tracks[ntrack].models[i]
         result, rc, rs, rp = prob.evaluate(model)
         reject_classic += rc
         reject_seismic += rs
@@ -3145,6 +3148,7 @@ def plot_distrib_iter(samples, labels, folder):
     for i in range(ndims):
         plt.figure()
         for j in range(config.nsteps):
+            print(samples[:,j,i])
             mid_values[j] = np.percentile(samples[:,j,i],50.0)
             yfill[j] = np.percentile(samples[:,j,i],25.0)
             yfill[-j-1] = np.percentile(samples[:,j,i],75.0)
@@ -3177,6 +3181,8 @@ def plot_histograms(samples, names, fancy_names, truths=None):
 
     for i in range(len(names)):
         plt.figure()
+        print(i)
+        print(samples[:,i])
         n, bins, patches = plt.hist(samples[:,i],50,density=True,histtype='bar')
         if (truths is not None):
             ylim = plt.ylim()

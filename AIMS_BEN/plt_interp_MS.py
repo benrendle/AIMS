@@ -308,8 +308,11 @@ def plot_hrd():
     """
     # a = [np.log10(0.01),np.log10(0.0125),np.log10(0.0156),np.log10(0.0194),np.log10(0.0240)] #KIC5786154
     # a = [np.log10(0.0090),np.log10(0.0072),np.log10(0.0057),np.log10(0.0046),np.log10(0.0036)] #KIC8430105
-    a = [np.log10(0.0125),np.log10(0.0100),np.log10(0.0080),np.log10(0.0064),np.log10(0.0051)] #KIC9970396
-    # a = [np.log10(0.0267),np.log10(0.0297),np.log10(0.0329),np.log10(0.0365)]#,np.log10(0.0446),np.log10(0.0492)] #NGC6791 np.log10(0.0404),
+    # a = [np.log10(0.0125),np.log10(0.0100),np.log10(0.0080),np.log10(0.0064),np.log10(0.0051)] #KIC9970396
+    # a = [np.log10(0.0156),np.log10(0.0125),np.log10(0.0100),np.log10(0.0080),np.log10(0.0064)] #KIC7037405
+    # a = [np.log10(0.0194),np.log10(0.0240),np.log10(0.0297),np.log10(0.0365),np.log10(0.0156)] #KIC8410637
+    # a = [np.log10(0.0267),np.log10(0.0297),np.log10(0.0329),np.log10(0.0365),np.log10(0.0404),np.log10(0.0446),np.log10(0.0492)] #NGC6791
+    a = [np.log10(0.0090),np.log10(0.0112),np.log10(0.0140),np.log10(0.0174),np.log10(0.0216),np.log10(0.0267),np.log10(0.0329)] #NGC6819
     for k in a:
         idx = []
         fig = plt.figure()
@@ -317,9 +320,7 @@ def plot_hrd():
             for j in xrange(len(results_age[0][i][:,0])):
                 if results_age[0][i][j,ndim-2] == k:
                     idx = np.append(idx,results_age[0][i][j,:])
-        # print(results_age[0][i][j,:])
-        print(idx[21::ndim+nglb+6+5]/3.828e33)
-        # sys.exit()
+
         plt.scatter(idx[20::ndim+nglb+6+5],np.log10(idx[21::ndim+nglb+6+5]/3.828e33),c=np.log10(idx[ndim::ndim+nglb+6+5]),label=r'Z = %s '%(10**idx[1]))
         cb = plt.colorbar()
         cax = cb.ax
@@ -327,7 +328,7 @@ def plot_hrd():
         cax.tick_params(labelsize=15)
         plt.gca().invert_xaxis()
         plt.legend(loc=3)
-        # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/HRD_RGB_Z'+str(10**idx[1])+'_v3.9.png')
+        # plt.savefig('/home/bmr135/AIMS/AIMS_BEN/KIC5786154/HRD_KIC5786154_Z'+str(10**idx[1])+'.png')
         # plt.show()
 
 def plot_MXc():
@@ -359,7 +360,8 @@ def plot_MmHe():
     """
     Make an HRD showing the distribution of uncertainties as a function of evolution.
     """
-    a = [np.log10(0.03),np.log10(0.0175),np.log10(0.01),np.log10(0.0057),np.log10(0.0032)]
+    # a = [np.log10(0.03),np.log10(0.0175),np.log10(0.01),np.log10(0.0057),np.log10(0.0032)]
+    a = [np.log10(0.0090),np.log10(0.0112),np.log10(0.0140),np.log10(0.0174),np.log10(0.0216),np.log10(0.0267),np.log10(0.0329)] #NGC6819
     for k in a:
         idx = []
         fig = plt.figure()
@@ -368,7 +370,7 @@ def plot_MmHe():
                 if results_age[0][i][j,ndim-2] == k:
                     idx = np.append(idx,results_age[0][i][j,:])
         # print idx[::ndim+nglb+6+4]
-        plt.scatter(idx[23::ndim+nglb+6+4],idx[0::ndim+nglb+6+4],c=np.log10(idx[ndim::ndim+nglb+6+4]),label=r'Z = %s '%(10**idx[1]))
+        plt.scatter(idx[23::ndim+nglb+6+5],idx[0::ndim+nglb+6+5],c=np.log10(idx[ndim::ndim+nglb+6+5]),label=r'Z = %s '%(10**idx[1]))
         cb = plt.colorbar()
         cax = cb.ax
         cax.text(3.5,0.7,r"$\log_{10}$(Max. error)",rotation=270,fontsize=20)
@@ -377,7 +379,7 @@ def plot_MmHe():
         plt.xlabel(r'Mass He-core')
         plt.ylabel(r'Mass')
         # plt.gca().invert_xaxis()
-        plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/MmHe_RGB_Z'+str(10**idx[1])+'_v3.9.png')
+        # plt.savefig('/media/bmr135/SAMSUNG/AIMS-interp-testing2/MmHe_RGB_Z'+str(10**idx[1])+'_v3.9.png')
         # plt.show()
 
 def plot_partition_tessellation(grid, ndx1, ndx2, tessellation):
@@ -568,7 +570,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
         if (value > 0.0):
 	    # print value
             z1.append(value)	# math.log10
-            z2.append(math.log10(value/constants.solar_radius))
+            z2.append(math.log10(value))
             x.append(results[i][0,0])
             y.append(results[i][0,1])
 
@@ -607,12 +609,12 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     plt.scatter(df['x'], df['y'], c=df['z2'], cmap=colormaps.parula, s=75)
     cb = plt.colorbar()
     # plt.xlabel(titles[0],fontsize=10)
-    plt.xlabel(r'Radius $R/R_{\odot}$',fontsize=10)
+    # plt.xlabel(r'Radius $R/R_{\odot}$',fontsize=10)
     plt.ylabel(titles[1],fontsize=10)
     plt.xticks(fontsize=8)
     plt.yticks(fontsize=8)
-    plt.xlim(0.75,2.25)
-    plt.ylim(-2.54,-1.46)
+    # plt.xlim(0.75,2.25)
+    # plt.ylim(-2.54,-1.46)
     a = min(z2)
     b = max(z2)
     d = a-b
@@ -629,7 +631,7 @@ def surface2D(p,results,error_ndx,tpe="max",title=None,truncate=0):
     cax.text(6.5,0.85,r"$\log_{10}$(%s. error)"%(tpe),rotation=270,fontsize=10)
     cax.tick_params(labelsize=8)
     # if (title is not None): plt.title(title,fontsize=15)
-    fig.savefig('rad_interp.pdf', bbox_inches='tight')
+    # fig.savefig('rad_interp.pdf', bbox_inches='tight')
     # plt.show()
     # sys.exit()
     # plt.figure()
@@ -692,9 +694,9 @@ if __name__ == "__main__":
     results_age = [results_age1, results_age2]
     input_data.close()
 
-    plot_hrd()
+    # plot_hrd()
     # plot_MXc()
-    # plot_MmHe()
+    plot_MmHe()
 
     # print results_track[]
 
@@ -710,7 +712,7 @@ if __name__ == "__main__":
     # surface2D(1,results_age2,0,tpe="max",title="Max radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,0,tpe="max",title="Max. radial error between tracks",truncate=1)
     ''' '''
-    # surface2D(1,results_age1,15,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
+    # surface2D(1,results_age1,1,tpe="max",title="Avg radial error (nincr = 1)",truncate=1)
     # surface2D(1,results_age2,1,tpe="max",title="Avg radial error (nincr = 2)",truncate=1)
     # surface2D(1,results_track,1,tpe="max",title="Avg radial error (nincr = struct)",truncate=1)
 
@@ -731,6 +733,6 @@ if __name__ == "__main__":
     #plot3D(results_track,2,tpe="avg",title="numax radial error (struct)")
 
     # plot_grid(grid)
-    plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
+    # plot_partition_tessellation(grid, ndx1, ndx2, tessellation)
 
     plt.show()

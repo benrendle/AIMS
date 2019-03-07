@@ -234,7 +234,7 @@ class Model:
         if (string.startswith("ln_")):  return math.log(self.string_to_param(string[3:]))
         if (string.startswith("exp_")): return math.exp(self.string_to_param(string[4:]))
         if (string == "Mass"):       return self.glb[imass]/constants.solar_mass
-        if (string == "mHe"):        return self.glb[imHe]/constants.solar_mass
+        if (string == "mHe"):        return self.glb[imHe]#/constants.solar_mass
         if (string == "Radius"):     return self.glb[iradius]/constants.solar_radius
         if (string == "Luminosity"): return self.glb[iluminosity]/constants.solar_luminosity
         if (string == "Z"):          return self.glb[iz0]
@@ -1487,6 +1487,7 @@ class Model_grid:
         models_small_spectra = []
         for line in listfile:
             try:
+                # print line
                 line = line.strip()
                 columns = line.split()
                 glb = np.empty((nglb,),dtype = gtype)
@@ -1521,7 +1522,9 @@ class Model_grid:
                     models_small_spectra.append(aModel.name)
                 print("%d %d %d"%(len(self.tracks), nmodels, nmodes))
                 print('\033[2A') # backup two line - might not work in all terminals
-            except: continue
+            except:
+            #     print 'exception: ', line
+                continue
         listfile.close()
         print("%d %d %d"%(len(self.tracks), nmodels, nmodes))
 
@@ -1928,6 +1931,7 @@ def combine_models(model1,coef1,model2,coef2):
     fvalues = np.empty((size3,),dtype=ftype)
     ivalues = np.empty((size3,),dtype=ftype)
 
+    # print(nvalues,lvalues,fvalues,ivalues,model1.glb[imass]/constants.solar_mass,model1.glb[ix0],model1.glb[itemperature],model2.glb[imass]/constants.solar_mass,model2.glb[ix0],model2.glb[itemperature])
     nvalues,lvalues,fvalues,ivalues,n3 = aims_fortran.combine_modes( \
             coef1,model1.modes['n'],model1.modes['l'],model1.modes['freq'],model1.modes['inertia'], \
             coef2,model2.modes['n'],model2.modes['l'],model2.modes['freq'],model2.modes['inertia'], \

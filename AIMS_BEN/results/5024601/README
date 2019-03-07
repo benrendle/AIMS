@@ -1,0 +1,96 @@
+
+################################################################################
+#########################   Observational constraints   ########################
+################################################################################
+Number of modes                         7
+# NOTE: the radial orders may have been recalculated (see Radial orders section)
+l    n    freq              dfreq            
+   0    4  2.2159800000e+01  3.7300000000e-01
+   0    5  2.5689500000e+01  2.7800000000e-02
+   0    6  2.9124600000e+01  1.2250000000e-02
+   0    7  3.2828400000e+01  1.5300000000e-02
+   0    8  3.6547500000e+01  2.0900000000e-02
+   0    9  4.0245100000e+01  2.7650000000e-02
+   0   10  4.3952000000e+01  7.4550000000e-02
+Teff                                    Gaussian [4679.0, 100.0]                
+Fe_H                                    Gaussian [0.02, 0.1]                    
+numax                                   Gaussian [33.12, 0.43]                  
+Seismic constraints                     ['nu']                                  
+Surface option                          Ball2014_2                              
+
+################################################################################
+##################################   Priors   ##################################
+################################################################################
+Prior on Mass                           Gaussian [1.65, 0.2]                    
+Prior on log_Z                          Uninformative []                        
+Prior on mHe                            Uninformative []                        
+Prior on A3_surf                        Uninformative []                        
+Prior on Am1_surf                       Uninformative []                        
+
+################################################################################
+#################################   Weighting   ################################
+################################################################################
+Weight option                           Absolute                                
+Absolute seismic weight                  1.000000000000000e+00
+Absolute classic weight                  1.000000000000000e+00
+Relative seismic weight                  2.333333333333333e+00
+Relative classic weight                  1.000000000000000e+00
+
+################################################################################
+###############################   Radial orders   ##############################
+################################################################################
+Radial orders from input file           True                                    
+Radial orders from best model           False                                   
+Use radial orders in mode map           True                                    
+
+################################################################################
+########################   The grid and interpolation   ########################
+################################################################################
+Binary grid                             NGC6819_grid                            
+User defined parameters                 ['Xc', 'DNl1']                          
+Scaled age interpolation                True                                    
+Distort grid prior to tessellation      False                                   
+
+################################################################################
+#############################   EMCEE parameters   #############################
+################################################################################
+With parallel tempering                 True                                    
+Number of temperatures                  10
+Number of walkers                       20
+Number of burn-in steps                 500
+Number of production steps              40
+Thinning parameter                      10
+
+################################################################################
+##############################   Initialisation   ##############################
+################################################################################
+Initialise with a tight ball            True                                    
+Tight ball distrib. on Mass             Gaussian [1.4000022223055748, 0.011666559461418672]
+Tight ball distrib. on log_Z            Gaussian [-1.9507819773298183, 0.018765112950354983]
+Tight ball distrib. on mHe              Gaussian [3.4647792173584505e+32, 18.918]
+Tight ball distrib. on A3_surf          Gaussian [5.4584474945133826e-11, 5.4584474945133826e-11]
+Tight ball distrib. on Am1_surf         Gaussian [-4.6934733065032566e-06, 4.6934733065032566e-06]
+
+################################################################################
+##################################   Output   ##################################
+################################################################################
+List of output parameters               ('Radius', 'Mass', 'log_g', 'Rho', 'Age', 'Teff', 'Xc', 'Luminosity', 'Dnu', 'numax', 'Fe_H')
+Write OSM files                         False                                   
+Plot walkers                            True                                    
+Plot echelle diagrams                   True                                    
+Plot histograms                         True                                    
+Plot triangle plots                     True                                    
+List of plot extensions                 ['png']                                 
+List of triangle plot extensions        ['png']                                 
+
+################################################################################
+###############################   Miscellaneous   ##############################
+################################################################################
+With parallelisation                    True                                    
+Number of processes                     4
+Execution time (s)                       1.262921531200409e+02
+Number of accepted models               85285
+Number of rejected models               0
+  Classic rejections                    0
+  Seismic rejections                    0
+  Prior-based rejections                0
