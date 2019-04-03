@@ -234,7 +234,7 @@ class Model:
         if (string.startswith("ln_")):  return math.log(self.string_to_param(string[3:]))
         if (string.startswith("exp_")): return math.exp(self.string_to_param(string[4:]))
         if (string == "Mass"):       return self.glb[imass]/constants.solar_mass
-        if (string == "mHe"):        return self.glb[imHe]#/constants.solar_mass
+        if (string == "mHe"):        return self.glb[imHe]/constants.solar_mass
         if (string == "Radius"):     return self.glb[iradius]/constants.solar_radius
         if (string == "Luminosity"): return self.glb[iluminosity]/constants.solar_luminosity
         if (string == "Z"):          return self.glb[iz0]
@@ -2287,7 +2287,7 @@ def find_mHes(coefs, tracks, mHe):
         mHe_s += coef*track.models[0].glb[imHe]
         mHe_f += coef*track.models[-1].glb[imHe]
 
-    # mHe *= constants.solar_mass
+    mHe *= constants.solar_mass
     eta = (mHe-mHe_s)/(mHe_f-mHe_s)
 
     # check to see if the mHe lies within the interpolated track:

@@ -1484,6 +1484,9 @@ class Likelihood:
             ind = np.lexsort((np.copy(my_model.modes['freq']),
                                  np.copy(my_model.modes['l'])))
 
+            # print(aims_fortran.find_map_freq(self.fvalues,self.lvalues,               \
+            #                      my_model.modes['freq']*my_model.glb[model.ifreq_ref], \
+            #                      my_model.modes['l'],ind,mode_map))
             return aims_fortran.find_map_freq(self.fvalues,self.lvalues,               \
                                  my_model.modes['freq']*my_model.glb[model.ifreq_ref], \
                                  my_model.modes['l'],ind,mode_map)
@@ -1607,7 +1610,9 @@ class Likelihood:
             chi2 += self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map)
             return chi2, reject_classic, 0
         else:
-            if (nmissing > 0): return log0, [0.0]*nsurf, reject_classic, 1
+            if (nmissing > 0):
+                print(nmissing)
+                return log0, [0.0]*nsurf, reject_classic, 1
             optimal_amplitudes = self.get_optimal_surface_amplitudes(my_model, mode_map)
             chi2 += self.seismic_weight*self.compare_frequency_combinations(my_model,mode_map,a=optimal_amplitudes)
             return chi2, optimal_amplitudes, reject_classic, 0
@@ -1788,11 +1793,11 @@ def load_binary_data(filename):
     #         # print model.glb
     #         # sys.exit()
     #         # print(model.glb[1]/constants.solar_mass)
-    #         if (model.glb[1] == 2.5253600000000000E+033) & (model.glb[3] == 0.01) & (model.glb[0] == 4098.5500000000002):
+    #         if (model.glb[1] == 3.1219100000000001E+033) & (model.glb[3] == 0.0140) & (model.glb[0] == 2101.7100000000000):
     #             print model.glb[1]/constants.solar_mass
     #             print model.glb
     #             print model.get_freq()
-    #             model.write_file_simple('test')
+    #             model.write_file_simple('NGC_6819_test')
     #             print model.find_large_separation()
     #             print model.numax
     #             print model.FeH
@@ -1876,6 +1881,8 @@ def find_best_model():
         nreject_classic += rc
         nreject_seismic += rs
         nreject_prior   += rp
+        if result == float('inf'):
+            result = log0
         if (result > best_grid_result):
             best_grid_result = result
             best_grid_model  = model
@@ -1896,8 +1903,11 @@ def find_best_model():
     best_grid_params  = utilities.my_map(best_grid_model.string_to_param,grid_params_MCMC)
 
     if (config.surface_option is not None):
+        # print(best_grid_model)
         mode_map, nmissing = prob.likelihood.find_map(best_grid_model, config.use_n and config.read_n)
         if (nmissing > 0):
+            # print(nmissing,best_grid_result)
+            # sys.exit()
             print("An unexpected error occured.  Please contact the authors of AIMS.")
         optimal_amplitudes  = prob.likelihood.get_optimal_surface_amplitudes(best_grid_model, mode_map)
         best_grid_params = best_grid_params + list(optimal_amplitudes)
@@ -1938,10 +1948,11 @@ def find_best_model_in_track(ntrack):
         if (config.interp_type == "mHe"):
             istart = max(i-1,0)
             istop  = min(i+1,nmodels-1)
-            log_slope = math.log(abs((grid.tracks[ntrack].models[istop].string_to_param("Age")   \
+            try: log_slope = math.log(abs((grid.tracks[ntrack].models[istop].string_to_param("Age")   \
                                     - grid.tracks[ntrack].models[istart].string_to_param("Age")) \
                                     /(grid.tracks[ntrack].models[istop].string_to_param("mHe")   \
                                     - grid.tracks[ntrack].models[istart].string_to_param("mHe"))))
+            except: log_slope = 0.0
         else:
             log_slope = 0.0
         result += log_slope
@@ -3148,7 +3159,7 @@ def plot_distrib_iter(samples, labels, folder):
     for i in range(ndims):
         plt.figure()
         for j in range(config.nsteps):
-            print(samples[:,j,i])
+            # print(samples[:,j,i])
             mid_values[j] = np.percentile(samples[:,j,i],50.0)
             yfill[j] = np.percentile(samples[:,j,i],25.0)
             yfill[-j-1] = np.percentile(samples[:,j,i],75.0)
@@ -3181,8 +3192,8 @@ def plot_histograms(samples, names, fancy_names, truths=None):
 
     for i in range(len(names)):
         plt.figure()
-        print(i)
-        print(samples[:,i])
+        # print(i)
+        # print(samples[:,i])
         n, bins, patches = plt.hist(samples[:,i],50,density=True,histtype='bar')
         if (truths is not None):
             ylim = plt.ylim()
@@ -3226,9 +3237,9 @@ def plot_frequencies(grid):
     ntrack = 0
     track = grid.tracks[ntrack]
 
-    #nmin, nmax, lmin, lmax = track.find_mode_range()
-    nmin = 15
-    nmax = 25
+    nmin, nmax, lmin, lmax = track.find_mode_range()
+    # nmin = 15
+    # nmax = 25
 
     title = r"$M = %.2f M_{\odot}$, $\log(Z) = %.3f$"%(track.params[0],track.params[1])
 
@@ -3260,7 +3271,7 @@ def plot_frequencies(grid):
     plt.xlabel(r"Stellar age (in Myrs)",fontsize=12)
     plt.ylabel(r"Frequency, $\omega/\sqrt{GM/R^3}$",fontsize=12)
     plt.title(title,fontsize=15)
-    plt.ylim(21.5,40)
+    # plt.ylim(21.5,40)
     plt.savefig("freq_non_dim.pdf")
     plt.clf()
     plt.close()
@@ -3283,7 +3294,7 @@ def plot_frequencies(grid):
     plt.title(title,fontsize=15)
     plt.savefig("freq_dim.pdf")
 
-    # sys.exit(0)
+    sys.exit(0)
 
 
 if __name__ == "__main__":
@@ -3344,7 +3355,7 @@ if __name__ == "__main__":
 
     # load grid and associated quantities
     grid = load_binary_data(config.binary_grid)
-    plot_frequencies(grid) # this will stop the program
+    # plot_frequencies(grid) # this will stop the program
     grid_params_MCMC = grid.grid_params + (config.interp_type,)
     grid_params_MCMC_with_surf = grid_params_MCMC \
                                + model.get_surface_parameter_names(config.surface_option)

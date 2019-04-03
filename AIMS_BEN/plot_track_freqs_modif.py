@@ -3,7 +3,6 @@ import sys
 import matplotlib.pyplot as plt
 import itertools
 import numpy as np
-
 import model as mdl
 import constants as csts
 import AIMS_configure as config
@@ -122,7 +121,7 @@ if __name__ == "__main__":
         #the attributes of the global vector or other quantities of the class "model" in model.py
         #writes the name of the last model of the sequence in "TracksEndCriterion"
         # print track.models[-1].glb[8+ len(config.user_params)]/csts.solar_mass
-        print track.models[-1].glb[4]
+        # print track.models[-1].glb[4]
         # if (track.models[-1].glb[8+ len(config.user_params)]/csts.solar_mass-0.20)<0.0:
         if (track.models[-1].glb[5]-0.01)<0.0:
            #checking if the grid is evolved enough
@@ -137,8 +136,8 @@ if __name__ == "__main__":
 
     #Verification of the frequencies
     Dnu = [] #AvgDnu
-    f3=open('./FreqOrderCheck_NGC6819', 'w+')
-    f4=open('./FreqRegularityCheck_NGC6819', 'w+')
+    f3=open('./FreqOrderCheck_NGC6791', 'w+')
+    f4=open('./FreqRegularityCheck_NGC6791', 'w+')
     #Check 1: verifying that there is no double identification or missed mode in the frequency spectrum of each model
     #Check 2: Verifying that the modes behave regularly and follow a pattern of +-25% of Delta nu
     #The treshold for the regularity can be altered if necessary.
@@ -146,20 +145,22 @@ if __name__ == "__main__":
     #A similar strategy can be adapted to g-modes, using the period spacing instead of Dnu.
     for index, track in enumerate(grid.tracks):
         for model in track.models:
-            for mode in model.modes:
-                mode_n, mode_l, mode_freq = find_frequencies(model)
+            # for mode in model.modes:
+            mode_n, mode_l, mode_freq = find_frequencies(model)
                 #print len(mode_l)
                 #Calculating the average large separation for each model
-                Dnu=model.find_large_separation()
+            Dnu=model.find_large_separation()
+            # print(mode_l)
+            # print(mode_n)
             for i in range(len(mode_l)-1):
                     #Checking radial orders
-                #print mode_n[i], mode_n[i+1]
+                print mode_n[i], mode_n[i+1], i
                 if (mode_l[i+1]==mode_l[i]) and (mode_n[i+1]!=(mode_n[i]+1)):
-                   #print mode_n[i], mode_n[i+1]
+                   print mode_n[i], mode_n[i+1]
                    f3.write(model.name+' '+str(mode_l[i])+' '+str(mode_n[i+1])+' '+str(mode_n[i])+'\n') #writes model name, l and n and n+1 of misidentified mode
                     #Checking regularity of frequency spectrum
                 elif (mode_l[i]==mode_l[i+1]) and (((mode_freq[i+1]-mode_freq[i])<0.75*Dnu) or ((mode_freq[i+1]-mode_freq[i])>1.25*Dnu)):
-                     print Dnu, mode_l[i], mode_n[i+1], mode_n[i], (mode_freq[i+1]-mode_freq[i])
+                     #print Dnu, mode_l[i], mode_n[i+1], mode_n[i], (mode_freq[i+1]-mode_freq[i])
                      f4.write(model.name+' '+str(Dnu)+str(mode_l[i])+' '+str(mode_n[i+1])+' '+str((mode_freq[i+1]-mode_freq[i]))+'\n') #writes model name, AvgDnu and local Dnu
                 else:
                      pass

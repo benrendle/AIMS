@@ -25,15 +25,15 @@ import math
 # NOTE: this is currently implemented with multiprocessing, which duplicates
 #       the memory in each process.  To be more memory efficient, turn off
 #       parallelisation using the "parallel" parameter.
-nprocesses  = 4      # number of processes (if running in parallel)
+nprocesses  = 2      # number of processes (if running in parallel)
 parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10     # number of temperatures
-nwalkers    = 20    # number of walkers (this number should be even)
-nsteps0     = 500   # number of burn-in steps
-nsteps      = 40    # number of steps
-add_steps   = 50    # number of steps to add if convergence isn't achieved
+nwalkers    = 400    # number of walkers (this number should be even)
+nsteps0     = 2000   # number of burn-in steps
+nsteps      = 500    # number of steps
+add_steps   = 100    # number of steps to add if convergence isn't achieved
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
 PT          = True   # use parallel tempering?
@@ -193,7 +193,7 @@ user_params = (("Xc", r'Central hydrogen, $%sX_c%s$'),("DNl1", r'Period Spacing,
 
 priors = {}                      # The priors will be defined thanks to this
 priors["Age"]     = ("Uniform", [0.0, 1.38e4])
-priors["Mass"]    = ("Gaussian", [1.65, 0.2])
+#priors["Mass"]    = ("Gaussian", [1.65, 0.2])
 #########################   Interpolation    ###############################
 scale_age = True                 # use a scaled age when interpolating
 interp_type = "mHe"		 # options to use either "age" or "mHe" for interpolation. Should only be
@@ -204,7 +204,7 @@ test_interpolation = False       # decide whether to test the interpolation.
                                  # out for the above binary grid, and written
                                  # in binary format to a file which can
                                  # subsequently be analysed using plot_test.py.
-interpolation_file = "NGC6819_interp"  # Name of the file to which to
+interpolation_file = "NGC6791_interp"  # Name of the file to which to
                                  # write the results from the interpolation
                                  # tests.  This file can be analysed using
                                  # plot_test.py.
