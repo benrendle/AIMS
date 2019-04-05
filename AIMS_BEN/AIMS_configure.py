@@ -30,10 +30,10 @@ parallel    = True   # specifies whether to run in parallel
 
 #########################   EMCEE control parameters   #####################
 ntemps      = 10     # number of temperatures
-nwalkers    = 400    # number of walkers (this number should be even)
-nsteps0     = 2000   # number of burn-in steps
-nsteps      = 500    # number of steps
-add_steps   = 100    # number of steps to add if convergence isn't achieved
+nwalkers    = 40    # number of walkers (this number should be even)
+nsteps0     = 200   # number of burn-in steps
+nsteps      = 50    # number of steps
+add_steps   = 0    # number of steps to add if convergence isn't achieved
 thin        = 10     # thinning parameter (1 out of thin steps will be kept ...)
 thin_comb   = 100    # thinning parameter for output linear combinations of models
 PT          = True   # use parallel tempering?

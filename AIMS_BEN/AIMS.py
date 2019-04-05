@@ -510,7 +510,7 @@ class Prior_list:
           The list of parameters should contain the same number of elements
           as the number of priors.
         """
-
+        print(params)
         assert (len(params) == len(self.priors)), "Incorrect number of parameters in call to Log_prior"
         lnprior = 0.0
         for aPrior, param in zip(self.priors, params):
@@ -2094,11 +2094,12 @@ def run_emcee():
         print "Number of temp.:      ", config.ntemps
         sampler = ptemcee.Sampler(config.nwalkers, ndims, prob.likelihood, prob.priors, ntemps=config.ntemps, threads=config.nprocesses)
         # initial burn-in:
-
+        # print(prob.priors.priors.count,prob.priors.realisation.im_self,prob())
+        # sys.exit()
         # for p, lnprob, lnlike in tqdm(sampler.sample(p0,adapt=True,iterations=config.nsteps0),total=config.nsteps0): pass
 	    # Test for convergence after burn in. Taken from grd349/Hacks GitHub <--- at some point add in full version so process repeated until convergence
         # or breaks if insufficient convergence to solution after burn in.
-        max_conv = 5
+        max_conv = 1
         rhat_accept = 1.05
         steps = config.nsteps0
         for i in range(max_conv):
@@ -3493,6 +3494,7 @@ if __name__ == "__main__":
     statistical_params = samples[:,1:].sum(axis=0, dtype=np.float64)/(1.0*config.nwalkers*config.nsteps)
     statistical_params.reshape(ndims)
     statistical_result = prob(statistical_params)
+    print(statistical_result)
     if config.interp_type == "Age":
         statistical_model  = model.interpolate_model(grid,statistical_params[0:ndims-nsurf],grid.tessellation,grid.ndx)
     elif config.interp_type == "mHe":
